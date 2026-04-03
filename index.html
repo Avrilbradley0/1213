@@ -158,7 +158,11 @@
       <div class="card">
         <h2>코드 생성기</h2>
         <div class="row">
-          <div class="field row-1">
+          <div class="field">
+            <label>카테고리 선택</label>
+            <select id="categoryFilterSelect"></select>
+          </div>
+          <div class="field">
             <label>상품 선택</label>
             <select id="productSelect"></select>
           </div>
@@ -424,6 +428,18 @@
       ]
     };
 
+    const categoryOptions = [
+      '전체',
+      '핸드폰 케이스',
+      '스마트톡',
+      '에어팟/버즈',
+      '디지털 테크',
+      '굿즈/문구',
+      '리빙/홈데코',
+      '스티커/지류',
+      '패션/잡화'
+    ];
+
     const defaultProducts = [
       { category: '핸드폰 케이스', name: '투명젤하드케이스 (스탠다드/프리미엄)', line: '', material: 'JH', feature: '', product: '', existingCode: 'JH', modelRequired: true, colorRequired: false },
       { category: '핸드폰 케이스', name: '맥세이프 투명젤하드케이스 (스탠다드/프리미엄)', line: 'M', material: 'JH', feature: '', product: '', existingCode: 'MJH', modelRequired: true, colorRequired: false },
@@ -465,6 +481,7 @@
     ];
 
     let state = loadState();
+    let selectedCategoryFilter = '전체';
 
     function loadState() {
       try {
@@ -520,13 +537,16 @@
 
     function renderGenerator() {
       const productSelect = document.getElementById('productSelect');
-      productSelect.innerHTML = '';
-      state.products.forEach(p => {
+      const categoryFilterSelect = document.getElementById('categoryFilterSelect');
+
+      categoryFilterSelect.innerHTML = '';
+      categoryOptions.forEach(category => {
         const option = document.createElement('option');
-        option.value = p.name;
-        option.textContent = `[${p.category}] ${p.name}`;
-        productSelect.appendChild(option);
+        option.value = category;
+        option.textContent = category;
+        categoryFilterSelect.appendChild(option);
       });
+      categoryFilterSelect.value = selectedCategoryFilter;
 
       fillSelect(document.getElementById('lineSelect'), state.lookups.lines);
       fillSelect(document.getElementById('materialSelect'), state.lookups.materials);
@@ -536,11 +556,16 @@
       fillSelect(document.getElementById('printTypeSelect'), state.lookups.printTypes);
       fillSelect(document.getElementById('printSideSelect'), state.lookups.printSides);
 
-      if (state.products.length) {
-        productSelect.value = state.products[0].name;
+      renderProductOptions();
+      if (productSelect.options.length) {
         applySelectedProduct();
       }
 
+      categoryFilterSelect.onchange = function () {
+        selectedCategoryFilter = this.value;
+        renderProductOptions();
+        applySelectedProduct();
+      };
       productSelect.onchange = applySelectedProduct;
       ['lineSelect','materialSelect','featureSelect','productCodeSelect','modelInput','colorSelect','printTypeSelect','printSideSelect','manualCodeInput'].forEach(id => {
         document.getElementById(id).addEventListener('input', updateResult);
@@ -551,7 +576,9 @@
       document.getElementById('copyFileBtn').onclick = () => copyText(document.getElementById('fileNameResult').textContent);
       document.getElementById('resetBtn').onclick = () => {
         if (!state.products.length) return;
-        document.getElementById('productSelect').value = state.products[0].name;
+        selectedCategoryFilter = '전체';
+        document.getElementById('categoryFilterSelect').value = selectedCategoryFilter;
+        renderProductOptions();
         applySelectedProduct();
         document.getElementById('modelInput').value = '';
         document.getElementById('colorSelect').value = '';
@@ -561,6 +588,26 @@
       };
 
       updateResult();
+    }
+
+    function renderProductOptions() {
+      const productSelect = document.getElementById('productSelect');
+      const currentValue = productSelect.value;
+      productSelect.innerHTML = '';
+
+      const filtered = state.products.filter(p => selectedCategoryFilter === '전체' || p.category === selectedCategoryFilter);
+      filtered.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.name;
+        option.textContent = p.name;
+        productSelect.appendChild(option);
+      });
+
+      if (filtered.some(p => p.name === currentValue)) {
+        productSelect.value = currentValue;
+      } else if (filtered.length) {
+        productSelect.value = filtered[0].name;
+      }
     }
 
     function applySelectedProduct() {
@@ -626,6 +673,10 @@
         }
         state.products.unshift(item);
         saveState();
+        if (!categoryOptions.includes(item.category)) {
+          categoryOptions.push(item.category);
+        }
+        selectedCategoryFilter = item.category || '전체';
         renderAllDynamic();
       };
 
@@ -735,4 +786,5 @@
   </script>
 </body>
 </html>
+
 
