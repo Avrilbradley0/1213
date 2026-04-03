@@ -558,8 +558,9 @@
 
       renderProductOptions();
       if (productSelect.options.length) {
-        applySelectedProduct();
+        productSelect.value = '';
       }
+      clearGeneratorFields();
 
       categoryFilterSelect.onchange = function () {
         selectedCategoryFilter = this.value;
@@ -574,50 +575,31 @@
 
       document.getElementById('copyFinalBtn').onclick = () => copyText(document.getElementById('finalCodeResult').textContent);
       document.getElementById('copyFileBtn').onclick = () => copyText(document.getElementById('fileNameResult').textContent);
-      document.getElementById('resetBtn').onclick = () => {
-        if (!state.products.length) return;
-        selectedCategoryFilter = '전체';
-        document.getElementById('categoryFilterSelect').value = selectedCategoryFilter;
-        renderProductOptions();
-        applySelectedProduct();
-        document.getElementById('modelInput').value = '';
-        document.getElementById('colorSelect').value = '';
-        document.getElementById('printTypeSelect').value = '';
-        document.getElementById('printSideSelect').value = '';
-        updateResult();
-      };
-
-      updateResult();
-    }
-
-    function renderProductOptions() {
-      const productSelect = document.getElementById('productSelect');
-      const currentValue = productSelect.value;
-      productSelect.innerHTML = '';
+      ';
+      placeholder.textContent = '상품 선택';
+      productSelect.appendChild(placeholder);
 
       const filtered = state.products.filter(p => selectedCategoryFilter === '전체' || p.category === selectedCategoryFilter);
       filtered.forEach(p => {
-        const option = document.createElement('option');
-        option.value = p.name;
-        option.textContent = p.name;
-        productSelect.appendChild(option);
-      });
-
-      if (filtered.some(p => p.name === currentValue)) {
-        productSelect.value = currentValue;
-      } else if (filtered.length) {
-        productSelect.value = filtered[0].name;
-      }
+        const option = document.createElemd('colorSelect').value = '';
+      document.getElementById('printTypeSelect').value = '';
+      document.getElementById('printSideSelect').value = '';
+      document.getElementById('manualCodeInput').value = '';
+      document.getElementById('statCategory').textContent = '-';
+      document.getElementById('statModelRequired').textContent = '-';
+      document.getElementById('statColorRequired').textContent = '-';
+      updateResult();
     }
 
     function applySelectedProduct() {
       const selected = state.products.find(p => p.name === document.getElementById('productSelect').value);
-      if (!selected) return;
+      if (!selected) {
+        clearGeneratorFields();
+        return;
+      }
       document.getElementById('lineSelect').value = selected.line || '';
       document.getElementById('materialSelect').value = selected.material || '';
-      document.getElementById('featureSelect').value = selected.feature || '';
-      document.getElementById('productCodeSelect').value = selected.product || '';
-      document.getElementById('manualCodeInput').value = selected.existingCode || '';
+      document.getElementById('featureSelect'e = selected.existingCode || '';
       document.getElementById('statCategory').textContent = selected.category || '-';
       document.getElementById('statModelRequired').textContent = selected.modelRequired ? '필수' : '선택';
       document.getElementById('statColorRequired').textContent = selected.colorRequired ? '필수' : '선택';
@@ -704,17 +686,7 @@
         body.appendChild(tr);
       });
       body.querySelectorAll('[data-del]').forEach(btn => {
-        btn.onclick = () => {
-          const idx = Number(btn.dataset.del);
-          if (!confirm('삭제할까?')) return;
-          state.products.splice(idx, 1);
-          saveState();
-          renderAllDynamic();
-        };
-      });
-    }
-
-    function renderDictionary() {
+   on renderDictionary() {
       const wrap = document.getElementById('tab-dictionary');
       wrap.innerHTML = '';
       const blocks = [
@@ -786,5 +758,3 @@
   </script>
 </body>
 </html>
-
-
