@@ -1,638 +1,738 @@
-import React, { useEffect, useMemo, useState } from "react";
-
-const defaultLookups = {
-  lines: [
-    { label: "없음", code: "" },
-    { label: "맥세이프", code: "M" },
-    { label: "자유형", code: "FR" },
-    { label: "에어팟", code: "A" },
-    { label: "버즈", code: "B" },
-    { label: "에어팟 맥스", code: "AM" },
-  ],
-  materials: [
-    { label: "없음", code: "" },
-    { label: "하드케이스", code: "HC" },
-    { label: "투명하드", code: "HDCL" },
-    { label: "투명젤하드", code: "JH" },
-    { label: "터프범퍼", code: "TB" },
-    { label: "카드포켓", code: "PK" },
-    { label: "에폭시범퍼", code: "EPB" },
-    { label: "글라스범퍼", code: "GB" },
-    { label: "TPU/실리콘", code: "TPU" },
-    { label: "아크릴", code: "AC" },
-    { label: "투명아크릴", code: "TAC" },
-    { label: "에폭시", code: "EPX" },
-    { label: "거울", code: "MR" },
-    { label: "구슬", code: "BEAD" },
-    { label: "틴케이스", code: "TIN" },
-    { label: "메탈", code: "MM" },
-    { label: "마그넷", code: "MAG" },
-  ],
-  features: [
-    { label: "없음", code: "" },
-    { label: "유광", code: "G" },
-    { label: "무광", code: "M" },
-    { label: "미러", code: "MR" },
-    { label: "홀로그램", code: "H" },
-    { label: "실버", code: "SV" },
-    { label: "투명", code: "CL" },
-    { label: "글리터", code: "GL" },
-    { label: "스탠다드", code: "ST" },
-    { label: "프리미엄", code: "PR" },
-    { label: "LED", code: "LED" },
-    { label: "원형", code: "OR" },
-    { label: "하트", code: "HT" },
-  ],
-  products: [
-    { label: "없음", code: "" },
-    { label: "케이스", code: "" },
-    { label: "스마트톡", code: "TOK" },
-    { label: "스마트톡 프로", code: "TOKP" },
-    { label: "키링", code: "KEY" },
-    { label: "키링 D고리", code: "KEYD" },
-    { label: "키링 볼체인", code: "KEYB" },
-    { label: "등신대", code: "STD" },
-    { label: "지비츠", code: "JIB" },
-    { label: "집게", code: "CLIP" },
-    { label: "마그넷", code: "MAG" },
-    { label: "메모홀더", code: "MHC" },
-    { label: "멀티펜", code: "MTP" },
-    { label: "젤볼펜", code: "BAP" },
-    { label: "코롯토", code: "COO" },
-    { label: "자", code: "RUL" },
-    { label: "오프너", code: "OPN" },
-    { label: "손거울", code: "MIR" },
-    { label: "문진", code: "PPR" },
-    { label: "티코스터", code: "TCO" },
-    { label: "인센스홀더", code: "INS" },
-  ],
-  printTypes: [
-    { label: "없음", code: "" },
-    { label: "일반", code: "GN" },
-    { label: "라미", code: "LA" },
-  ],
-  printSides: [
-    { label: "없음", code: "" },
-    { label: "단면", code: "SS" },
-    { label: "양면", code: "DB" },
-  ],
-  colors: [
-    { label: "없음", code: "" },
-    { label: "블랙", code: "BK" },
-    { label: "화이트", code: "WH" },
-    { label: "투명", code: "CL" },
-    { label: "실버", code: "SV" },
-    { label: "골드", code: "GD" },
-    { label: "오렌지", code: "OR" },
-    { label: "블루", code: "BL" },
-    { label: "그린", code: "GR" },
-    { label: "핑크", code: "PK" },
-    { label: "레드", code: "RD" },
-    { label: "퍼플", code: "PU" },
-    { label: "그레이", code: "GY" },
-  ],
-};
-
-const defaultProducts = [
-  {
-    category: "핸드폰 케이스",
-    name: "하드케이스 (유광/무광)",
-    line: "",
-    material: "HC",
-    feature: "",
-    product: "",
-    existingCode: "HC",
-    modelRequired: true,
-    colorRequired: false,
-  },
-  {
-    category: "핸드폰 케이스",
-    name: "맥세이프 하드케이스 (유광/무광)",
-    line: "M",
-    material: "HC",
-    feature: "",
-    product: "",
-    existingCode: "MHC",
-    modelRequired: true,
-    colorRequired: false,
-  },
-  {
-    category: "핸드폰 케이스",
-    name: "터프범퍼케이스",
-    line: "",
-    material: "TB",
-    feature: "",
-    product: "",
-    existingCode: "TBC",
-    modelRequired: true,
-    colorRequired: false,
-  },
-  {
-    category: "핸드폰 케이스",
-    name: "맥세이프 터프범퍼케이스",
-    line: "M",
-    material: "TB",
-    feature: "",
-    product: "",
-    existingCode: "MTBC",
-    modelRequired: true,
-    colorRequired: false,
-  },
-  {
-    category: "핸드폰 케이스",
-    name: "글라스범퍼케이스 (유광/무광/미러/홀로그램)",
-    line: "",
-    material: "GB",
-    feature: "",
-    product: "",
-    existingCode: "GB",
-    modelRequired: true,
-    colorRequired: false,
-  },
-  {
-    category: "핸드폰 케이스",
-    name: "맥세이프 글라스범퍼케이스 (유광/무광/미러/홀로그램)",
-    line: "M",
-    material: "GB",
-    feature: "",
-    product: "",
-    existingCode: "MGB",
-    modelRequired: true,
-    colorRequired: false,
-  },
-  {
-    category: "스마트톡",
-    name: "자유형 투명아크릴 스마트톡 (일반/라미)",
-    line: "FR",
-    material: "TAC",
-    feature: "",
-    product: "TOK",
-    existingCode: "FRTACTOK",
-    modelRequired: false,
-    colorRequired: false,
-  },
-  {
-    category: "스마트톡",
-    name: "자유형 맥세이프 투명아크릴 스마트톡 프로 (일반/라미)",
-    line: "FRM",
-    material: "TAC",
-    feature: "",
-    product: "TOKP",
-    existingCode: "FRMTACTOKP",
-    modelRequired: false,
-    colorRequired: false,
-  },
-  {
-    category: "스마트톡",
-    name: "자유형 에폭시 스마트톡",
-    line: "FR",
-    material: "EPX",
-    feature: "",
-    product: "TOK",
-    existingCode: "FREPXTOK",
-    modelRequired: false,
-    colorRequired: false,
-  },
-  {
-    category: "에어팟/버즈",
-    name: "에어팟 하드케이스 (유광/무광)",
-    line: "A",
-    material: "HC",
-    feature: "",
-    product: "",
-    existingCode: "AHC",
-    modelRequired: true,
-    colorRequired: false,
-  },
-  {
-    category: "에어팟/버즈",
-    name: "버즈 하드케이스 (유광/무광)",
-    line: "B",
-    material: "HC",
-    feature: "",
-    product: "",
-    existingCode: "BHC",
-    modelRequired: true,
-    colorRequired: false,
-  },
-  {
-    category: "굿즈/문구",
-    name: "자유형 투명아크릴 키링 D고리 (일반/라미)",
-    line: "FR",
-    material: "TAC",
-    feature: "",
-    product: "KEYD",
-    existingCode: "FRTACKEYD",
-    modelRequired: false,
-    colorRequired: true,
-  },
-  {
-    category: "굿즈/문구",
-    name: "자유형 투명아크릴 등신대 (일반/라미)",
-    line: "FR",
-    material: "TAC",
-    feature: "",
-    product: "STD",
-    existingCode: "FRTACSTD",
-    modelRequired: false,
-    colorRequired: true,
-  },
-  {
-    category: "굿즈/문구",
-    name: "메탈 멀티펜",
-    line: "",
-    material: "MM",
-    feature: "",
-    product: "MTP",
-    existingCode: "MMMTP",
-    modelRequired: false,
-    colorRequired: true,
-  },
-  {
-    category: "리빙/홈데코",
-    name: "아크릴 반구 마그넷",
-    line: "",
-    material: "AC",
-    feature: "",
-    product: "MAG",
-    existingCode: "ACMAG",
-    modelRequired: false,
-    colorRequired: true,
-  },
-];
-
-const tabs = [
-  { key: "generator", label: "코드 생성기" },
-  { key: "master", label: "상품마스터" },
-  { key: "dictionary", label: "약어사전" },
-  { key: "search", label: "코드 검색" },
-];
-
-const STORAGE_KEY = "husk-code-manager-v1";
-
-function getLabel(items, code) {
-  return items.find((x) => x.code === code)?.label || "";
-}
-
-function dedupeJoin(parts) {
-  return parts.filter(Boolean).join("");
-}
-
-function buildBaseCode(selected) {
-  if (selected.existingCode) return selected.existingCode;
-  return dedupeJoin([selected.line, selected.material, selected.feature, selected.product]);
-}
-
-function buildFinalCode(baseCode, model) {
-  return [baseCode, model].filter(Boolean).join("_");
-}
-
-function buildFileName(finalCode, color, printType, printSide) {
-  return [finalCode, color, printType, printSide].filter(Boolean).join("_");
-}
-
-function Select({ value, onChange, items }) {
-  return (
-    <select
-      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-400"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      {items.map((item) => (
-        <option key={`${item.label}-${item.code}`} value={item.code}>
-          {item.label} {item.code ? `(${item.code})` : ""}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-function SectionCard({ title, children, right }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
-        {right}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Husk Code Manager</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --line: #e2e8f0;
+      --text: #0f172a;
+      --sub: #64748b;
+      --blue: #0f172a;
+      --blue-2: #1e293b;
+      --soft: #f1f5f9;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --green: #16a34a;
+      --warn: #b45309;
+      --danger: #dc2626;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input, select, textarea { font: inherit; }
+    .wrap { max-width: 1440px; margin: 0 auto; padding: 24px; }
+    .hero {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-2) 100%);
+      color: white;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .hero-top { display: flex; gap: 20px; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; }
+    .hero h1 { margin: 6px 0 10px; font-size: 36px; line-height: 1.1; }
+    .hero p { margin: 0; color: rgba(255,255,255,0.78); }
+    .tabs { display: flex; flex-wrap: wrap; gap: 10px; }
+    .tab {
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    .tab.active { background: white; color: var(--blue); font-weight: 700; }
+    .grid { display: grid; gap: 20px; margin-top: 20px; }
+    .generator-grid { grid-template-columns: 1.2fr 0.8fr; }
+    .master-grid { grid-template-columns: 0.95fr 1.05fr; }
+    .dict-grid { grid-template-columns: repeat(4, 1fr); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .card h2, .card h3 { margin: 0 0 16px; font-size: 20px; }
+    .muted { color: var(--sub); }
+    .row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .row-1 { grid-column: 1 / -1; }
+    .field label { display: block; margin-bottom: 8px; font-size: 13px; color: var(--sub); font-weight: 600; }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      background: white;
+      border-radius: 14px;
+      padding: 12px 14px;
+      min-height: 46px;
+      outline: none;
+      transition: .2s ease;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: #94a3b8;
+      box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.16);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--soft);
+      color: var(--blue);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .result-box {
+      border-radius: 18px;
+      padding: 16px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+    }
+    .result-title { font-size: 12px; color: var(--sub); font-weight: 700; margin-bottom: 8px; }
+    .result-code { font-size: 28px; font-weight: 800; word-break: break-all; }
+    .result-file { background: var(--blue); color: white; }
+    .btn {
+      border: 0;
+      background: var(--blue);
+      color: white;
+      border-radius: 14px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .btn.secondary { background: #e2e8f0; color: var(--blue); }
+    .btn.soft { background: #eff6ff; color: #1d4ed8; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 18px; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    th, td { padding: 12px 14px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; font-size: 14px; }
+    th { background: #f8fafc; color: var(--sub); font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; position: sticky; top: 0; }
+    tr:first-child td { border-top: 0; }
+    .pill { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #eff6ff; color: #1d4ed8; font-size: 12px; font-weight: 700; }
+    .tiny { font-size: 12px; color: var(--sub); }
+    .checkboxes { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+    .checkboxes label { display: inline-flex; gap: 8px; align-items: center; color: var(--sub); font-size: 14px; }
+    .search { margin-bottom: 14px; }
+    .footer-note { margin-top: 14px; font-size: 13px; color: var(--sub); line-height: 1.6; }
+    .hidden { display: none !important; }
+    .stat-grid { display: grid; gap: 12px; grid-template-columns: repeat(3, 1fr); }
+    .stat { background: var(--soft); border-radius: 16px; padding: 14px; border: 1px solid var(--line); }
+    .stat strong { display: block; font-size: 24px; margin-top: 6px; }
+    @media (max-width: 1100px) {
+      .generator-grid, .master-grid, .dict-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .wrap { padding: 14px; }
+      .hero h1 { font-size: 28px; }
+      .row { grid-template-columns: 1fr; }
+      .result-code { font-size: 22px; }
+      .stat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="badge">사내용 운영툴 초안</div>
+          <h1>허스크 / 커스텀랜드 상품코드 관리자</h1>
+          <p>라인 · 소재/형태 · 특징 · 제품 · 기종 · 컬러 · 일반/라미 · 단면/양면 기준으로 코드를 빠르게 생성하고 관리하는 단일 파일 버전</p>
+        </div>
+        <div class="tabs">
+          <button class="tab active" data-tab="generator">코드 생성기</button>
+          <button class="tab" data-tab="master">상품마스터</button>
+          <button class="tab" data-tab="dictionary">약어사전</button>
+          <button class="tab" data-tab="search">코드 검색</button>
+        </div>
       </div>
-      {children}
-    </div>
-  );
-}
+    </section>
 
-export default function HuskCodeManagerApp() {
-  const [tab, setTab] = useState("generator");
-  const [lookups, setLookups] = useState(defaultLookups);
-  const [products, setProducts] = useState(defaultProducts);
-  const [search, setSearch] = useState("");
-
-  const [selectedProductName, setSelectedProductName] = useState(defaultProducts[0].name);
-  const [line, setLine] = useState("");
-  const [material, setMaterial] = useState("");
-  const [feature, setFeature] = useState("");
-  const [productCode, setProductCode] = useState("");
-  const [model, setModel] = useState("");
-  const [color, setColor] = useState("");
-  const [printType, setPrintType] = useState("");
-  const [printSide, setPrintSide] = useState("");
-  const [manualBaseCode, setManualBaseCode] = useState("");
-
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return;
-    try {
-      const parsed = JSON.parse(saved);
-      if (parsed.lookups) setLookups(parsed.lookups);
-      if (parsed.products) setProducts(parsed.products);
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ lookups, products }));
-  }, [lookups, products]);
-
-  const selectedMaster = useMemo(
-    () => products.find((p) => p.name === selectedProductName) || products[0],
-    [products, selectedProductName]
-  );
-
-  useEffect(() => {
-    if (!selectedMaster) return;
-    setLine(selectedMaster.line || "");
-    setMaterial(selectedMaster.material || "");
-    setFeature(selectedMaster.feature || "");
-    setProductCode(selectedMaster.product || "");
-    setManualBaseCode(selectedMaster.existingCode || "");
-  }, [selectedMaster]);
-
-  const autoBaseCode = buildBaseCode({
-    existingCode: manualBaseCode,
-    line,
-    material,
-    feature,
-    product: productCode,
-  });
-
-  const finalCode = buildFinalCode(autoBaseCode, model);
-  const fileName = buildFileName(finalCode, color, printType, printSide);
-
-  const filteredProducts = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return products;
-    return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        (p.existingCode || "").toLowerCase().includes(q)
-    );
-  }, [products, search]);
-
-  const [newProduct, setNewProduct] = useState({
-    category: "",
-    name: "",
-    line: "",
-    material: "",
-    feature: "",
-    product: "",
-    existingCode: "",
-    modelRequired: false,
-    colorRequired: false,
-  });
-
-  const addProduct = () => {
-    if (!newProduct.name.trim()) return;
-    setProducts((prev) => [newProduct, ...prev]);
-    setNewProduct({
-      category: "",
-      name: "",
-      line: "",
-      material: "",
-      feature: "",
-      product: "",
-      existingCode: "",
-      modelRequired: false,
-      colorRequired: false,
-    });
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <div className="text-sm font-medium text-slate-500">사내용 코드 생성/관리 툴</div>
-              <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">허스크 / 커스텀랜드 상품코드 관리자</h1>
-              <p className="mt-2 text-sm text-slate-600">
-                라인 / 소재 / 특징 / 제품 / 기종 / 컬러 / 일반·라미 / 단면·양면 규칙을 한 화면에서 관리하도록 만든 초안.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-              {tabs.map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
-                    tab === t.key ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
+    <section id="tab-generator" class="grid generator-grid">
+      <div class="card">
+        <h2>코드 생성기</h2>
+        <div class="row">
+          <div class="field row-1">
+            <label>상품 선택</label>
+            <select id="productSelect"></select>
+          </div>
+          <div class="field">
+            <label>라인</label>
+            <select id="lineSelect"></select>
+          </div>
+          <div class="field">
+            <label>소재·형태</label>
+            <select id="materialSelect"></select>
+          </div>
+          <div class="field">
+            <label>특징</label>
+            <select id="featureSelect"></select>
+          </div>
+          <div class="field">
+            <label>제품</label>
+            <select id="productCodeSelect"></select>
+          </div>
+          <div class="field">
+            <label>기종명</label>
+            <input id="modelInput" placeholder="예: S26+, BUDS4" />
+          </div>
+          <div class="field">
+            <label>컬러</label>
+            <select id="colorSelect"></select>
+          </div>
+          <div class="field">
+            <label>인쇄종류</label>
+            <select id="printTypeSelect"></select>
+          </div>
+          <div class="field">
+            <label>인쇄방식</label>
+            <select id="printSideSelect"></select>
+          </div>
+          <div class="field row-1">
+            <label>기존 운영코드 / 직접코드</label>
+            <input id="manualCodeInput" placeholder="예: MHCG, TBC, FRMTACTOKP" />
           </div>
         </div>
-
-        {tab === "generator" && (
-          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <SectionCard title="코드 생성기">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="md:col-span-2">
-                  <label className="mb-1 block text-sm font-medium text-slate-700">상품명</label>
-                  <select
-                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-400"
-                    value={selectedProductName}
-                    onChange={(e) => setSelectedProductName(e.target.value)}
-                  >
-                    {products.map((p) => (
-                      <option key={p.name} value={p.name}>
-                        [{p.category}] {p.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">라인</label>
-                  <Select value={line} onChange={setLine} items={lookups.lines} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">소재·형태</label>
-                  <Select value={material} onChange={setMaterial} items={lookups.materials} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">특징</label>
-                  <Select value={feature} onChange={setFeature} items={lookups.features} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">제품</label>
-                  <Select value={productCode} onChange={setProductCode} items={lookups.products} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">기종명</label>
-                  <input className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" value={model} onChange={(e) => setModel(e.target.value.toUpperCase())} placeholder="예: S26+, BUDS4" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">컬러</label>
-                  <Select value={color} onChange={setColor} items={lookups.colors} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">인쇄종류</label>
-                  <Select value={printType} onChange={setPrintType} items={lookups.printTypes} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">인쇄방식</label>
-                  <Select value={printSide} onChange={setPrintSide} items={lookups.printSides} />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="mb-1 block text-sm font-medium text-slate-700">기존 운영코드 / 직접코드</label>
-                  <input className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" value={manualBaseCode} onChange={(e) => setManualBaseCode(e.target.value.toUpperCase())} placeholder="예: MHCG, TBC, FRMTACTOKP" />
-                </div>
-              </div>
-            </SectionCard>
-
-            <SectionCard title="결과">
-              <div className="space-y-4">
-                <div className="rounded-2xl bg-slate-100 p-4">
-                  <div className="text-xs font-medium text-slate-500">기본코드</div>
-                  <div className="mt-1 break-all text-2xl font-bold text-slate-900">{autoBaseCode || "-"}</div>
-                </div>
-                <div className="rounded-2xl bg-slate-100 p-4">
-                  <div className="text-xs font-medium text-slate-500">최종운영코드</div>
-                  <div className="mt-1 break-all text-2xl font-bold text-slate-900">{finalCode || "-"}</div>
-                </div>
-                <div className="rounded-2xl bg-slate-900 p-4 text-white">
-                  <div className="text-xs font-medium text-slate-300">추천 파일명</div>
-                  <div className="mt-1 break-all text-xl font-bold">{fileName || "-"}</div>
-                </div>
-                <div className="rounded-2xl border border-slate-200 p-4 text-sm text-slate-600">
-                  케이스류는 기종명을 붙이고, 컬러/일반·라미/단면·양면은 파일명 뒤에 언더바로 붙이는 방식으로 운영하면 관리가 제일 편함.
-                </div>
-              </div>
-            </SectionCard>
-          </div>
-        )}
-
-        {tab === "master" && (
-          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <SectionCard title="신규 상품 추가">
-              <div className="grid gap-3">
-                <input className="rounded-xl border border-slate-300 px-3 py-2 text-sm" placeholder="카테고리" value={newProduct.category} onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })} />
-                <input className="rounded-xl border border-slate-300 px-3 py-2 text-sm" placeholder="상품명" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} />
-                <Select value={newProduct.line} onChange={(v) => setNewProduct({ ...newProduct, line: v })} items={lookups.lines} />
-                <Select value={newProduct.material} onChange={(v) => setNewProduct({ ...newProduct, material: v })} items={lookups.materials} />
-                <Select value={newProduct.feature} onChange={(v) => setNewProduct({ ...newProduct, feature: v })} items={lookups.features} />
-                <Select value={newProduct.product} onChange={(v) => setNewProduct({ ...newProduct, product: v })} items={lookups.products} />
-                <input className="rounded-xl border border-slate-300 px-3 py-2 text-sm" placeholder="기존 운영코드" value={newProduct.existingCode} onChange={(e) => setNewProduct({ ...newProduct, existingCode: e.target.value.toUpperCase() })} />
-                <label className="flex items-center gap-2 text-sm text-slate-700">
-                  <input type="checkbox" checked={newProduct.modelRequired} onChange={(e) => setNewProduct({ ...newProduct, modelRequired: e.target.checked })} />
-                  기종명 필요
-                </label>
-                <label className="flex items-center gap-2 text-sm text-slate-700">
-                  <input type="checkbox" checked={newProduct.colorRequired} onChange={(e) => setNewProduct({ ...newProduct, colorRequired: e.target.checked })} />
-                  컬러 필요
-                </label>
-                <button onClick={addProduct} className="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-medium text-white">상품 추가</button>
-              </div>
-            </SectionCard>
-
-            <SectionCard title="상품마스터 목록" right={<span className="text-sm text-slate-500">총 {products.length}개</span>}>
-              <div className="max-h-[700px] overflow-auto rounded-2xl border border-slate-200">
-                <table className="min-w-full text-left text-sm">
-                  <thead className="sticky top-0 bg-slate-100 text-slate-700">
-                    <tr>
-                      <th className="px-3 py-2">카테고리</th>
-                      <th className="px-3 py-2">상품명</th>
-                      <th className="px-3 py-2">기존코드</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((p, idx) => (
-                      <tr key={`${p.name}-${idx}`} className="border-t border-slate-200">
-                        <td className="px-3 py-2 text-slate-600">{p.category}</td>
-                        <td className="px-3 py-2 font-medium text-slate-800">{p.name}</td>
-                        <td className="px-3 py-2 text-slate-600">{p.existingCode || buildBaseCode(p)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </SectionCard>
-          </div>
-        )}
-
-        {tab === "dictionary" && (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {[
-              ["라인", lookups.lines],
-              ["소재·형태", lookups.materials],
-              ["특징", lookups.features],
-              ["제품", lookups.products],
-            ].map(([title, items]) => (
-              <SectionCard key={title} title={title}>
-                <div className="space-y-2">
-                  {items.map((item) => (
-                    <div key={`${title}-${item.label}-${item.code}`} className="flex items-center justify-between rounded-xl bg-slate-100 px-3 py-2 text-sm">
-                      <span className="text-slate-700">{item.label}</span>
-                      <span className="font-semibold text-slate-900">{item.code || "-"}</span>
-                    </div>
-                  ))}
-                </div>
-              </SectionCard>
-            ))}
-          </div>
-        )}
-
-        {tab === "search" && (
-          <SectionCard title="코드 검색">
-            <div className="mb-4">
-              <input
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="상품명, 카테고리, 코드로 검색"
-              />
-            </div>
-            <div className="overflow-auto rounded-2xl border border-slate-200">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-slate-100 text-slate-700">
-                  <tr>
-                    <th className="px-3 py-2">카테고리</th>
-                    <th className="px-3 py-2">상품명</th>
-                    <th className="px-3 py-2">라인</th>
-                    <th className="px-3 py-2">소재</th>
-                    <th className="px-3 py-2">특징</th>
-                    <th className="px-3 py-2">제품</th>
-                    <th className="px-3 py-2">기존코드</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredProducts.map((p, idx) => (
-                    <tr key={`${p.name}-${idx}`} className="border-t border-slate-200">
-                      <td className="px-3 py-2 text-slate-600">{p.category}</td>
-                      <td className="px-3 py-2 font-medium text-slate-800">{p.name}</td>
-                      <td className="px-3 py-2">{getLabel(lookups.lines, p.line) || "-"}</td>
-                      <td className="px-3 py-2">{getLabel(lookups.materials, p.material) || "-"}</td>
-                      <td className="px-3 py-2">{getLabel(lookups.features, p.feature) || "-"}</td>
-                      <td className="px-3 py-2">{getLabel(lookups.products, p.product) || "-"}</td>
-                      <td className="px-3 py-2 font-semibold">{p.existingCode || buildBaseCode(p)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </SectionCard>
-        )}
+        <div class="footer-note">
+          케이스류는 기종명을 붙이고, 파일명은 <strong>최종운영코드_컬러_일반·라미_단면·양면</strong> 구조로 쓰는 걸 기본으로 잡음. 기존 코드가 있으면 그 코드를 우선 사용.
+        </div>
       </div>
-    </div>
-  );
-}
+
+      <div class="card">
+        <h2>결과</h2>
+        <div class="stat-grid">
+          <div class="stat"><div class="tiny">선택된 카테고리</div><strong id="statCategory">-</strong></div>
+          <div class="stat"><div class="tiny">기종 필요</div><strong id="statModelRequired">-</strong></div>
+          <div class="stat"><div class="tiny">컬러 필요</div><strong id="statColorRequired">-</strong></div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="result-box">
+          <div class="result-title">기본코드</div>
+          <div class="result-code" id="baseCodeResult">-</div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="result-box">
+          <div class="result-title">최종운영코드</div>
+          <div class="result-code" id="finalCodeResult">-</div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="result-box result-file">
+          <div class="result-title" style="color:rgba(255,255,255,.72)">추천 파일명</div>
+          <div class="result-code" style="font-size:22px" id="fileNameResult">-</div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="btn-row">
+          <button class="btn" id="copyFinalBtn">최종코드 복사</button>
+          <button class="btn soft" id="copyFileBtn">파일명 복사</button>
+          <button class="btn secondary" id="resetBtn">초기화</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-master" class="grid master-grid hidden">
+      <div class="card">
+        <h2>신규 상품 추가</h2>
+        <div class="row">
+          <div class="field"><label>카테고리</label><input id="newCategory" /></div>
+          <div class="field"><label>상품명</label><input id="newName" /></div>
+          <div class="field"><label>라인</label><select id="newLine"></select></div>
+          <div class="field"><label>소재·형태</label><select id="newMaterial"></select></div>
+          <div class="field"><label>특징</label><select id="newFeature"></select></div>
+          <div class="field"><label>제품</label><select id="newProductCode"></select></div>
+          <div class="field row-1"><label>기존 운영코드</label><input id="newExistingCode" /></div>
+        </div>
+        <div style="height:14px"></div>
+        <div class="checkboxes">
+          <label><input type="checkbox" id="newModelRequired" /> 기종명 필요</label>
+          <label><input type="checkbox" id="newColorRequired" /> 컬러 필요</label>
+        </div>
+        <div style="height:14px"></div>
+        <div class="btn-row">
+          <button class="btn" id="addProductBtn">상품 추가</button>
+          <button class="btn secondary" id="resetProductBtn">입력 초기화</button>
+        </div>
+        <div class="footer-note">추가한 상품은 브라우저 로컬저장으로 유지됨. 다른 PC에서는 자동 공유 안 됨.</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <h2>상품마스터 목록</h2>
+          <span class="pill" id="masterCount">0개</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>카테고리</th>
+                <th>상품명</th>
+                <th>기존코드</th>
+                <th>작업</th>
+              </tr>
+            </thead>
+            <tbody id="masterTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-dictionary" class="grid dict-grid hidden"></section>
+
+    <section id="tab-search" class="card hidden">
+      <h2>코드 검색</h2>
+      <div class="field search">
+        <label>상품명 / 카테고리 / 코드 검색</label>
+        <input id="searchInput" placeholder="예: 스마트톡, 키링, MHCG" />
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>카테고리</th>
+              <th>상품명</th>
+              <th>라인</th>
+              <th>소재·형태</th>
+              <th>특징</th>
+              <th>제품</th>
+              <th>기존코드</th>
+            </tr>
+          </thead>
+          <tbody id="searchTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'husk-code-manager-html-v1';
+
+    const defaultLookups = {
+      lines: [
+        { label: '없음', code: '' },
+        { label: '맥세이프', code: 'M' },
+        { label: '자유형', code: 'FR' },
+        { label: '자유형 맥세이프', code: 'FRM' },
+        { label: '에어팟', code: 'A' },
+        { label: '버즈', code: 'B' },
+        { label: '에어팟 맥스', code: 'AM' }
+      ],
+      materials: [
+        { label: '없음', code: '' },
+        { label: '하드케이스', code: 'HC' },
+        { label: '투명하드', code: 'HDCL' },
+        { label: '투명젤하드', code: 'JH' },
+        { label: '터프범퍼', code: 'TB' },
+        { label: '카드포켓', code: 'PK' },
+        { label: '에폭시범퍼', code: 'EPB' },
+        { label: '글라스범퍼', code: 'GB' },
+        { label: 'TPU/실리콘', code: 'TPU' },
+        { label: '아크릴', code: 'AC' },
+        { label: '투명아크릴', code: 'TAC' },
+        { label: '에폭시', code: 'EPX' },
+        { label: '거울', code: 'MR' },
+        { label: '반구구슬', code: 'BEAD' },
+        { label: '틴케이스', code: 'TIN' },
+        { label: '메탈', code: 'MM' },
+        { label: '마그넷', code: 'MAG' },
+        { label: '포켓슬라이드', code: 'PSA' },
+        { label: '스마트커버', code: 'SC' }
+      ],
+      features: [
+        { label: '없음', code: '' },
+        { label: '유광', code: 'G' },
+        { label: '무광', code: 'M' },
+        { label: '미러', code: 'MR' },
+        { label: '홀로그램', code: 'H' },
+        { label: '실버', code: 'SV' },
+        { label: '투명', code: 'CL' },
+        { label: '글리터', code: 'GL' },
+        { label: '스탠다드', code: 'ST' },
+        { label: '프리미엄', code: 'PR' },
+        { label: 'LED', code: 'LED' },
+        { label: '원형', code: 'OR' },
+        { label: '하트', code: 'HT' },
+        { label: '창문형', code: 'WD' }
+      ],
+      products: [
+        { label: '없음', code: '' },
+        { label: '케이스', code: '' },
+        { label: '스마트톡', code: 'TOK' },
+        { label: '스마트톡 프로', code: 'TOKP' },
+        { label: '키링', code: 'KEY' },
+        { label: '키링 D고리', code: 'KEYD' },
+        { label: '키링 볼체인', code: 'KEYB' },
+        { label: '등신대', code: 'STD' },
+        { label: '지비츠', code: 'JIB' },
+        { label: '집게', code: 'CLIP' },
+        { label: '메모홀더', code: 'MHC' },
+        { label: '멀티펜', code: 'MTP' },
+        { label: '젤볼펜', code: 'BAP' },
+        { label: '코롯토', code: 'COO' },
+        { label: '자', code: 'RUL' },
+        { label: '오프너', code: 'OPN' },
+        { label: '손거울', code: 'MIR' },
+        { label: '문진', code: 'PPR' },
+        { label: '티코스터', code: 'TCO' },
+        { label: '인센스홀더', code: 'INS' },
+        { label: '보조배터리', code: 'BAT' },
+        { label: '가죽포켓', code: 'LPK' },
+        { label: '케이블', code: 'CAB' },
+        { label: '마우스패드', code: 'PAD' },
+        { label: '스트랩', code: 'STR' },
+        { label: '보호필름', code: 'FILM' },
+        { label: '버튼', code: 'BTN' },
+        { label: '수정테이프', code: 'CT' },
+        { label: '프린트앤컷', code: 'PNC' },
+        { label: '형광펜세트', code: 'HLP' },
+        { label: 'PVC포토카드', code: 'PVCP' },
+        { label: '라이트박스', code: 'LB' },
+        { label: '머그컵', code: 'MUG' },
+        { label: '워터북', code: 'WB' },
+        { label: '노트', code: 'NOTE' },
+        { label: '스티커', code: 'STK' },
+        { label: '포스터', code: 'PST' },
+        { label: '에코백', code: 'ECO' }
+      ],
+      printTypes: [
+        { label: '없음', code: '' },
+        { label: '일반', code: 'GN' },
+        { label: '라미', code: 'LA' }
+      ],
+      printSides: [
+        { label: '없음', code: '' },
+        { label: '단면', code: 'SS' },
+        { label: '양면', code: 'DB' }
+      ],
+      colors: [
+        { label: '없음', code: '' },
+        { label: '블랙', code: 'BK' },
+        { label: '화이트', code: 'WH' },
+        { label: '투명', code: 'CL' },
+        { label: '실버', code: 'SV' },
+        { label: '골드', code: 'GD' },
+        { label: '오렌지', code: 'OR' },
+        { label: '블루', code: 'BL' },
+        { label: '그린', code: 'GR' },
+        { label: '핑크', code: 'PK' },
+        { label: '레드', code: 'RD' },
+        { label: '퍼플', code: 'PU' },
+        { label: '그레이', code: 'GY' }
+      ]
+    };
+
+    const defaultProducts = [
+      { category: '핸드폰 케이스', name: '투명젤하드케이스 (스탠다드/프리미엄)', line: '', material: 'JH', feature: '', product: '', existingCode: 'JH', modelRequired: true, colorRequired: false },
+      { category: '핸드폰 케이스', name: '맥세이프 투명젤하드케이스 (스탠다드/프리미엄)', line: 'M', material: 'JH', feature: '', product: '', existingCode: 'MJH', modelRequired: true, colorRequired: false },
+      { category: '핸드폰 케이스', name: '하드케이스 (유광/무광)', line: '', material: 'HC', feature: '', product: '', existingCode: 'HC', modelRequired: true, colorRequired: false },
+      { category: '핸드폰 케이스', name: '맥세이프 하드케이스 (유광/무광)', line: 'M', material: 'HC', feature: '', product: '', existingCode: 'MHC', modelRequired: true, colorRequired: false },
+      { category: '핸드폰 케이스', name: '터프범퍼케이스', line: '', material: 'TB', feature: '', product: '', existingCode: 'TBC', modelRequired: true, colorRequired: false },
+      { category: '핸드폰 케이스', name: '맥세이프 터프범퍼케이스', line: 'M', material: 'TB', feature: '', product: '', existingCode: 'MTBC', modelRequired: true, colorRequired: false },
+      { category: '핸드폰 케이스', name: '카드포켓케이스 (유광/무광)', line: '', material: 'PK', feature: '', product: '', existingCode: 'GPKC', modelRequired: true, colorRequired: false },
+      { category: '핸드폰 케이스', name: '맥세이프 카드포켓케이스 무광', line: 'M', material: 'PK', feature: '', product: '', existingCode: 'MPKC', modelRequired: true, colorRequired: false },
+      { category: '핸드폰 케이스', name: '에폭시범퍼케이스', line: '', material: 'EPB', feature: '', product: '', existingCode: 'EPOXY', modelRequired: true, colorRequired: false },
+      { category: '핸드폰 케이스', name: '글라스범퍼케이스 (유광/무광/미러/홀로그램)', line: '', material: 'GB', feature: '', product: '', existingCode: 'GB', modelRequired: true, colorRequired: false },
+      { category: '핸드폰 케이스', name: '맥세이프 글라스범퍼케이스 (유광/무광/미러/홀로그램)', line: 'M', material: 'GB', feature: '', product: '', existingCode: 'MGB', modelRequired: true, colorRequired: false },
+      { category: '스마트톡', name: '무단차 스마트톡 (투명)', line: '', material: '', feature: 'CL', product: 'TOK', existingCode: 'UV', modelRequired: false, colorRequired: false },
+      { category: '스마트톡', name: '맥세이프 무단차 스마트톡', line: 'M', material: '', feature: '', product: 'TOK', existingCode: 'MTUV', modelRequired: false, colorRequired: false },
+      { category: '스마트톡', name: '자유형 거울 스마트톡', line: 'FR', material: 'MR', feature: '', product: 'TOK', existingCode: 'FRMRTOK', modelRequired: false, colorRequired: false },
+      { category: '스마트톡', name: '자유형 맥세이프 거울 스마트톡', line: 'FRM', material: 'MR', feature: '', product: 'TOK', existingCode: 'FRMMRTOK', modelRequired: false, colorRequired: false },
+      { category: '스마트톡', name: '자유형 투명아크릴 스마트톡 (일반/라미)', line: 'FR', material: 'TAC', feature: '', product: 'TOK', existingCode: 'FRTACTOK', modelRequired: false, colorRequired: false },
+      { category: '스마트톡', name: '자유형 맥세이프 투명아크릴 스마트톡 (일반/라미)', line: 'FRM', material: 'TAC', feature: '', product: 'TOK', existingCode: 'FRMTACTOK', modelRequired: false, colorRequired: false },
+      { category: '스마트톡', name: '자유형 맥세이프 투명아크릴 스마트톡 프로 (일반/라미)', line: 'FRM', material: 'TAC', feature: '', product: 'TOKP', existingCode: 'FRMTACTOKP', modelRequired: false, colorRequired: false },
+      { category: '스마트톡', name: '자유형 에폭시 스마트톡', line: 'FR', material: 'EPX', feature: '', product: 'TOK', existingCode: 'FREPXTOK', modelRequired: false, colorRequired: false },
+      { category: '스마트톡', name: '자유형 맥세이프 에폭시 스마트톡', line: 'FRM', material: 'EPX', feature: '', product: 'TOK', existingCode: 'FRMEPXTOK', modelRequired: false, colorRequired: false },
+      { category: '에어팟/버즈', name: '에어팟 투명하드케이스', line: 'A', material: 'HDCL', feature: '', product: '', existingCode: 'AHDCL', modelRequired: true, colorRequired: false },
+      { category: '에어팟/버즈', name: '에어팟 하드케이스 (유광/무광)', line: 'A', material: 'HC', feature: '', product: '', existingCode: 'AHC', modelRequired: true, colorRequired: false },
+      { category: '에어팟/버즈', name: '버즈 투명하드케이스', line: 'B', material: 'HDCL', feature: '', product: '', existingCode: 'BHDCL', modelRequired: true, colorRequired: false },
+      { category: '에어팟/버즈', name: '버즈 하드케이스 (유광/무광)', line: 'B', material: 'HC', feature: '', product: '', existingCode: 'BHC', modelRequired: true, colorRequired: false },
+      { category: '굿즈/문구', name: '자유형 투명아크릴 등신대 (일반/라미)', line: 'FR', material: 'TAC', feature: '', product: 'STD', existingCode: 'ACSTD', modelRequired: false, colorRequired: true },
+      { category: '굿즈/문구', name: '자유형 투명아크릴 자 15cm (일반/라미)', line: 'FR', material: 'TAC', feature: '', product: 'RUL', existingCode: 'FRTACRUL', modelRequired: false, colorRequired: true },
+      { category: '굿즈/문구', name: '자유형 투명아크릴 지비츠 (일반/LED)', line: 'FR', material: 'TAC', feature: '', product: 'JIB', existingCode: 'FRTACJIB', modelRequired: false, colorRequired: true },
+      { category: '굿즈/문구', name: '자유형 투명아크릴 집게 양면 (일반/라미)', line: 'FR', material: 'TAC', feature: '', product: 'CLIP', existingCode: 'FRTACCLIP', modelRequired: false, colorRequired: true },
+      { category: '굿즈/문구', name: '자유형 투명아크릴 키링 D고리 (일반/라미)', line: 'FR', material: 'TAC', feature: '', product: 'KEYD', existingCode: 'FRTACKEYD', modelRequired: false, colorRequired: true },
+      { category: '굿즈/문구', name: '자유형 투명아크릴 키링 볼체인 (일반/라미)', line: 'FR', material: 'TAC', feature: '', product: 'KEYB', existingCode: 'FRTACKEYB', modelRequired: false, colorRequired: true },
+      { category: '굿즈/문구', name: '메탈 멀티펜', line: '', material: 'MM', feature: '', product: 'MTP', existingCode: 'MMTPSV', modelRequired: false, colorRequired: true },
+      { category: '리빙/홈데코', name: '아크릴 반구 마그넷', line: '', material: 'AC', feature: '', product: 'MAG', existingCode: 'MAGBEAD', modelRequired: false, colorRequired: true },
+      { category: '리빙/홈데코', name: '글리터 손거울', line: '', material: '', feature: 'GL', product: 'MIR', existingCode: 'MRGLITTER', modelRequired: false, colorRequired: true },
+      { category: '리빙/홈데코', name: '오프너', line: '', material: '', feature: '', product: 'OPN', existingCode: 'OPENER', modelRequired: false, colorRequired: true },
+      { category: '스티커/지류', name: '스프링노트 A5 (유광/무광/비코팅)', line: '', material: '', feature: '', product: 'NOTE', existingCode: 'SPNOTE', modelRequired: false, colorRequired: false },
+      { category: '스티커/지류', name: '포토카드 (비코팅/유광/무광)', line: '', material: '', feature: '', product: 'PVCP', existingCode: 'PAPERPHO', modelRequired: false, colorRequired: false },
+      { category: '패션/잡화', name: '에코백', line: '', material: '', feature: '', product: 'ECO', existingCode: 'ECOBAG', modelRequired: false, colorRequired: false }
+    ];
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && saved.lookups && saved.products) return saved;
+      } catch (e) {}
+      return { lookups: defaultLookups, products: defaultProducts };
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function fillSelect(select, items) {
+      select.innerHTML = '';
+      items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.code;
+        option.textContent = item.label + (item.code ? ` (${item.code})` : '');
+        select.appendChild(option);
+      });
+    }
+
+    function getLabel(list, code) {
+      const found = list.find(x => x.code === code);
+      return found ? found.label : '-';
+    }
+
+    function buildBaseCode(obj) {
+      if (obj.manualCode && obj.manualCode.trim()) return obj.manualCode.trim().toUpperCase();
+      return [obj.line, obj.material, obj.feature, obj.product].filter(Boolean).join('');
+    }
+
+    function buildFinalCode(baseCode, model) {
+      return [baseCode, (model || '').trim().toUpperCase()].filter(Boolean).join('_');
+    }
+
+    function buildFileName(finalCode, color, printType, printSide) {
+      return [finalCode, color, printType, printSide].filter(Boolean).join('_');
+    }
+
+    function renderTabs() {
+      document.querySelectorAll('.tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+          btn.classList.add('active');
+          ['generator', 'master', 'dictionary', 'search'].forEach(key => {
+            document.getElementById('tab-' + key).classList.toggle('hidden', key !== btn.dataset.tab);
+          });
+        });
+      });
+    }
+
+    function renderGenerator() {
+      const productSelect = document.getElementById('productSelect');
+      productSelect.innerHTML = '';
+      state.products.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.name;
+        option.textContent = `[${p.category}] ${p.name}`;
+        productSelect.appendChild(option);
+      });
+
+      fillSelect(document.getElementById('lineSelect'), state.lookups.lines);
+      fillSelect(document.getElementById('materialSelect'), state.lookups.materials);
+      fillSelect(document.getElementById('featureSelect'), state.lookups.features);
+      fillSelect(document.getElementById('productCodeSelect'), state.lookups.products);
+      fillSelect(document.getElementById('colorSelect'), state.lookups.colors);
+      fillSelect(document.getElementById('printTypeSelect'), state.lookups.printTypes);
+      fillSelect(document.getElementById('printSideSelect'), state.lookups.printSides);
+
+      if (state.products.length) {
+        productSelect.value = state.products[0].name;
+        applySelectedProduct();
+      }
+
+      productSelect.onchange = applySelectedProduct;
+      ['lineSelect','materialSelect','featureSelect','productCodeSelect','modelInput','colorSelect','printTypeSelect','printSideSelect','manualCodeInput'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateResult);
+        document.getElementById(id).addEventListener('change', updateResult);
+      });
+
+      document.getElementById('copyFinalBtn').onclick = () => copyText(document.getElementById('finalCodeResult').textContent);
+      document.getElementById('copyFileBtn').onclick = () => copyText(document.getElementById('fileNameResult').textContent);
+      document.getElementById('resetBtn').onclick = () => {
+        if (!state.products.length) return;
+        document.getElementById('productSelect').value = state.products[0].name;
+        applySelectedProduct();
+        document.getElementById('modelInput').value = '';
+        document.getElementById('colorSelect').value = '';
+        document.getElementById('printTypeSelect').value = '';
+        document.getElementById('printSideSelect').value = '';
+        updateResult();
+      };
+
+      updateResult();
+    }
+
+    function applySelectedProduct() {
+      const selected = state.products.find(p => p.name === document.getElementById('productSelect').value);
+      if (!selected) return;
+      document.getElementById('lineSelect').value = selected.line || '';
+      document.getElementById('materialSelect').value = selected.material || '';
+      document.getElementById('featureSelect').value = selected.feature || '';
+      document.getElementById('productCodeSelect').value = selected.product || '';
+      document.getElementById('manualCodeInput').value = selected.existingCode || '';
+      document.getElementById('statCategory').textContent = selected.category || '-';
+      document.getElementById('statModelRequired').textContent = selected.modelRequired ? '필수' : '선택';
+      document.getElementById('statColorRequired').textContent = selected.colorRequired ? '필수' : '선택';
+      updateResult();
+    }
+
+    function updateResult() {
+      const line = document.getElementById('lineSelect').value;
+      const material = document.getElementById('materialSelect').value;
+      const feature = document.getElementById('featureSelect').value;
+      const product = document.getElementById('productCodeSelect').value;
+      const model = document.getElementById('modelInput').value;
+      const color = document.getElementById('colorSelect').value;
+      const printType = document.getElementById('printTypeSelect').value;
+      const printSide = document.getElementById('printSideSelect').value;
+      const manualCode = document.getElementById('manualCodeInput').value;
+
+      const baseCode = buildBaseCode({ line, material, feature, product, manualCode });
+      const finalCode = buildFinalCode(baseCode, model);
+      const fileName = buildFileName(finalCode, color, printType, printSide);
+
+      document.getElementById('baseCodeResult').textContent = baseCode || '-';
+      document.getElementById('finalCodeResult').textContent = finalCode || '-';
+      document.getElementById('fileNameResult').textContent = fileName || '-';
+    }
+
+    function copyText(text) {
+      if (!text || text === '-') return;
+      navigator.clipboard.writeText(text).then(() => alert('복사됨: ' + text));
+    }
+
+    function renderMaster() {
+      fillSelect(document.getElementById('newLine'), state.lookups.lines);
+      fillSelect(document.getElementById('newMaterial'), state.lookups.materials);
+      fillSelect(document.getElementById('newFeature'), state.lookups.features);
+      fillSelect(document.getElementById('newProductCode'), state.lookups.products);
+
+      document.getElementById('addProductBtn').onclick = () => {
+        const item = {
+          category: document.getElementById('newCategory').value.trim(),
+          name: document.getElementById('newName').value.trim(),
+          line: document.getElementById('newLine').value,
+          material: document.getElementById('newMaterial').value,
+          feature: document.getElementById('newFeature').value,
+          product: document.getElementById('newProductCode').value,
+          existingCode: document.getElementById('newExistingCode').value.trim().toUpperCase(),
+          modelRequired: document.getElementById('newModelRequired').checked,
+          colorRequired: document.getElementById('newColorRequired').checked,
+        };
+        if (!item.name) {
+          alert('상품명 넣어야 함');
+          return;
+        }
+        state.products.unshift(item);
+        saveState();
+        renderAllDynamic();
+      };
+
+      document.getElementById('resetProductBtn').onclick = () => {
+        ['newCategory','newName','newExistingCode'].forEach(id => document.getElementById(id).value = '');
+        ['newLine','newMaterial','newFeature','newProductCode'].forEach(id => document.getElementById(id).value = '');
+        ['newModelRequired','newColorRequired'].forEach(id => document.getElementById(id).checked = false);
+      };
+
+      renderMasterTable();
+    }
+
+    function renderMasterTable() {
+      document.getElementById('masterCount').textContent = `${state.products.length}개`;
+      const body = document.getElementById('masterTableBody');
+      body.innerHTML = '';
+      state.products.forEach((p, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(p.category || '-')}</td>
+          <td><strong>${escapeHtml(p.name)}</strong></td>
+          <td>${escapeHtml(p.existingCode || [p.line, p.material, p.feature, p.product].filter(Boolean).join(''))}</td>
+          <td><button class="btn secondary" data-del="${idx}">삭제</button></td>
+        `;
+        body.appendChild(tr);
+      });
+      body.querySelectorAll('[data-del]').forEach(btn => {
+        btn.onclick = () => {
+          const idx = Number(btn.dataset.del);
+          if (!confirm('삭제할까?')) return;
+          state.products.splice(idx, 1);
+          saveState();
+          renderAllDynamic();
+        };
+      });
+    }
+
+    function renderDictionary() {
+      const wrap = document.getElementById('tab-dictionary');
+      wrap.innerHTML = '';
+      const blocks = [
+        ['라인', state.lookups.lines],
+        ['소재·형태', state.lookups.materials],
+        ['특징', state.lookups.features],
+        ['제품', state.lookups.products],
+      ];
+      blocks.forEach(([title, items]) => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `<h3>${title}</h3><div>${items.map(item => `<div class="result-box" style="margin-bottom:8px;padding:12px"><div style="display:flex;justify-content:space-between;gap:10px"><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.code || '-')}</strong></div></div>`).join('')}</div>`;
+        wrap.appendChild(div);
+      });
+    }
+
+    function renderSearch() {
+      const input = document.getElementById('searchInput');
+      input.oninput = renderSearchTable;
+      renderSearchTable();
+    }
+
+    function renderSearchTable() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const body = document.getElementById('searchTableBody');
+      body.innerHTML = '';
+      state.products
+        .filter(p => {
+          if (!q) return true;
+          const code = (p.existingCode || [p.line, p.material, p.feature, p.product].filter(Boolean).join('')).toLowerCase();
+          return (p.name || '').toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q) || code.includes(q);
+        })
+        .forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${escapeHtml(p.category || '-')}</td>
+            <td><strong>${escapeHtml(p.name)}</strong></td>
+            <td>${escapeHtml(getLabel(state.lookups.lines, p.line))}</td>
+            <td>${escapeHtml(getLabel(state.lookups.materials, p.material))}</td>
+            <td>${escapeHtml(getLabel(state.lookups.features, p.feature))}</td>
+            <td>${escapeHtml(getLabel(state.lookups.products, p.product))}</td>
+            <td><strong>${escapeHtml(p.existingCode || [p.line, p.material, p.feature, p.product].filter(Boolean).join(''))}</strong></td>
+          `;
+          body.appendChild(tr);
+        });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderAllDynamic() {
+      renderGenerator();
+      renderMasterTable();
+      renderDictionary();
+      renderSearchTable();
+    }
+
+    renderTabs();
+    renderGenerator();
+    renderMaster();
+    renderDictionary();
+    renderSearch();
+  </script>
+</body>
+</html>
+
