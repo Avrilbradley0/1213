@@ -66,6 +66,9 @@
     .chip{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:800;background:#eef4fd;color:#26446f;border:1px solid #dbe7f7}
     .empty{padding:24px;text-align:center;color:var(--sub)}
     .search{flex:1 1 340px}
+    .sub-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+    .sub-tab-btn{height:38px;padding:0 14px;border:none;border-radius:999px;background:#edf3fc;color:#23406f;font-size:13px;font-weight:800;cursor:pointer}
+    .sub-tab-btn.active{background:var(--brand);color:#fff}
     @media (max-width:1200px){.grid-2,.grid-codes{grid-template-columns:1fr}}
     @media (max-width:900px){.form-grid{grid-template-columns:1fr 1fr}.form-grid-2{grid-template-columns:1fr}}
     @media (max-width:640px){
@@ -213,6 +216,7 @@
               <input class="search" type="text" id="codeSearchInput" placeholder="구분 / 한글명 / 코드 / 조회키 검색 (예: 재질, 라인, 제품)" />
               <button class="btn-light" id="reloadCodeBtn">새로고침</button>
             </div>
+            <div class="sub-tabs" id="codeGroupTabs"></div>
             <div class="table-wrap">
               <table>
                 <thead>
@@ -262,6 +266,7 @@ const state = {
   codeMap: [],
   editingProductId: null,
   editingCodeLookupKey: null,
+  activeCodeGroupTab: 'all',
 };
 
 const $ = (id) => document.getElementById(id);
@@ -408,7 +413,7 @@ function renderProducts() {
   });
   const tbody = $('productTableBody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="9" class="empty">검색 결과가 없어</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" class="empty">선택한 구분에 표시할 약어가 없어</td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(row => `
@@ -431,11 +436,29 @@ function renderProducts() {
   `).join('');
 }
 
+function renderCodeGroupTabs() {
+  const wrap = $('codeGroupTabs');
+  if (!wrap) return;
+  const tabs = [{ value: 'all', label: '전체' }, ...CONFIG.CODE_GROUPS.map(group => ({ value: group, label: getCodeGroupLabel(group) }))];
+  wrap.innerHTML = tabs.map(tab => `
+    <button class="sub-tab-btn ${state.activeCodeGroupTab === tab.value ? 'active' : ''}" data-code-tab="${escapeHtml(tab.value)}">${escapeHtml(tab.label)}</button>
+  `).join('');
+  wrap.querySelectorAll('[data-code-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.activeCodeGroupTab = btn.dataset.codeTab || 'all';
+      renderCodeGroupTabs();
+      renderCodeMap();
+    });
+  });
+}
+
 function renderCodeMap() {
   const q = ($('codeSearchInput').value || '').trim().toLowerCase();
   const rows = state.codeMap.filter(row => {
-    const groupLabel = getCodeGroupLabel(row.구분 || '');
-    const displayLookupKey = getDisplayLookupKey(row.구분 || '', row.한글명 || '');
+    const group = row.구분 || '';
+    const groupLabel = getCodeGroupLabel(group);
+    const displayLookupKey = getDisplayLookupKey(group, row.한글명 || '');
+    if (state.activeCodeGroupTab !== 'all' && group !== state.activeCodeGroupTab) return false;
     if (!q) return true;
     return [displayLookupKey, groupLabel, row.조회키, row.구분, row.한글명, row.코드, row.비고].join(' ').toLowerCase().includes(q);
   });
@@ -522,6 +545,8 @@ window.editCode = function(lookupKey) {
   const row = state.codeMap.find(item => item.조회키 === lookupKey);
   if (!row) return;
   state.editingCodeLookupKey = lookupKey;
+  state.activeCodeGroupTab = row.구분 || 'all';
+  renderCodeGroupTabs();
   $('codeGroup').value = row.구분 || CONFIG.CODE_GROUPS[0];
   $('codeUseYn').value = row.사용여부 || 'Y';
   $('codeLabelKo').value = row.한글명 || '';
@@ -556,6 +581,7 @@ async function loadMeta() {
   state.codeMap = state.meta.codeMap || [];
   renderBaseSelects();
   refreshLookupSelects();
+  renderCodeGroupTabs();
   renderCodeMap();
   updateCodePreview();
   updateProductPreview();
