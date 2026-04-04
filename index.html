@@ -210,7 +210,7 @@
           </div>
           <div>
             <div class="toolbar">
-              <input class="search" type="text" id="codeSearchInput" placeholder="구분 / 한글명 / 코드 / 조회키 검색" />
+              <input class="search" type="text" id="codeSearchInput" placeholder="구분 / 한글명 / 코드 / 조회키 검색 (예: 재질, 라인, 제품)" />
               <button class="btn-light" id="reloadCodeBtn">새로고침</button>
             </div>
             <div class="table-wrap">
@@ -230,6 +230,12 @@
   </div>
 </div>
 
+<!--
+중요:
+현재 대화에 실제 Apps Script 웹앱 URL 값이 없어서, 아래 URL은 자리표시자 상태다.
+배포 후 받은 /exec URL로 한 줄만 바꾸면 바로 사용 가능.
+예: https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec
+-->
 <script>
 const CONFIG = {
   API_BASE_URL: 'https://script.google.com/macros/s/AKfycbzMNG_6M_UT26LICJv8xFzNc9NOjYuApj_9B7E879MHH2WZcmmIxQ7MiS3FsYtgTT7E3g/exec',
@@ -237,6 +243,17 @@ const CONFIG = {
   APPLY_MODEL_OPTIONS: [{label:'적용', value:'Y'},{label:'미적용', value:'N'}],
   USE_OPTIONS: [{label:'사용', value:'Y'},{label:'미사용', value:'N'}],
   CODE_GROUPS: ['line','material','structure','shape','product','finish','color','lamination','side'],
+  CODE_GROUP_LABELS: {
+    line: '라인',
+    material: '재질',
+    structure: '구조',
+    shape: '세부형태',
+    product: '제품',
+    finish: '마감',
+    color: '컬러',
+    lamination: '라미',
+    side: '면',
+  },
 };
 
 const state = {
@@ -256,6 +273,16 @@ function escapeHtml(value='') {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+
+function getCodeGroupLabel(group='') {
+  return CONFIG.CODE_GROUP_LABELS[group] || group || '';
+}
+
+function getDisplayLookupKey(group='', label='') {
+  const groupLabel = getCodeGroupLabel(group);
+  return groupLabel && label ? `${groupLabel} | ${label}` : '-';
 }
 
 function setStatus(text, type='') {
@@ -288,7 +315,7 @@ function renderBaseSelects() {
   populateSelect($('applyModel'), CONFIG.APPLY_MODEL_OPTIONS.map(v => ({label:v.label, value:v.value})));
   populateSelect($('useYn'), CONFIG.USE_OPTIONS.map(v => ({label:v.label, value:v.value})));
   populateSelect($('codeUseYn'), CONFIG.USE_OPTIONS.map(v => ({label:v.label, value:v.value})));
-  populateSelect($('codeGroup'), CONFIG.CODE_GROUPS.map(v => ({label:v, value:v})));
+  populateSelect($('codeGroup'), CONFIG.CODE_GROUPS.map(v => ({label:getCodeGroupLabel(v), value:v})));
 }
 
 function refreshLookupSelects() {
@@ -353,7 +380,7 @@ function updateProductPreview() {
 function updateCodePreview() {
   const group = $('codeGroup').value || '';
   const label = ($('codeLabelKo').value || '').trim();
-  $('previewLookupKey').textContent = group && label ? `${group}|${label}` : '-';
+  $('previewLookupKey').textContent = getDisplayLookupKey(group, label);
 }
 
 async function apiGet(action, params={}) {
@@ -407,18 +434,23 @@ function renderProducts() {
 function renderCodeMap() {
   const q = ($('codeSearchInput').value || '').trim().toLowerCase();
   const rows = state.codeMap.filter(row => {
+    const groupLabel = getCodeGroupLabel(row.구분 || '');
+    const displayLookupKey = getDisplayLookupKey(row.구분 || '', row.한글명 || '');
     if (!q) return true;
-    return [row.조회키,row.구분,row.한글명,row.코드,row.비고].join(' ').toLowerCase().includes(q);
+    return [displayLookupKey, groupLabel, row.조회키, row.구분, row.한글명, row.코드, row.비고].join(' ').toLowerCase().includes(q);
   });
   const tbody = $('codeTableBody');
   if (!rows.length) {
     tbody.innerHTML = `<tr><td colspan="7" class="empty">검색 결과가 없어</td></tr>`;
     return;
   }
-  tbody.innerHTML = rows.map(row => `
+  tbody.innerHTML = rows.map(row => {
+    const groupLabel = getCodeGroupLabel(row.구분 || '');
+    const displayLookupKey = getDisplayLookupKey(row.구분 || '', row.한글명 || '');
+    return `
     <tr>
-      <td class="code">${escapeHtml(row.조회키 || '')}</td>
-      <td>${escapeHtml(row.구분 || '')}</td>
+      <td class="code" title="실제 저장키: ${escapeHtml(row.조회키 || '')}">${escapeHtml(displayLookupKey)}</td>
+      <td>${escapeHtml(groupLabel)}</td>
       <td>${escapeHtml(row.한글명 || '')}</td>
       <td class="code">${escapeHtml(row.코드 || '')}</td>
       <td><span class="chip">${escapeHtml(row.사용여부 || '')}</span></td>
@@ -430,7 +462,8 @@ function renderCodeMap() {
         </div>
       </td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function resetProductForm() {
