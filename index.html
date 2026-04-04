@@ -23,37 +23,52 @@
 <pre id="result"></pre>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzTk7tCeyNQfrYup3UQ2IET-8Y3D9u4DoVz_d3ifoDlknf4QTWNkH24ZBjsKvDTbvjz2g/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxupC_WSpCiEhYZ7p1QZHFZBQWLqqEjUZKjfYeVIwyU6JhODnyOSAFOufzKI5-Z5z2X-g/exec";
 
-function load() {
-  fetch(API_URL + "?action=list")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("result").innerText =
-        JSON.stringify(data, null, 2);
-    });
+async function load() {
+  try {
+    const res = await fetch(API_URL + "?action=list");
+    const data = await res.json();
+    document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+  } catch (err) {
+    console.error(err);
+    alert("불러오기 실패");
+  }
 }
 
-function save() {
+async function save() {
   const data = {
     action: "create",
-    카테고리: document.getElementById("category").value,
-    제품: document.getElementById("product").value,
-    재질: document.getElementById("material").value,
-    세부형태: document.getElementById("shape").value,
-    수정자: document.getElementById("user").value,
+    카테고리: document.getElementById("category").value || "",
+    제품: document.getElementById("product").value || "",
+    재질: document.getElementById("material").value || "",
+    세부형태: document.getElementById("shape").value || "",
+    수정자: document.getElementById("user").value || "unknown",
     사용여부: "Y"
   };
 
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify(data)
-  })
-  .then(res => res.json())
-  .then(res => {
-    alert("저장 완료");
-    load();
-  });
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+    console.log("save result:", result);
+
+    if (result.success) {
+      alert("저장 완료");
+      load();
+    } else {
+      alert("저장 실패: " + JSON.stringify(result));
+    }
+  } catch (err) {
+    console.error(err);
+    alert("저장 중 오류 발생");
+  }
 }
 </script>
 
