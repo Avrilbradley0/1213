@@ -281,8 +281,40 @@ function escapeHtml(value='') {
 }
 
 
+function normalizeCodeGroup(group='') {
+  const raw = String(group || '').trim();
+  if (!raw) return '';
+  const lower = raw.toLowerCase();
+  const aliasMap = {
+    line: 'line',
+    material: 'material',
+    structure: 'structure',
+    shape: 'shape',
+    product: 'product',
+    finish: 'finish',
+    color: 'color',
+    lamination: 'lamination',
+    side: 'side',
+    라인: 'line',
+    재질: 'material',
+    구조: 'structure',
+    세부형태: 'shape',
+    세부 형태: 'shape',
+    형태: 'shape',
+    제품: 'product',
+    마감: 'finish',
+    컬러: 'color',
+    색상: 'color',
+    라미: 'lamination',
+    라미네이팅: 'lamination',
+    면: 'side',
+  };
+  return aliasMap[raw] || aliasMap[lower] || lower;
+}
+
 function getCodeGroupLabel(group='') {
-  return CONFIG.CODE_GROUP_LABELS[group] || group || '';
+  const normalized = normalizeCodeGroup(group);
+  return CONFIG.CODE_GROUP_LABELS[normalized] || String(group || '').trim() || '';
 }
 
 function getDisplayLookupKey(group='', label='') {
@@ -304,8 +336,9 @@ function populateSelect(selectEl, items, includeEmpty=false) {
 }
 
 function getActiveCodeItems(group) {
+  const normalizedTarget = normalizeCodeGroup(group);
   return (state.codeMap || [])
-    .filter(row => row.구분 === group && String(row.사용여부 || 'Y').toUpperCase() !== 'N')
+    .filter(row => normalizeCodeGroup(row.구분) === normalizedTarget && String(row.사용여부 || 'Y').toUpperCase() !== 'N')
     .sort((a,b) => String(a.한글명).localeCompare(String(b.한글명), 'ko'))
     .map(row => ({label: row.한글명, value: row.한글명}));
 }
@@ -357,8 +390,8 @@ function currentProductForm() {
 
 function updateProductPreview() {
   const form = currentProductForm();
-  const codeByGroup = Object.fromEntries((state.codeMap || []).map(row => [row.조회키, row.코드 || '']));
-  const getCode = (group, name) => codeByGroup[`${group}|${name}`] || '';
+  const codeByGroup = Object.fromEntries((state.codeMap || []).map(row => [`${normalizeCodeGroup(row.구분)}|${String(row.한글명 || '').trim()}`, row.코드 || '']));
+  const getCode = (group, name) => codeByGroup[`${normalizeCodeGroup(group)}|${String(name || '').trim()}`] || '';
   const segments = [
     getCode('line', form.라인),
     getCode('material', form.재질),
@@ -456,11 +489,12 @@ function renderCodeMap() {
   const q = ($('codeSearchInput').value || '').trim().toLowerCase();
   const rows = state.codeMap.filter(row => {
     const group = row.구분 || '';
+    const normalizedGroup = normalizeCodeGroup(group);
     const groupLabel = getCodeGroupLabel(group);
     const displayLookupKey = getDisplayLookupKey(group, row.한글명 || '');
-    if (state.activeCodeGroupTab !== 'all' && group !== state.activeCodeGroupTab) return false;
+    if (state.activeCodeGroupTab !== 'all' && normalizedGroup !== state.activeCodeGroupTab) return false;
     if (!q) return true;
-    return [displayLookupKey, groupLabel, row.조회키, row.구분, row.한글명, row.코드, row.비고].join(' ').toLowerCase().includes(q);
+    return [displayLookupKey, groupLabel, normalizedGroup, row.조회키, row.구분, row.한글명, row.코드, row.비고].join(' ').toLowerCase().includes(q);
   });
   const tbody = $('codeTableBody');
   if (!rows.length) {
@@ -545,9 +579,9 @@ window.editCode = function(lookupKey) {
   const row = state.codeMap.find(item => item.조회키 === lookupKey);
   if (!row) return;
   state.editingCodeLookupKey = lookupKey;
-  state.activeCodeGroupTab = row.구분 || 'all';
+  state.activeCodeGroupTab = normalizeCodeGroup(row.구분) || 'all';
   renderCodeGroupTabs();
-  $('codeGroup').value = row.구분 || CONFIG.CODE_GROUPS[0];
+  $('codeGroup').value = normalizeCodeGroup(row.구분) || CONFIG.CODE_GROUPS[0];
   $('codeUseYn').value = row.사용여부 || 'Y';
   $('codeLabelKo').value = row.한글명 || '';
   $('codeValue').value = row.코드 || '';
@@ -578,7 +612,13 @@ async function loadMeta() {
   const res = await apiGet('meta');
   if (!res.success) throw new Error(res.message || 'meta load failed');
   state.meta = res.data || {};
-  state.codeMap = state.meta.codeMap || [];
+  state.codeMap = (state.meta.codeMap || []).map(row => ({
+    ...row,
+    구분: String(row.구분 || '').trim(),
+    한글명: String(row.한글명 || '').trim(),
+    코드: String(row.코드 || '').trim(),
+    조회키: String(row.조회키 || '').trim(),
+  }));
   renderBaseSelects();
   refreshLookupSelects();
   renderCodeGroupTabs();
