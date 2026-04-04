@@ -491,7 +491,7 @@ function renderCodeMap() {
     const group = row.구분 || '';
     const normalizedGroup = normalizeCodeGroup(group);
     const groupLabel = getCodeGroupLabel(group);
-    const displayLookupKey = getDisplayLookupKey(group, row.한글명 || '');
+    const displayLookupKey = (row.한글명 || '') ? getDisplayLookupKey(group, row.한글명 || '') : (row.조회키 || '-');
     if (state.activeCodeGroupTab !== 'all' && normalizedGroup !== state.activeCodeGroupTab) return false;
     if (!q) return true;
     return [displayLookupKey, groupLabel, normalizedGroup, row.조회키, row.구분, row.한글명, row.코드, row.비고].join(' ').toLowerCase().includes(q);
@@ -503,7 +503,7 @@ function renderCodeMap() {
   }
   tbody.innerHTML = rows.map(row => {
     const groupLabel = getCodeGroupLabel(row.구분 || '');
-    const displayLookupKey = getDisplayLookupKey(row.구분 || '', row.한글명 || '');
+    const displayLookupKey = (row.한글명 || '') ? getDisplayLookupKey(row.구분 || '', row.한글명 || '') : (row.조회키 || '-');
     return `
     <tr>
       <td class="code" title="실제 저장키: ${escapeHtml(row.조회키 || '')}">${escapeHtml(displayLookupKey)}</td>
@@ -612,13 +612,41 @@ async function loadMeta() {
   const res = await apiGet('meta');
   if (!res.success) throw new Error(res.message || 'meta load failed');
   state.meta = res.data || {};
-  state.codeMap = (state.meta.codeMap || []).map(row => ({
-    ...row,
-    구분: String(row.구분 || '').trim(),
-    한글명: String(row.한글명 || '').trim(),
-    코드: String(row.코드 || '').trim(),
-    조회키: String(row.조회키 || '').trim(),
-  }));
+  state.codeMap = (state.meta.codeMap || []).map(rawRow => {
+    const row = { ...rawRow };
+    const rawLookup = String(row.조회키 || '').trim();
+    const rawGroup = String(row.구분 || '').trim();
+    const rawLabel = String(row.한글명 || '').trim();
+    const rawCode = String(row.코드 || '').trim();
+    const rawUse = String(row.사용여부 || '').trim();
+    const rawNote = String(row.비고 || '').trim();
+
+    // 일부 시트/응답에서는 컬럼이 한 칸씩 밀려 들어오는 경우가 있어서 화면단에서 보정
+    // 잘못 들어온 패턴 예:
+    // 구분=맥세이프, 한글명=M, 코드=Y, 사용여부=line|맥세이프
+    if (rawUse.includes('|') && !rawLookup) {
+      const inferredGroup = rawUse.split('|')[0].trim();
+      return {
+        ...row,
+        조회키: rawUse,
+        구분: inferredGroup,
+        한글명: rawGroup,
+        코드: rawLabel,
+        사용여부: rawCode || 'Y',
+        비고: rawNote,
+      };
+    }
+
+    return {
+      ...row,
+      구분: rawGroup,
+      한글명: rawLabel,
+      코드: rawCode,
+      조회키: rawLookup,
+      사용여부: rawUse,
+      비고: rawNote,
+    };
+  });
   renderBaseSelects();
   refreshLookupSelects();
   renderCodeGroupTabs();
