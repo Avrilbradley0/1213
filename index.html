@@ -3,28 +3,34 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>코드 매니저 - 타입 구조 확장판</title>
+<title>코드 매니저 - 비교 기능 추가판</title>
 <style>
   *{box-sizing:border-box}
   body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#1f2937}
-  .wrap{max-width:1320px;margin:0 auto;padding:24px}
+  .wrap{max-width:1480px;margin:0 auto;padding:24px}
   .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-  .title{font-size:24px;font-weight:700}
+  .title{font-size:26px;font-weight:700}
   .status{font-size:13px;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#4338ca}
-  .layout{display:grid;grid-template-columns:380px 1fr;gap:20px}
+  .main-tabs{display:flex;gap:10px;margin-bottom:16px}
+  .main-tab{height:42px;padding:0 16px;border:none;border-radius:12px;background:#eef2ff;color:#3730a3;font-weight:700;cursor:pointer}
+  .main-tab.active{background:#111827;color:#fff}
+  .page{display:none}
+  .page.active{display:block}
+  .layout{display:grid;grid-template-columns:440px 1fr;gap:20px}
   .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px;box-shadow:0 4px 18px rgba(15,23,42,.05)}
   .card h2{margin:0 0 14px;font-size:18px}
   .field{margin-bottom:12px}
   .field label{display:block;margin-bottom:6px;font-size:13px;font-weight:700;color:#374151}
-  .field input,.field select,.toolbar input{
-    width:100%;height:42px;padding:0 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff;font-size:14px
+  .field input,.field select,.field textarea,.toolbar input{
+    width:100%;min-height:42px;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff;font-size:14px
   }
+  .field textarea{min-height:84px;resize:vertical}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .preview{
-    margin-top:8px;padding:12px;border-radius:12px;background:#111827;color:#22c55e;
-    font-family:Consolas,monospace;font-size:14px;min-height:48px;display:flex;align-items:center;white-space:pre-wrap
-  }
-  .thumbbox{background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:12px;font-family:Consolas,monospace;font-size:13px;white-space:pre-wrap}
+  .preview{margin-top:8px;padding:12px;border-radius:12px;background:#111827;color:#22c55e;font-family:Consolas,monospace;font-size:14px;min-height:48px;display:flex;align-items:center;white-space:pre-wrap}
+  .thumbbox,.comparebox{background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:12px;font-family:Consolas,monospace;font-size:13px;white-space:pre-wrap}
+  .comparebox strong{font-family:Arial,sans-serif}
+  .ok{color:#166534}
+  .bad{color:#b91c1c}
   .actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
   button{border:none;border-radius:10px;height:42px;padding:0 14px;font-size:14px;font-weight:700;cursor:pointer}
   .btn-primary{background:#111827;color:#fff;flex:1}
@@ -32,9 +38,9 @@
   .btn-danger{background:#fee2e2;color:#b91c1c}
   .btn-green{background:#dcfce7;color:#166534}
   .toolbar{display:flex;gap:10px;margin-bottom:14px}
-  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-  .tab{padding:8px 12px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:13px;font-weight:700;cursor:pointer}
-  .tab.active{background:#111827;color:#fff}
+  .sub-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .sub-tab{padding:8px 12px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:13px;font-weight:700;cursor:pointer}
+  .sub-tab.active{background:#111827;color:#fff}
   .empty{padding:28px;border:1px dashed #cbd5e1;border-radius:14px;text-align:center;color:#64748b;background:#f8fafc}
   .table-wrap{overflow:auto}
   table{width:100%;border-collapse:collapse}
@@ -43,84 +49,67 @@
   .muted{color:#6b7280}
   .clickable-row{cursor:pointer}
   .clickable-row:hover{background:#f8fafc}
-  .split{display:grid;grid-template-columns:1fr;gap:20px}
   @media (max-width: 1080px){ .layout{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
-    <div class="title">코드 매니저 - 타입 구조 확장판</div>
+    <div class="title">코드 매니저 - 비교 기능 추가판</div>
     <div class="status" id="statusBadge">연결 대기</div>
   </div>
 
-  <div class="layout">
-    <div class="card">
-      <h2>상품 등록 / 수정</h2>
-      <div class="field"><label for="id">상품 ID</label><input id="id" placeholder="수정 시 자동 입력됨" /></div>
-      <div class="field"><label for="카테고리">카테고리</label><input id="카테고리" placeholder="예: 케이스 / 굿즈" /></div>
-      <div class="field"><label for="라인">라인</label><select id="라인"></select></div>
-      <div class="field"><label for="타입">타입</label><select id="타입"></select></div>
-      <div class="field"><label for="컬러">컬러</label><select id="컬러"></select></div>
+  <div class="main-tabs">
+    <button class="main-tab active" data-page="productPage">상품 관리</button>
+    <button class="main-tab" data-page="codePage">약어 관리</button>
+  </div>
 
-      <div class="row2">
-        <div class="field"><label for="라미">라미</label><select id="라미"></select></div>
-        <div class="field"><label for="면">면</label><select id="면"></select></div>
-      </div>
-
-      <div class="field">
-        <label>코드 미리보기</label>
-        <div class="preview" id="previewBox">항목을 선택하면 코드가 보여</div>
-      </div>
-
-      <div class="field">
-        <label>썸네일 / 캐러셀 자동생성</label>
-        <div class="thumbbox" id="thumbBox">코드가 생성되면 여기 표시됨</div>
-      </div>
-
-      <div class="actions">
-        <button class="btn-light" id="copyCodeBtn" type="button">코드 복사</button>
-        <button class="btn-green" id="copyThumbBtn" type="button">썸네일 복사</button>
-      </div>
-      <div class="actions">
-        <button class="btn-primary" id="saveBtn" type="button">저장</button>
-        <button class="btn-light" id="updateBtn" type="button">수정</button>
-        <button class="btn-danger" id="deleteBtn" type="button">삭제</button>
-      </div>
-      <div class="actions">
-        <button class="btn-light" id="resetBtn" type="button">입력 초기화</button>
-      </div>
-    </div>
-
-    <div class="split">
+  <div class="page active" id="productPage">
+    <div class="layout">
       <div class="card">
-        <h2>약어 목록</h2>
-        <div class="toolbar">
-          <input id="searchInput" placeholder="구분 / 한글명 / 코드 / 조회키 검색" />
-          <button class="btn-light" id="reloadBtn" type="button">새로고침</button>
+        <h2>상품 등록 / 수정</h2>
+        <div class="field"><label for="p_id">상품 ID</label><input id="p_id" placeholder="수정 시 자동 입력됨" /></div>
+        <div class="field"><label for="p_카테고리">카테고리</label><input id="p_카테고리" placeholder="예: 케이스 / 굿즈" /></div>
+        <div class="field"><label for="p_기존코드">기존 코드</label><input id="p_기존코드" placeholder="예: MGMCBK" /></div>
+
+        <div class="field"><label for="p_라인">라인</label><select id="p_라인"></select></div>
+        <div class="field"><label for="p_재질">재질</label><select id="p_재질"></select></div>
+        <div class="field"><label for="p_제품">제품</label><select id="p_제품"></select></div>
+        <div class="field"><label for="p_마감">마감</label><select id="p_마감"></select></div>
+        <div class="field"><label for="p_컬러">컬러</label><select id="p_컬러"></select></div>
+        <div class="row2">
+          <div class="field"><label for="p_라미">라미</label><select id="p_라미"></select></div>
+          <div class="field"><label for="p_면">면</label><select id="p_면"></select></div>
         </div>
-        <div class="tabs" id="groupTabs"></div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>구분</th><th>한글명</th><th>코드</th><th>조회키</th></tr>
-            </thead>
-            <tbody id="codeTableBody"></tbody>
-          </table>
+
+        <div class="field"><label>신규 코드 미리보기</label><div class="preview" id="previewBox">항목을 선택하면 코드가 보여</div></div>
+        <div class="field"><label>기존 코드 비교</label><div class="comparebox" id="compareBox">기존 코드를 입력하면 비교 결과가 여기 표시됨</div></div>
+        <div class="field"><label>썸네일 / 캐러셀 자동생성</label><div class="thumbbox" id="thumbBox">코드가 생성되면 여기 표시됨</div></div>
+
+        <div class="actions">
+          <button class="btn-light" id="copyCodeBtn" type="button">신규 코드 복사</button>
+          <button class="btn-green" id="copyThumbBtn" type="button">썸네일 복사</button>
         </div>
-        <div class="empty" id="codeEmptyBox" style="display:none;">표시할 약어가 없어</div>
+        <div class="actions">
+          <button class="btn-primary" id="saveProductBtn" type="button">저장</button>
+          <button class="btn-light" id="updateProductBtn" type="button">수정</button>
+          <button class="btn-danger" id="deleteProductBtn" type="button">삭제</button>
+        </div>
+        <div class="actions">
+          <button class="btn-light" id="resetProductBtn" type="button">입력 초기화</button>
+        </div>
       </div>
 
       <div class="card">
         <h2>상품 목록</h2>
         <div class="toolbar">
-          <input id="productSearchInput" placeholder="상품코드 / 파생코드 / 카테고리 검색" />
+          <input id="productSearchInput" placeholder="상품코드 / 기존코드 / 카테고리 검색" />
           <button class="btn-light" id="reloadProductsBtn" type="button">상품 새로고침</button>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>ID</th><th>카테고리</th><th>제품코드</th><th>파생코드</th><th>사용여부</th></tr>
+              <tr><th>ID</th><th>카테고리</th><th>기존코드</th><th>신규코드</th><th>비교</th><th>사용여부</th></tr>
             </thead>
             <tbody id="productTableBody"></tbody>
           </table>
@@ -129,11 +118,53 @@
       </div>
     </div>
   </div>
+
+  <div class="page" id="codePage">
+    <div class="layout">
+      <div class="card">
+        <h2>약어 등록 / 수정</h2>
+        <div class="field"><label for="c_lookupKey">조회키</label><input id="c_lookupKey" placeholder="수정 시 자동 입력됨" /></div>
+        <div class="field"><label for="c_구분">구분</label><select id="c_구분"></select></div>
+        <div class="field"><label for="c_한글명">한글명</label><input id="c_한글명" placeholder="예: 글라스" /></div>
+        <div class="row2">
+          <div class="field"><label for="c_코드">코드</label><input id="c_코드" placeholder="예: GL" /></div>
+          <div class="field"><label for="c_정렬">정렬</label><input id="c_정렬" placeholder="예: 1" /></div>
+        </div>
+        <div class="field"><label for="c_비고">비고</label><textarea id="c_비고" placeholder="설명"></textarea></div>
+        <div class="actions">
+          <button class="btn-primary" id="addCodeBtn" type="button">추가</button>
+          <button class="btn-light" id="updateCodeBtn" type="button">수정</button>
+          <button class="btn-danger" id="deleteCodeBtn" type="button">삭제</button>
+        </div>
+        <div class="actions">
+          <button class="btn-light" id="resetCodeBtn" type="button">입력 초기화</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>약어 목록</h2>
+        <div class="toolbar">
+          <input id="codeSearchInput" placeholder="구분 / 한글명 / 코드 / 조회키 검색" />
+          <button class="btn-light" id="reloadCodeBtn" type="button">새로고침</button>
+        </div>
+        <div class="sub-tabs" id="groupTabs"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>구분</th><th>한글명</th><th>코드</th><th>조회키</th><th>정렬</th></tr>
+            </thead>
+            <tbody id="codeTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="codeEmptyBox" style="display:none;">표시할 약어가 없어</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxbQYxDDfGuK_fR8AgmSlSn6BoPi-YZkmlzmRz-dxxGEz0D1hOsyhYdrxqgAuelsDV6yg/exec";
-const GROUP_ORDER = ["라인","타입","컬러","라미","면"];
+const API = "https://script.google.com/macros/s/AKfycbx7W3hcUDRHZFytOcNckE1jdq7Fx2xDHCIzbyh_p7t_uOAD6-A57Fiq-JY9iEm6feq8hQ/exec";
+const GROUP_ORDER = ["라인","재질","제품","마감","컬러","라미","면"];
 const state = { codeMap: [], products: [], activeGroup: "전체", previewCode: "" };
 
 function setStatus(text, ok=false){
@@ -144,7 +175,10 @@ function setStatus(text, ok=false){
 }
 function safeText(v){ return String(v == null ? "" : v).trim(); }
 function escapeHtml(str){ return safeText(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
-function getCodeMapByGroup(group){ return state.codeMap.filter(row => safeText(row.구분) === group && safeText(row.사용여부 || "Y") !== "N"); }
+
+function getCodeMapByGroup(group){
+  return state.codeMap.filter(row => safeText(row.구분) === group && safeText(row.사용여부 || "Y") !== "N");
+}
 function fillSelect(id, rows){
   const el = document.getElementById(id);
   el.innerHTML = "";
@@ -160,7 +194,17 @@ function fillSelect(id, rows){
     el.appendChild(opt);
   });
 }
-function buildSelects(){ GROUP_ORDER.forEach(group => fillSelect(group, getCodeMapByGroup(group))); }
+function buildProductSelects(){ ["라인","재질","제품","마감","컬러","라미","면"].forEach(group => fillSelect("p_" + group, getCodeMapByGroup(group))); }
+function buildCodeGroupSelect(){
+  const el = document.getElementById("c_구분");
+  el.innerHTML = "";
+  GROUP_ORDER.forEach(group => {
+    const opt = document.createElement("option");
+    opt.value = group;
+    opt.textContent = group;
+    el.appendChild(opt);
+  });
+}
 function codeFrom(group, label){
   const row = state.codeMap.find(r => safeText(r.구분) === group && safeText(r.한글명) === safeText(label) && safeText(r.사용여부 || "Y") !== "N");
   return row ? safeText(row.코드) : "";
@@ -168,13 +212,29 @@ function codeFrom(group, label){
 function thumbStrings(code){ return code ? [code+"_T_01", code+"_T_02", code+"_C_01", code+"_C_02"] : []; }
 function buildPreviewCode(){
   state.previewCode = [
-    codeFrom("라인", valueOf("라인")),
-    codeFrom("타입", valueOf("타입")),
-    codeFrom("컬러", valueOf("컬러")),
-    codeFrom("라미", valueOf("라미")),
-    codeFrom("면", valueOf("면"))
+    codeFrom("라인", valueOf("p_라인")),
+    codeFrom("재질", valueOf("p_재질")),
+    codeFrom("제품", valueOf("p_제품")),
+    codeFrom("마감", valueOf("p_마감")),
+    codeFrom("컬러", valueOf("p_컬러")),
+    codeFrom("라미", valueOf("p_라미")),
+    codeFrom("면", valueOf("p_면"))
   ].filter(Boolean).join("");
   document.getElementById("previewBox").textContent = state.previewCode || "항목을 선택하면 코드가 보여";
+
+  const oldCode = valueOf("p_기존코드");
+  let compareText = "기존 코드를 입력하면 비교 결과가 여기 표시됨";
+  if(oldCode || state.previewCode){
+    if(!oldCode) compareText = "기존코드 없음\n신규코드: " + (state.previewCode || "-");
+    else if(oldCode === state.previewCode) compareText = "비교 결과: 일치\n기존코드: " + oldCode + "\n신규코드: " + state.previewCode;
+    else compareText = "비교 결과: 불일치\n기존코드: " + oldCode + "\n신규코드: " + state.previewCode;
+  }
+  document.getElementById("compareBox").innerHTML = compareText.includes("일치")
+    ? '<strong class="ok">' + compareText.replace(/\n/g,'<br>') + '</strong>'
+    : (compareText.includes("불일치")
+      ? '<strong class="bad">' + compareText.replace(/\n/g,'<br>') + '</strong>'
+      : compareText.replace(/\n/g,'<br>'));
+
   document.getElementById("thumbBox").textContent = state.previewCode ? thumbStrings(state.previewCode).join("\n") : "코드가 생성되면 여기 표시됨";
 }
 function buildTabs(){
@@ -184,19 +244,19 @@ function buildTabs(){
   groups.forEach(group => {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "tab" + (state.activeGroup === group ? " active" : "");
+    btn.className = "sub-tab" + (state.activeGroup === group ? " active" : "");
     btn.textContent = group;
     btn.addEventListener("click", () => { state.activeGroup = group; buildTabs(); renderCodeTable(); });
     wrap.appendChild(btn);
   });
 }
 function renderCodeTable(){
-  const q = safeText(document.getElementById("searchInput").value).toLowerCase();
+  const q = safeText(document.getElementById("codeSearchInput").value).toLowerCase();
   const body = document.getElementById("codeTableBody");
   const empty = document.getElementById("codeEmptyBox");
   let rows = state.codeMap.filter(row => safeText(row.사용여부 || "Y") !== "N");
   if(state.activeGroup !== "전체") rows = rows.filter(row => safeText(row.구분) === state.activeGroup);
-  if(q) rows = rows.filter(row => [row.구분, row.한글명, row.코드, row.조회키].join(" ").toLowerCase().includes(q));
+  if(q) rows = rows.filter(row => [row.구분, row.한글명, row.코드, row.조회키, row.비고].join(" ").toLowerCase().includes(q));
   rows.sort((a,b) => {
     const ga = GROUP_ORDER.indexOf(safeText(a.구분));
     const gb = GROUP_ORDER.indexOf(safeText(b.구분));
@@ -208,7 +268,9 @@ function renderCodeTable(){
   empty.style.display = "none";
   rows.forEach(row => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${escapeHtml(row.구분)}</td><td>${escapeHtml(row.한글명)}</td><td><strong>${escapeHtml(row.코드)}</strong></td><td class="muted">${escapeHtml(row.조회키)}</td>`;
+    tr.className = "clickable-row";
+    tr.innerHTML = `<td>${escapeHtml(row.구분)}</td><td>${escapeHtml(row.한글명)}</td><td><strong>${escapeHtml(row.코드)}</strong></td><td class="muted">${escapeHtml(row.조회키)}</td><td>${escapeHtml(row.정렬)}</td>`;
+    tr.addEventListener("click", () => loadCodeToForm(row));
     body.appendChild(tr);
   });
 }
@@ -217,48 +279,82 @@ function renderProductTable(){
   const body = document.getElementById("productTableBody");
   const empty = document.getElementById("productEmptyBox");
   let rows = state.products.slice();
-  if(q) rows = rows.filter(row => [row.id, row.카테고리, row.제품코드, row.파생코드].join(" ").toLowerCase().includes(q));
+  if(q) rows = rows.filter(row => [row.id, row.카테고리, row.기존코드, row.제품코드, row.파생코드, row.코드비교].join(" ").toLowerCase().includes(q));
   body.innerHTML = "";
   if(!rows.length){ empty.style.display = ""; return; }
   empty.style.display = "none";
   rows.forEach(row => {
     const tr = document.createElement("tr");
     tr.className = "clickable-row";
-    tr.innerHTML = `<td>${escapeHtml(row.id)}</td><td>${escapeHtml(row.카테고리)}</td><td><strong>${escapeHtml(row.제품코드)}</strong></td><td>${escapeHtml(row.파생코드)}</td><td>${escapeHtml(row.사용여부 || "Y")}</td>`;
+    tr.innerHTML = `<td>${escapeHtml(row.id)}</td><td>${escapeHtml(row.카테고리)}</td><td>${escapeHtml(row.기존코드)}</td><td><strong>${escapeHtml(row.제품코드)}</strong></td><td>${escapeHtml(row.코드비교)}</td><td>${escapeHtml(row.사용여부 || "Y")}</td>`;
     tr.addEventListener("click", () => loadProductToForm(row));
     body.appendChild(tr);
   });
 }
 function loadProductToForm(row){
-  document.getElementById("id").value = safeText(row.id);
-  document.getElementById("카테고리").value = safeText(row.카테고리);
-  ["라인","타입","컬러","라미","면"].forEach(group => {
-    const el = document.getElementById(group);
+  document.getElementById("p_id").value = safeText(row.id);
+  document.getElementById("p_카테고리").value = safeText(row.카테고리);
+  document.getElementById("p_기존코드").value = safeText(row.기존코드);
+  ["라인","재질","제품","마감","컬러","라미","면"].forEach(group => {
+    const el = document.getElementById("p_" + group);
     if(el) el.value = safeText(row[group]);
   });
   buildPreviewCode();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  switchPage("productPage");
 }
-function resetForm(){
-  document.getElementById("id").value = "";
-  document.getElementById("카테고리").value = "";
-  ["라인","타입","컬러","라미","면"].forEach(group => {
-    const el = document.getElementById(group);
+function loadCodeToForm(row){
+  document.getElementById("c_lookupKey").value = safeText(row.조회키);
+  document.getElementById("c_구분").value = safeText(row.구분);
+  document.getElementById("c_한글명").value = safeText(row.한글명);
+  document.getElementById("c_코드").value = safeText(row.코드);
+  document.getElementById("c_정렬").value = safeText(row.정렬);
+  document.getElementById("c_비고").value = safeText(row.비고);
+  switchPage("codePage");
+}
+function resetProductForm(){
+  document.getElementById("p_id").value = "";
+  document.getElementById("p_카테고리").value = "";
+  document.getElementById("p_기존코드").value = "";
+  ["라인","재질","제품","마감","컬러","라미","면"].forEach(group => {
+    const el = document.getElementById("p_" + group);
     if(el) el.value = "";
   });
   buildPreviewCode();
 }
+function resetCodeForm(){
+  document.getElementById("c_lookupKey").value = "";
+  document.getElementById("c_구분").value = GROUP_ORDER[0];
+  document.getElementById("c_한글명").value = "";
+  document.getElementById("c_코드").value = "";
+  document.getElementById("c_정렬").value = "";
+  document.getElementById("c_비고").value = "";
+}
 function valueOf(id){ return safeText(document.getElementById(id).value); }
-function makePayload(actionName){
+function makeProductPayload(actionName){
   return {
     action: actionName,
-    id: valueOf("id"),
-    카테고리: valueOf("카테고리"),
-    라인: valueOf("라인"),
-    타입: valueOf("타입"),
-    컬러: valueOf("컬러"),
-    라미: valueOf("라미"),
-    면: valueOf("면")
+    id: valueOf("p_id"),
+    카테고리: valueOf("p_카테고리"),
+    기존코드: valueOf("p_기존코드"),
+    라인: valueOf("p_라인"),
+    재질: valueOf("p_재질"),
+    제품: valueOf("p_제품"),
+    마감: valueOf("p_마감"),
+    컬러: valueOf("p_컬러"),
+    라미: valueOf("p_라미"),
+    면: valueOf("p_면")
+  };
+}
+function makeCodePayload(actionName){
+  return {
+    action: actionName,
+    lookupKey: valueOf("c_lookupKey"),
+    구분: valueOf("c_구분"),
+    한글명: valueOf("c_한글명"),
+    코드: valueOf("c_코드"),
+    정렬: valueOf("c_정렬"),
+    비고: valueOf("c_비고"),
+    사용여부: "Y"
   };
 }
 async function postJson(payload){
@@ -266,37 +362,20 @@ async function postJson(payload){
   const text = await res.text();
   try { return JSON.parse(text); } catch { return { raw: text }; }
 }
-async function saveProduct(){ await postJson(makePayload("saveProduct")); alert("저장 완료"); await loadProducts(); resetForm(); }
-async function updateProduct(){
-  if(!valueOf("id")){ alert("수정할 상품 ID가 없어"); return; }
-  await postJson(makePayload("updateProduct"));
-  alert("수정 완료");
-  await loadProducts();
-}
-async function deleteProduct(){
-  if(!valueOf("id")){ alert("삭제할 상품 ID가 없어"); return; }
-  if(!confirm("이 상품을 삭제할까?")) return;
-  await postJson({ action: "deactivateProduct", id: valueOf("id") });
-  alert("삭제 완료");
-  await loadProducts();
-  resetForm();
-}
-async function copyCode(){
-  if(!state.previewCode){ alert("복사할 코드가 없어"); return; }
-  await navigator.clipboard.writeText(state.previewCode);
-  alert("코드 복사 완료");
-}
-async function copyThumbs(){
-  const thumbs = thumbStrings(state.previewCode);
-  if(!thumbs.length){ alert("복사할 썸네일 코드가 없어"); return; }
-  await navigator.clipboard.writeText(thumbs.join("\n"));
-  alert("썸네일 코드 복사 완료");
-}
+async function saveProduct(){ await postJson(makeProductPayload("saveProduct")); alert("저장 완료"); await loadProducts(); resetProductForm(); }
+async function updateProduct(){ if(!valueOf("p_id")){ alert("수정할 상품 ID가 없어"); return; } await postJson(makeProductPayload("updateProduct")); alert("수정 완료"); await loadProducts(); }
+async function deleteProduct(){ if(!valueOf("p_id")){ alert("삭제할 상품 ID가 없어"); return; } if(!confirm("이 상품을 삭제할까?")) return; await postJson({ action: "deactivateProduct", id: valueOf("p_id") }); alert("삭제 완료"); await loadProducts(); resetProductForm(); }
+async function addCode(){ await postJson(makeCodePayload("addCodeMap")); alert("약어 추가 완료"); await loadMeta(); resetCodeForm(); }
+async function updateCode(){ if(!valueOf("c_lookupKey")){ alert("수정할 조회키가 없어"); return; } await postJson(makeCodePayload("updateCodeMap")); alert("약어 수정 완료"); await loadMeta(); }
+async function deleteCode(){ if(!valueOf("c_lookupKey")){ alert("삭제할 조회키가 없어"); return; } if(!confirm("이 약어를 삭제할까?")) return; await postJson({ action: "deactivateCodeMap", lookupKey: valueOf("c_lookupKey") }); alert("약어 삭제 완료"); await loadMeta(); resetCodeForm(); }
+async function copyCode(){ if(!state.previewCode){ alert("복사할 코드가 없어"); return; } await navigator.clipboard.writeText(state.previewCode); alert("신규 코드 복사 완료"); }
+async function copyThumbs(){ const thumbs = thumbStrings(state.previewCode); if(!thumbs.length){ alert("복사할 썸네일 코드가 없어"); return; } await navigator.clipboard.writeText(thumbs.join("\n")); alert("썸네일 코드 복사 완료"); }
 async function loadMeta(){
   const res = await fetch(`${API}?action=meta`);
   const json = await res.json();
   state.codeMap = Array.isArray(json.data && json.data.codeMap) ? json.data.codeMap : [];
-  buildSelects();
+  buildProductSelects();
+  buildCodeGroupSelect();
   buildTabs();
   renderCodeTable();
   buildPreviewCode();
@@ -307,35 +386,37 @@ async function loadProducts(){
   state.products = Array.isArray(json.data) ? json.data : [];
   renderProductTable();
 }
+function switchPage(pageId){
+  document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".main-tab").forEach(el => el.classList.remove("active"));
+  document.getElementById(pageId).classList.add("active");
+  document.querySelector(`.main-tab[data-page="${pageId}"]`).classList.add("active");
+}
 function bindEvents(){
-  ["라인","타입","컬러","라미","면","카테고리"].forEach(id => {
+  document.querySelectorAll(".main-tab").forEach(btn => btn.addEventListener("click", () => switchPage(btn.dataset.page)));
+  ["p_라인","p_재질","p_제품","p_마감","p_컬러","p_라미","p_면","p_카테고리","p_기존코드"].forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener("change", buildPreviewCode);
     el.addEventListener("input", buildPreviewCode);
   });
-  document.getElementById("searchInput").addEventListener("input", renderCodeTable);
+  document.getElementById("codeSearchInput").addEventListener("input", renderCodeTable);
   document.getElementById("productSearchInput").addEventListener("input", renderProductTable);
-  document.getElementById("reloadBtn").addEventListener("click", () => loadMeta().catch(showError));
+  document.getElementById("reloadCodeBtn").addEventListener("click", () => loadMeta().catch(showError));
   document.getElementById("reloadProductsBtn").addEventListener("click", () => loadProducts().catch(showError));
-  document.getElementById("saveBtn").addEventListener("click", () => saveProduct().catch(showError));
-  document.getElementById("updateBtn").addEventListener("click", () => updateProduct().catch(showError));
-  document.getElementById("deleteBtn").addEventListener("click", () => deleteProduct().catch(showError));
+  document.getElementById("saveProductBtn").addEventListener("click", () => saveProduct().catch(showError));
+  document.getElementById("updateProductBtn").addEventListener("click", () => updateProduct().catch(showError));
+  document.getElementById("deleteProductBtn").addEventListener("click", () => deleteProduct().catch(showError));
+  document.getElementById("resetProductBtn").addEventListener("click", resetProductForm);
+  document.getElementById("addCodeBtn").addEventListener("click", () => addCode().catch(showError));
+  document.getElementById("updateCodeBtn").addEventListener("click", () => updateCode().catch(showError));
+  document.getElementById("deleteCodeBtn").addEventListener("click", () => deleteCode().catch(showError));
+  document.getElementById("resetCodeBtn").addEventListener("click", resetCodeForm);
   document.getElementById("copyCodeBtn").addEventListener("click", () => copyCode().catch(showError));
   document.getElementById("copyThumbBtn").addEventListener("click", () => copyThumbs().catch(showError));
-  document.getElementById("resetBtn").addEventListener("click", resetForm);
 }
-function showError(err){
-  setStatus("연결 실패");
-  alert("오류\n" + (err && err.message ? err.message : err));
-}
-async function init(){
-  setStatus("불러오는 중...");
-  await loadMeta();
-  await loadProducts();
-  setStatus("연결됨", true);
-}
-bindEvents();
-init().catch(showError);
+function showError(err){ setStatus("오류"); alert("오류\n" + (err && err.message ? err.message : err)); }
+async function init(){ setStatus("불러오는 중..."); await loadMeta(); await loadProducts(); resetCodeForm(); setStatus("연결됨", true); }
+bindEvents(); init().catch(showError);
 </script>
 </body>
 </html>
