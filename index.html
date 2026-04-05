@@ -1,252 +1,83 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>코드 매니저 - 완성형</title>
+<!DOCTYPE html><html lang='ko'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'><title>코드 매니저 - 카테고리 반영판</title>
 <style>
-*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#1f2937}
-.wrap{max-width:1520px;margin:0 auto;padding:24px}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.title{font-size:26px;font-weight:700}.status{font-size:13px;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#4338ca}
-.main-tabs{display:flex;gap:10px;margin-bottom:16px}.main-tab{height:42px;padding:0 16px;border:none;border-radius:12px;background:#eef2ff;color:#3730a3;font-weight:700;cursor:pointer}.main-tab.active{background:#111827;color:#fff}
-.page{display:none}.page.active{display:block}.layout{display:grid;grid-template-columns:440px 1fr;gap:20px}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px;box-shadow:0 4px 18px rgba(15,23,42,.05)} .card h2{margin:0 0 14px;font-size:18px}
-.field{margin-bottom:12px}.field label{display:block;margin-bottom:6px;font-size:13px;font-weight:700;color:#374151}
-.field input,.field select,.field textarea,.toolbar input{width:100%;min-height:42px;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff;font-size:14px}
-.field textarea{min-height:84px;resize:vertical}.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.preview{margin-top:8px;padding:12px;border-radius:12px;background:#111827;color:#22c55e;font-family:Consolas,monospace;font-size:14px;min-height:48px;display:flex;align-items:center;white-space:pre-wrap}
-.thumbbox,.comparebox{background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:12px;font-family:Consolas,monospace;font-size:13px;white-space:pre-wrap}
-.comparebox strong{font-family:Arial,sans-serif}.ok{color:#166534}.bad{color:#b91c1c}.actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-button{border:none;border-radius:10px;height:42px;padding:0 14px;font-size:14px;font-weight:700;cursor:pointer}.btn-primary{background:#111827;color:#fff;flex:1}.btn-light{background:#eef2ff;color:#3730a3}.btn-danger{background:#fee2e2;color:#b91c1c}.btn-green{background:#dcfce7;color:#166534}
-.toolbar{display:flex;gap:10px;margin-bottom:14px}.sub-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.sub-tab{padding:8px 12px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:13px;font-weight:700;cursor:pointer}.sub-tab.active{background:#111827;color:#fff}
-.empty{padding:28px;border:1px dashed #cbd5e1;border-radius:14px;text-align:center;color:#64748b;background:#f8fafc}.table-wrap{overflow:auto}
-table{width:100%;border-collapse:collapse} th,td{padding:12px 10px;border-bottom:1px solid #eef2f7;font-size:13px;text-align:left;white-space:nowrap}
-th{font-size:12px;color:#6b7280;background:#fafafa;position:sticky;top:0}.muted{color:#6b7280}.clickable-row{cursor:pointer}.clickable-row:hover{background:#f8fafc}
-@media (max-width:1080px){.layout{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="topbar"><div class="title">코드 매니저 - 완성형</div><div class="status" id="statusBadge">연결 대기</div></div>
-  <div class="main-tabs">
-    <button class="main-tab active" data-page="productPage">상품 관리</button>
-    <button class="main-tab" data-page="codePage">약어 관리</button>
-    <button class="main-tab" data-page="legacyPage">기존 코드 관리</button>
-  </div>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#1f2937}.wrap{max-width:1520px;margin:0 auto;padding:24px}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:26px;font-weight:700}.status{font-size:13px;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#4338ca}.main-tabs{display:flex;gap:10px;margin-bottom:16px}.main-tab{height:42px;padding:0 16px;border:none;border-radius:12px;background:#eef2ff;color:#3730a3;font-weight:700;cursor:pointer}.main-tab.active{background:#111827;color:#fff}.page{display:none}.page.active{display:block}.layout{display:grid;grid-template-columns:440px 1fr;gap:20px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px;box-shadow:0 4px 18px rgba(15,23,42,.05)}.card h2{margin:0 0 14px;font-size:18px}.field{margin-bottom:12px}.field label{display:block;margin-bottom:6px;font-size:13px;font-weight:700;color:#374151}.field input,.field select,.field textarea,.toolbar input{width:100%;min-height:42px;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff;font-size:14px}.field input[readonly]{background:#f8fafc;color:#64748b}.field textarea{min-height:84px;resize:vertical}.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.preview{margin-top:8px;padding:12px;border-radius:12px;background:#111827;color:#22c55e;font-family:Consolas,monospace;font-size:14px;min-height:48px;display:flex;align-items:center;white-space:pre-wrap}.thumbbox,.comparebox{background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:12px;font-family:Consolas,monospace;font-size:13px;white-space:pre-wrap}.comparebox strong{font-family:Arial,sans-serif}.ok{color:#166534}.bad{color:#b91c1c}.actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}button{border:none;border-radius:10px;height:42px;padding:0 14px;font-size:14px;font-weight:700;cursor:pointer}.btn-primary{background:#111827;color:#fff;flex:1}.btn-light{background:#eef2ff;color:#3730a3}.btn-danger{background:#fee2e2;color:#b91c1c}.btn-green{background:#dcfce7;color:#166534}.toolbar{display:flex;gap:10px;margin-bottom:14px}.sub-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.sub-tab{padding:8px 12px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:13px;font-weight:700;cursor:pointer}.sub-tab.active{background:#111827;color:#fff}.empty{padding:28px;border:1px dashed #cbd5e1;border-radius:14px;text-align:center;color:#64748b;background:#f8fafc}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:12px 10px;border-bottom:1px solid #eef2f7;font-size:13px;text-align:left;white-space:nowrap}th{font-size:12px;color:#6b7280;background:#fafafa;position:sticky;top:0}.clickable-row{cursor:pointer}.clickable-row:hover{background:#f8fafc}.helper{font-size:12px;color:#64748b;margin-top:-4px;margin-bottom:12px}.loading-mask{position:fixed;inset:0;background:rgba(17,24,39,.18);display:none;align-items:center;justify-content:center;z-index:9999}.loading-mask.show{display:flex}.loading-box{background:#fff;padding:18px 22px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);font-weight:700}@media (max-width:1080px){.layout{grid-template-columns:1fr}}
+</style></head><body>
+<div class='loading-mask' id='loadingMask'><div class='loading-box' id='loadingText'>불러오는 중...</div></div>
+<div class='wrap'><div class='topbar'><div class='title'>코드 매니저 - 카테고리 반영판</div><div class='status' id='statusBadge'>연결 대기</div></div>
+<div class='main-tabs'><button class='main-tab active' data-page='productPage'>상품 관리</button><button class='main-tab' data-page='codePage'>약어 관리</button><button class='main-tab' data-page='legacyPage'>기존 코드 관리</button></div>
 
-  <div class="page active" id="productPage">
-    <div class="layout">
-      <div class="card">
-        <h2>상품 등록 / 수정</h2>
-        <div class="field"><label for="p_id">상품 ID</label><input id="p_id" placeholder="수정 시 자동 입력됨" /></div>
-        <div class="field"><label for="p_카테고리">카테고리</label><input id="p_카테고리" placeholder="예: 케이스 / 굿즈" /></div>
-        <div class="field"><label for="p_기존코드">기존 코드</label><input id="p_기존코드" placeholder="예: MGMCBK" /></div>
-        <div class="field"><label for="p_라인">라인</label><select id="p_라인"></select></div>
-        <div class="field"><label for="p_재질">재질</label><select id="p_재질"></select></div>
-        <div class="field"><label for="p_제품">제품</label><select id="p_제품"></select></div>
-        <div class="field"><label for="p_마감">마감</label><select id="p_마감"></select></div>
-        <div class="field"><label for="p_컬러">컬러</label><select id="p_컬러"></select></div>
-        <div class="row2">
-          <div class="field"><label for="p_라미">라미</label><select id="p_라미"></select></div>
-          <div class="field"><label for="p_면">면</label><select id="p_면"></select></div>
-        </div>
-        <div class="field"><label>신규 코드 미리보기</label><div class="preview" id="previewBox">항목을 선택하면 코드가 보여</div></div>
-        <div class="field"><label>기존 코드 비교</label><div class="comparebox" id="compareBox">기존 코드를 입력하면 비교 결과가 여기 표시됨</div></div>
-        <div class="field"><label>썸네일 / 캐러셀 자동생성</label><div class="thumbbox" id="thumbBox">코드가 생성되면 여기 표시됨</div></div>
-        <div class="actions"><button class="btn-light" id="copyCodeBtn" type="button">신규 코드 복사</button><button class="btn-green" id="copyThumbBtn" type="button">썸네일 복사</button></div>
-        <div class="actions"><button class="btn-primary" id="saveProductBtn" type="button">저장</button><button class="btn-light" id="updateProductBtn" type="button">수정</button><button class="btn-danger" id="deleteProductBtn" type="button">삭제</button></div>
-        <div class="actions"><button class="btn-light" id="resetProductBtn" type="button">입력 초기화</button></div>
-      </div>
-      <div class="card">
-        <h2>상품 목록</h2>
-        <div class="toolbar"><input id="productSearchInput" placeholder="상품코드 / 기존코드 / 카테고리 검색" /><button class="btn-light" id="reloadProductsBtn" type="button">상품 새로고침</button></div>
-        <div class="table-wrap"><table><thead><tr><th>ID</th><th>카테고리</th><th>기존코드</th><th>신규코드</th><th>비교</th><th>사용여부</th></tr></thead><tbody id="productTableBody"></tbody></table></div>
-        <div class="empty" id="productEmptyBox" style="display:none;">표시할 상품이 없어</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="page" id="codePage">
-    <div class="layout">
-      <div class="card">
-        <h2>약어 등록 / 수정</h2>
-        <div class="field"><label for="c_lookupKey">조회키</label><input id="c_lookupKey" placeholder="수정 시 자동 입력됨" /></div>
-        <div class="field"><label for="c_구분">구분</label><select id="c_구분"></select></div>
-        <div class="field"><label for="c_한글명">한글명</label><input id="c_한글명" placeholder="예: 글라스" /></div>
-        <div class="row2"><div class="field"><label for="c_코드">코드</label><input id="c_코드" placeholder="예: GL" /></div><div class="field"><label for="c_정렬">정렬</label><input id="c_정렬" placeholder="예: 1" /></div></div>
-        <div class="field"><label for="c_비고">비고</label><textarea id="c_비고" placeholder="설명"></textarea></div>
-        <div class="actions"><button class="btn-primary" id="addCodeBtn" type="button">추가</button><button class="btn-light" id="updateCodeBtn" type="button">수정</button><button class="btn-danger" id="deleteCodeBtn" type="button">삭제</button></div>
-        <div class="actions"><button class="btn-light" id="resetCodeBtn" type="button">입력 초기화</button></div>
-      </div>
-      <div class="card">
-        <h2>약어 목록</h2>
-        <div class="toolbar"><input id="codeSearchInput" placeholder="구분 / 한글명 / 코드 / 조회키 검색" /><button class="btn-light" id="reloadCodeBtn" type="button">새로고침</button></div>
-        <div class="sub-tabs" id="groupTabs"></div>
-        <div class="table-wrap"><table><thead><tr><th>구분</th><th>한글명</th><th>코드</th><th>조회키</th><th>정렬</th></tr></thead><tbody id="codeTableBody"></tbody></table></div>
-        <div class="empty" id="codeEmptyBox" style="display:none;">표시할 약어가 없어</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="page" id="legacyPage">
-    <div class="layout">
-      <div class="card">
-        <h2>기존 코드 등록 / 수정</h2>
-        <div class="field"><label for="l_id">기존 코드 ID</label><input id="l_id" placeholder="수정 시 자동 입력됨" /></div>
-        <div class="field"><label for="l_기존코드">기존 코드</label><input id="l_기존코드" placeholder="예: MGMCBK" /></div>
-        <div class="field"><label for="l_카테고리">카테고리</label><input id="l_카테고리" placeholder="예: 케이스" /></div>
-        <div class="field"><label for="l_제품명">제품명</label><input id="l_제품명" placeholder="예: 맥세이프 글라스범퍼케이스 무광 블랙" /></div>
-        <div class="field"><label for="l_비고">비고</label><textarea id="l_비고" placeholder="폴더명, 참고사항 등"></textarea></div>
-        <div class="actions"><button class="btn-primary" id="addLegacyBtn" type="button">추가</button><button class="btn-light" id="updateLegacyBtn" type="button">수정</button><button class="btn-danger" id="deleteLegacyBtn" type="button">삭제</button></div>
-        <div class="actions"><button class="btn-light" id="resetLegacyBtn" type="button">입력 초기화</button></div>
-      </div>
-      <div class="card">
-        <h2>기존 코드 목록</h2>
-        <div class="toolbar"><input id="legacySearchInput" placeholder="기존코드 / 카테고리 / 제품명 검색" /><button class="btn-light" id="reloadLegacyBtn" type="button">기존 코드 새로고침</button></div>
-        <div class="table-wrap"><table><thead><tr><th>ID</th><th>기존코드</th><th>카테고리</th><th>제품명</th><th>비고</th></tr></thead><tbody id="legacyTableBody"></tbody></table></div>
-        <div class="empty" id="legacyEmptyBox" style="display:none;">표시할 기존 코드가 없어</div>
-      </div>
-    </div>
-  </div>
+<div class='page active' id='productPage'><div class='layout'><div class='card'>
+<h2>상품 등록 / 수정</h2>
+<div class='field'><label for='p_id'>상품 ID</label><input id='p_id' readonly placeholder='저장 후 자동 생성 / 목록 클릭 시 표시'></div><div class='helper'>새 상품 등록 때는 비워두고 저장하면 자동 생성돼.</div>
+<div class='field'><label for='p_카테고리'>카테고리</label><select id='p_카테고리'><option value=''>선택</option><option value="핸드폰 케이스">핸드폰 케이스</option><option value="스마트톡">스마트톡</option><option value="에어팟/버즈">에어팟/버즈</option><option value="디지털 테크">디지털 테크</option><option value="굿즈/문구">굿즈/문구</option><option value="리빙/홈데코">리빙/홈데코</option><option value="스티커/지류">스티커/지류</option><option value="패션/잡화">패션/잡화</option></select></div>
+<div class='field'><label for='p_기존코드'>기존 코드</label><div class='row2'><input id='p_기존코드' readonly placeholder='기존 코드 관리에서 선택'><button class='btn-light' id='goLegacyBtn' type='button'>기존 코드 선택</button></div></div>
+<div class='field'><label for='p_라인'>라인</label><select id='p_라인'></select></div>
+<div class='field'><label for='p_재질'>재질</label><select id='p_재질'></select></div>
+<div class='field'><label for='p_제품'>제품</label><select id='p_제품'></select></div>
+<div class='field'><label for='p_마감'>마감</label><select id='p_마감'></select></div>
+<div class='field'><label for='p_컬러'>컬러</label><select id='p_컬러'></select></div>
+<div class='row2'><div class='field'><label for='p_라미'>라미</label><select id='p_라미'></select></div><div class='field'><label for='p_면'>면</label><select id='p_면'></select></div></div>
+<div class='field'><label>신규 코드 미리보기</label><div class='preview' id='previewBox'>항목을 선택하면 코드가 보여</div></div>
+<div class='field'><label>기존 코드 비교</label><div class='comparebox' id='compareBox'>기존 코드를 선택하면 비교 결과가 여기 표시됨</div></div>
+<div class='field'><label>썸네일 / 캐러셀 자동생성</label><div class='thumbbox' id='thumbBox'>코드가 생성되면 여기 표시됨</div></div>
+<div class='actions'><button class='btn-light' id='copyCodeBtn' type='button'>신규 코드 복사</button><button class='btn-green' id='copyThumbBtn' type='button'>썸네일 복사</button></div>
+<div class='actions'><button class='btn-primary' id='saveProductBtn' type='button'>저장</button><button class='btn-light' id='updateProductBtn' type='button'>수정</button><button class='btn-danger' id='deleteProductBtn' type='button'>삭제</button></div>
+<div class='actions'><button class='btn-light' id='resetProductBtn' type='button'>입력 초기화</button></div>
 </div>
+<div class='card'><h2>상품 목록</h2><div class='toolbar'><input id='productSearchInput' placeholder='상품코드 / 기존코드 / 카테고리 검색'><button class='btn-light' id='reloadProductsBtn' type='button'>상품 새로고침</button></div><div class='table-wrap'><table><thead><tr><th>ID</th><th>카테고리</th><th>기존코드</th><th>신규코드</th><th>비교</th><th>사용여부</th></tr></thead><tbody id='productTableBody'></tbody></table></div><div class='empty' id='productEmptyBox' style='display:none'>표시할 상품이 없어</div></div></div></div>
 
+<div class='page' id='codePage'><div class='layout'><div class='card'><h2>약어 등록 / 수정</h2><div class='field'><label for='c_lookupKey'>조회키</label><input id='c_lookupKey' readonly placeholder='수정 시 자동 입력됨'></div><div class='field'><label for='c_구분'>구분</label><select id='c_구분'></select></div><div class='field'><label for='c_한글명'>한글명</label><input id='c_한글명' placeholder='예: 글라스'></div><div class='row2'><div class='field'><label for='c_코드'>코드</label><input id='c_코드' placeholder='예: GL'></div><div class='field'><label for='c_정렬'>정렬</label><input id='c_정렬' placeholder='예: 1'></div></div><div class='field'><label for='c_비고'>비고</label><textarea id='c_비고' placeholder='설명'></textarea></div><div class='actions'><button class='btn-primary' id='addCodeBtn' type='button'>추가</button><button class='btn-light' id='updateCodeBtn' type='button'>수정</button><button class='btn-danger' id='deleteCodeBtn' type='button'>삭제</button></div><div class='actions'><button class='btn-light' id='resetCodeBtn' type='button'>입력 초기화</button></div></div><div class='card'><h2>약어 목록</h2><div class='toolbar'><input id='codeSearchInput' placeholder='구분 / 한글명 / 코드 / 조회키 검색'><button class='btn-light' id='reloadCodeBtn' type='button'>새로고침</button></div><div class='sub-tabs' id='groupTabs'></div><div class='table-wrap'><table><thead><tr><th>구분</th><th>한글명</th><th>코드</th><th>조회키</th><th>정렬</th></tr></thead><tbody id='codeTableBody'></tbody></table></div><div class='empty' id='codeEmptyBox' style='display:none'>표시할 약어가 없어</div></div></div></div>
+
+<div class='page' id='legacyPage'><div class='layout'><div class='card'><h2>기존 코드 등록 / 수정</h2><div class='field'><label for='l_id'>기존 코드 ID</label><input id='l_id' readonly placeholder='수정 시 자동 입력됨'></div><div class='field'><label for='l_기존코드'>기존 코드</label><input id='l_기존코드' placeholder='예: MGMCBK'></div><div class='field'><label for='l_카테고리'>카테고리</label><select id='l_카테고리'><option value=''>선택</option><option value="핸드폰 케이스">핸드폰 케이스</option><option value="스마트톡">스마트톡</option><option value="에어팟/버즈">에어팟/버즈</option><option value="디지털 테크">디지털 테크</option><option value="굿즈/문구">굿즈/문구</option><option value="리빙/홈데코">리빙/홈데코</option><option value="스티커/지류">스티커/지류</option><option value="패션/잡화">패션/잡화</option></select></div><div class='field'><label for='l_제품명'>제품명</label><input id='l_제품명' placeholder='예: 맥세이프 글라스범퍼케이스 무광 블랙'></div><div class='field'><label for='l_비고'>비고</label><textarea id='l_비고' placeholder='폴더명, 참고사항 등'></textarea></div><div class='actions'><button class='btn-primary' id='addLegacyBtn' type='button'>추가</button><button class='btn-light' id='updateLegacyBtn' type='button'>수정</button><button class='btn-danger' id='deleteLegacyBtn' type='button'>삭제</button></div><div class='actions'><button class='btn-light' id='resetLegacyBtn' type='button'>입력 초기화</button></div></div><div class='card'><h2>기존 코드 목록</h2><div class='toolbar'><input id='legacySearchInput' placeholder='기존코드 / 카테고리 / 제품명 검색'><button class='btn-light' id='reloadLegacyBtn' type='button'>기존 코드 새로고침</button></div><div class='table-wrap'><table><thead><tr><th>ID</th><th>기존코드</th><th>카테고리</th><th>제품명</th><th>비고</th></tr></thead><tbody id='legacyTableBody'></tbody></table></div><div class='empty' id='legacyEmptyBox' style='display:none'>표시할 기존 코드가 없어</div></div></div></div>
+</div>
 <script>
-const API = "https://script.google.com/macros/s/AKfycbwSvwTTFhIV4WiYS0KHcrpX7mninpmix3GDmXEElRqB2W3_kuBftcDDcGPeSMWGemzLLw/exec";
-const GROUP_ORDER = ["라인","재질","제품","마감","컬러","라미","면"];
-const state = { codeMap: [], products: [], legacyCodes: [], activeGroup: "전체", previewCode: "" };
-
-function setStatus(text, ok=false){ const el=document.getElementById("statusBadge"); el.textContent=text; el.style.background=ok?"#dcfce7":"#eef2ff"; el.style.color=ok?"#166534":"#4338ca"; }
-function safeText(v){ return String(v==null?"":v).trim(); }
-function escapeHtml(str){ return safeText(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
-function valueOf(id){ return safeText(document.getElementById(id).value); }
-
-function getCodeMapByGroup(group){ return state.codeMap.filter(row => safeText(row.구분)===group && safeText(row.사용여부||"Y")!=="N"); }
-function fillSelect(id, rows){
-  const el=document.getElementById(id); el.innerHTML="";
-  const base=document.createElement("option"); base.value=""; base.textContent="선택"; el.appendChild(base);
-  rows.sort((a,b)=>Number(a.정렬||9999)-Number(b.정렬||9999)||safeText(a.한글명).localeCompare(safeText(b.한글명),"ko"));
-  rows.forEach(row=>{ const opt=document.createElement("option"); opt.value=safeText(row.한글명); opt.textContent=safeText(row.한글명); el.appendChild(opt); });
-}
-function buildProductSelects(){ ["라인","재질","제품","마감","컬러","라미","면"].forEach(group=>fillSelect("p_"+group, getCodeMapByGroup(group))); }
-function buildCodeGroupSelect(){
-  const el=document.getElementById("c_구분"); el.innerHTML="";
-  GROUP_ORDER.forEach(group=>{ const opt=document.createElement("option"); opt.value=group; opt.textContent=group; el.appendChild(opt); });
-}
-function codeFrom(group,label){
-  const row=state.codeMap.find(r=>safeText(r.구분)===group && safeText(r.한글명)===safeText(label) && safeText(r.사용여부||"Y")!=="N");
-  return row ? safeText(row.코드) : "";
-}
-function thumbStrings(code){ return code?[code+"_T_01",code+"_T_02",code+"_C_01",code+"_C_02"]:[]; }
-function buildPreviewCode(){
-  state.previewCode=[codeFrom("라인",valueOf("p_라인")),codeFrom("재질",valueOf("p_재질")),codeFrom("제품",valueOf("p_제품")),codeFrom("마감",valueOf("p_마감")),codeFrom("컬러",valueOf("p_컬러")),codeFrom("라미",valueOf("p_라미")),codeFrom("면",valueOf("p_면"))].filter(Boolean).join("");
-  document.getElementById("previewBox").textContent=state.previewCode||"항목을 선택하면 코드가 보여";
-  const oldCode=valueOf("p_기존코드"); let compareText="기존 코드를 입력하면 비교 결과가 여기 표시됨";
-  if(oldCode||state.previewCode){
-    if(!oldCode) compareText="기존코드 없음\\n신규코드: "+(state.previewCode||"-");
-    else if(oldCode===state.previewCode) compareText="비교 결과: 일치\\n기존코드: "+oldCode+"\\n신규코드: "+state.previewCode;
-    else compareText="비교 결과: 불일치\\n기존코드: "+oldCode+"\\n신규코드: "+state.previewCode;
-  }
-  document.getElementById("compareBox").innerHTML = compareText.includes("일치") ? '<strong class="ok">'+compareText.replace(/\\n/g,'<br>')+'</strong>' : (compareText.includes("불일치") ? '<strong class="bad">'+compareText.replace(/\\n/g,'<br>')+'</strong>' : compareText.replace(/\\n/g,'<br>'));
-  document.getElementById("thumbBox").textContent = state.previewCode ? thumbStrings(state.previewCode).join("\\n") : "코드가 생성되면 여기 표시됨";
-}
-
-function buildTabs(){
-  const wrap=document.getElementById("groupTabs"); const groups=["전체",...GROUP_ORDER.filter(g=>getCodeMapByGroup(g).length>0)]; wrap.innerHTML="";
-  groups.forEach(group=>{ const btn=document.createElement("button"); btn.type="button"; btn.className="sub-tab"+(state.activeGroup===group?" active":""); btn.textContent=group; btn.addEventListener("click",()=>{ state.activeGroup=group; buildTabs(); renderCodeTable(); }); wrap.appendChild(btn); });
-}
-
-function renderCodeTable(){
-  const q=safeText(document.getElementById("codeSearchInput").value).toLowerCase(); const body=document.getElementById("codeTableBody"); const empty=document.getElementById("codeEmptyBox");
-  let rows=state.codeMap.filter(row=>safeText(row.사용여부||"Y")!=="N");
-  if(state.activeGroup!=="전체") rows=rows.filter(row=>safeText(row.구분)===state.activeGroup);
-  if(q) rows=rows.filter(row=>[row.구분,row.한글명,row.코드,row.조회키,row.비고].join(" ").toLowerCase().includes(q));
-  rows.sort((a,b)=>{ const ga=GROUP_ORDER.indexOf(safeText(a.구분)), gb=GROUP_ORDER.indexOf(safeText(b.구분)); if(ga!==gb) return ga-gb; return Number(a.정렬||9999)-Number(b.정렬||9999); });
-  body.innerHTML=""; if(!rows.length){ empty.style.display=""; return; } empty.style.display="none";
-  rows.forEach(row=>{ const tr=document.createElement("tr"); tr.className="clickable-row"; tr.innerHTML=`<td>${escapeHtml(row.구분)}</td><td>${escapeHtml(row.한글명)}</td><td><strong>${escapeHtml(row.코드)}</strong></td><td class="muted">${escapeHtml(row.조회키)}</td><td>${escapeHtml(row.정렬)}</td>`; tr.addEventListener("click",()=>loadCodeToForm(row)); body.appendChild(tr); });
-}
-function renderProductTable(){
-  const q=safeText(document.getElementById("productSearchInput").value).toLowerCase(); const body=document.getElementById("productTableBody"); const empty=document.getElementById("productEmptyBox");
-  let rows=state.products.slice(); if(q) rows=rows.filter(row=>[row.id,row.카테고리,row.기존코드,row.제품코드,row.파생코드,row.코드비교].join(" ").toLowerCase().includes(q));
-  body.innerHTML=""; if(!rows.length){ empty.style.display=""; return; } empty.style.display="none";
-  rows.forEach(row=>{ const tr=document.createElement("tr"); tr.className="clickable-row"; tr.innerHTML=`<td>${escapeHtml(row.id)}</td><td>${escapeHtml(row.카테고리)}</td><td>${escapeHtml(row.기존코드)}</td><td><strong>${escapeHtml(row.제품코드)}</strong></td><td>${escapeHtml(row.코드비교)}</td><td>${escapeHtml(row.사용여부||"Y")}</td>`; tr.addEventListener("click",()=>loadProductToForm(row)); body.appendChild(tr); });
-}
-function renderLegacyTable(){
-  const q=safeText(document.getElementById("legacySearchInput").value).toLowerCase(); const body=document.getElementById("legacyTableBody"); const empty=document.getElementById("legacyEmptyBox");
-  let rows=state.legacyCodes.filter(row=>safeText(row.사용여부||"Y")!=="N"); if(q) rows=rows.filter(row=>[row.id,row.기존코드,row.카테고리,row.제품명,row.비고].join(" ").toLowerCase().includes(q));
-  body.innerHTML=""; if(!rows.length){ empty.style.display=""; return; } empty.style.display="none";
-  rows.forEach(row=>{ const tr=document.createElement("tr"); tr.className="clickable-row"; tr.innerHTML=`<td>${escapeHtml(row.id)}</td><td><strong>${escapeHtml(row.기존코드)}</strong></td><td>${escapeHtml(row.카테고리)}</td><td>${escapeHtml(row.제품명)}</td><td>${escapeHtml(row.비고)}</td>`; tr.addEventListener("click",()=>loadLegacyToForm(row)); body.appendChild(tr); });
-}
-
-function loadProductToForm(row){
-  document.getElementById("p_id").value=safeText(row.id); document.getElementById("p_카테고리").value=safeText(row.카테고리); document.getElementById("p_기존코드").value=safeText(row.기존코드);
-  ["라인","재질","제품","마감","컬러","라미","면"].forEach(group=>{ const el=document.getElementById("p_"+group); if(el) el.value=safeText(row[group]); });
-  buildPreviewCode(); switchPage("productPage");
-}
-function loadCodeToForm(row){
-  document.getElementById("c_lookupKey").value=safeText(row.조회키); document.getElementById("c_구분").value=safeText(row.구분); document.getElementById("c_한글명").value=safeText(row.한글명); document.getElementById("c_코드").value=safeText(row.코드); document.getElementById("c_정렬").value=safeText(row.정렬); document.getElementById("c_비고").value=safeText(row.비고); switchPage("codePage");
-}
-function loadLegacyToForm(row){
-  document.getElementById("l_id").value=safeText(row.id); document.getElementById("l_기존코드").value=safeText(row.기존코드); document.getElementById("l_카테고리").value=safeText(row.카테고리); document.getElementById("l_제품명").value=safeText(row.제품명); document.getElementById("l_비고").value=safeText(row.비고); switchPage("legacyPage");
-  document.getElementById("p_기존코드").value=safeText(row.기존코드); buildPreviewCode();
-}
-function resetProductForm(){ document.getElementById("p_id").value=""; document.getElementById("p_카테고리").value=""; document.getElementById("p_기존코드").value=""; ["라인","재질","제품","마감","컬러","라미","면"].forEach(group=>{ const el=document.getElementById("p_"+group); if(el) el.value=""; }); buildPreviewCode(); }
-function resetCodeForm(){ document.getElementById("c_lookupKey").value=""; document.getElementById("c_구분").value=GROUP_ORDER[0]; document.getElementById("c_한글명").value=""; document.getElementById("c_코드").value=""; document.getElementById("c_정렬").value=""; document.getElementById("c_비고").value=""; }
-function resetLegacyForm(){ document.getElementById("l_id").value=""; document.getElementById("l_기존코드").value=""; document.getElementById("l_카테고리").value=""; document.getElementById("l_제품명").value=""; document.getElementById("l_비고").value=""; }
-
-function makeProductPayload(actionName){ return {action:actionName,id:valueOf("p_id"),카테고리:valueOf("p_카테고리"),기존코드:valueOf("p_기존코드"),라인:valueOf("p_라인"),재질:valueOf("p_재질"),제품:valueOf("p_제품"),마감:valueOf("p_마감"),컬러:valueOf("p_컬러"),라미:valueOf("p_라미"),면:valueOf("p_면")}; }
-function makeCodePayload(actionName){ return {action:actionName,lookupKey:valueOf("c_lookupKey"),구분:valueOf("c_구분"),한글명:valueOf("c_한글명"),코드:valueOf("c_코드"),정렬:valueOf("c_정렬"),비고:valueOf("c_비고"),사용여부:"Y"}; }
-function makeLegacyPayload(actionName){ return {action:actionName,id:valueOf("l_id"),기존코드:valueOf("l_기존코드"),카테고리:valueOf("l_카테고리"),제품명:valueOf("l_제품명"),비고:valueOf("l_비고")}; }
-
-async function postJson(payload){ const res=await fetch(API,{method:"POST",body:JSON.stringify(payload)}); const text=await res.text(); try{return JSON.parse(text)}catch{return{raw:text}} }
-async function saveProduct(){ await postJson(makeProductPayload("saveProduct")); alert("저장 완료"); await loadProducts(); resetProductForm(); }
-async function updateProduct(){ if(!valueOf("p_id")){ alert("수정할 상품 ID가 없어"); return; } await postJson(makeProductPayload("updateProduct")); alert("수정 완료"); await loadProducts(); }
-async function deleteProduct(){ if(!valueOf("p_id")){ alert("삭제할 상품 ID가 없어"); return; } if(!confirm("이 상품을 삭제할까?")) return; await postJson({action:"deactivateProduct",id:valueOf("p_id")}); alert("삭제 완료"); await loadProducts(); resetProductForm(); }
-async function addCode(){ await postJson(makeCodePayload("addCodeMap")); alert("약어 추가 완료"); await loadMeta(); resetCodeForm(); }
-async function updateCode(){ if(!valueOf("c_lookupKey")){ alert("수정할 조회키가 없어"); return; } await postJson(makeCodePayload("updateCodeMap")); alert("약어 수정 완료"); await loadMeta(); }
-async function deleteCode(){ if(!valueOf("c_lookupKey")){ alert("삭제할 조회키가 없어"); return; } if(!confirm("이 약어를 삭제할까?")) return; await postJson({action:"deactivateCodeMap",lookupKey:valueOf("c_lookupKey")}); alert("약어 삭제 완료"); await loadMeta(); resetCodeForm(); }
-async function addLegacy(){ await postJson(makeLegacyPayload("addLegacyCode")); alert("기존 코드 추가 완료"); await loadLegacy(); resetLegacyForm(); }
-async function updateLegacy(){ if(!valueOf("l_id")){ alert("수정할 기존 코드 ID가 없어"); return; } await postJson(makeLegacyPayload("updateLegacyCode")); alert("기존 코드 수정 완료"); await loadLegacy(); }
-async function deleteLegacy(){ if(!valueOf("l_id")){ alert("삭제할 기존 코드 ID가 없어"); return; } if(!confirm("이 기존 코드를 삭제할까?")) return; await postJson({action:"deactivateLegacyCode",id:valueOf("l_id")}); alert("기존 코드 삭제 완료"); await loadLegacy(); resetLegacyForm(); }
-async function copyCode(){ if(!state.previewCode){ alert("복사할 코드가 없어"); return; } await navigator.clipboard.writeText(state.previewCode); alert("신규 코드 복사 완료"); }
-async function copyThumbs(){ const thumbs=thumbStrings(state.previewCode); if(!thumbs.length){ alert("복사할 썸네일 코드가 없어"); return; } await navigator.clipboard.writeText(thumbs.join("\\n")); alert("썸네일 코드 복사 완료"); }
-
-async function loadMeta(){
-  const res=await fetch(`${API}?action=meta`); const json=await res.json();
-  state.codeMap=Array.isArray(json.data&&json.data.codeMap)?json.data.codeMap:[];
-  state.legacyCodes=Array.isArray(json.data&&json.data.legacyCodes)?json.data.legacyCodes:[];
-  buildProductSelects(); buildCodeGroupSelect(); buildTabs(); renderCodeTable(); renderLegacyTable(); buildPreviewCode();
-}
-async function loadProducts(){ const res=await fetch(`${API}?action=products`); const json=await res.json(); state.products=Array.isArray(json.data)?json.data:[]; renderProductTable(); }
-async function loadLegacy(){ const res=await fetch(`${API}?action=legacy`); const json=await res.json(); state.legacyCodes=Array.isArray(json.data)?json.data:[]; renderLegacyTable(); }
-function switchPage(pageId){ document.querySelectorAll(".page").forEach(el=>el.classList.remove("active")); document.querySelectorAll(".main-tab").forEach(el=>el.classList.remove("active")); document.getElementById(pageId).classList.add("active"); document.querySelector(`.main-tab[data-page="${pageId}"]`).classList.add("active"); }
-
-function bindEvents(){
-  document.querySelectorAll(".main-tab").forEach(btn=>btn.addEventListener("click",()=>switchPage(btn.dataset.page)));
-  ["p_라인","p_재질","p_제품","p_마감","p_컬러","p_라미","p_면","p_카테고리","p_기존코드"].forEach(id=>{ const el=document.getElementById(id); el.addEventListener("change",buildPreviewCode); el.addEventListener("input",buildPreviewCode); });
-  document.getElementById("codeSearchInput").addEventListener("input",renderCodeTable);
-  document.getElementById("productSearchInput").addEventListener("input",renderProductTable);
-  document.getElementById("legacySearchInput").addEventListener("input",renderLegacyTable);
-  document.getElementById("reloadCodeBtn").addEventListener("click",()=>loadMeta().catch(showError));
-  document.getElementById("reloadProductsBtn").addEventListener("click",()=>loadProducts().catch(showError));
-  document.getElementById("reloadLegacyBtn").addEventListener("click",()=>loadLegacy().catch(showError));
-  document.getElementById("saveProductBtn").addEventListener("click",()=>saveProduct().catch(showError));
-  document.getElementById("updateProductBtn").addEventListener("click",()=>updateProduct().catch(showError));
-  document.getElementById("deleteProductBtn").addEventListener("click",()=>deleteProduct().catch(showError));
-  document.getElementById("resetProductBtn").addEventListener("click",resetProductForm);
-  document.getElementById("addCodeBtn").addEventListener("click",()=>addCode().catch(showError));
-  document.getElementById("updateCodeBtn").addEventListener("click",()=>updateCode().catch(showError));
-  document.getElementById("deleteCodeBtn").addEventListener("click",()=>deleteCode().catch(showError));
-  document.getElementById("resetCodeBtn").addEventListener("click",resetCodeForm);
-  document.getElementById("addLegacyBtn").addEventListener("click",()=>addLegacy().catch(showError));
-  document.getElementById("updateLegacyBtn").addEventListener("click",()=>updateLegacy().catch(showError));
-  document.getElementById("deleteLegacyBtn").addEventListener("click",()=>deleteLegacy().catch(showError));
-  document.getElementById("resetLegacyBtn").addEventListener("click",resetLegacyForm);
-  document.getElementById("copyCodeBtn").addEventListener("click",()=>copyCode().catch(showError));
-  document.getElementById("copyThumbBtn").addEventListener("click",()=>copyThumbs().catch(showError));
-}
-function showError(err){ setStatus("오류"); alert("오류\\n"+(err&&err.message?err.message:err)); }
-async function init(){ setStatus("불러오는 중..."); await loadMeta(); await loadProducts(); resetCodeForm(); resetLegacyForm(); setStatus("연결됨",true); }
-bindEvents(); init().catch(showError);
-</script>
-</body>
-</html>
+const API="https://script.google.com/macros/s/AKfycbwSvwTTFhIV4WiYS0KHcrpX7mninpmix3GDmXEElRqB2W3_kuBftcDDcGPeSMWGemzLLw/exec",GROUP_ORDER=["라인","재질","제품","마감","컬러","라미","면"],state={codeMap:[],products:[],legacyCodes:[],activeGroup:"전체",previewCode:""};
+const delay=ms=>new Promise(r=>setTimeout(r,ms));const $=id=>document.getElementById(id);const val=id=>String($(id).value||"").trim();
+function setStatus(t,ok=false){$("statusBadge").textContent=t;$("statusBadge").style.background=ok?"#dcfce7":"#eef2ff";$("statusBadge").style.color=ok?"#166534":"#4338ca"}
+function setLoading(show,t="처리 중..."){$("loadingMask").classList.toggle("show",show);$("loadingText").textContent=t}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function getGroup(g){return state.codeMap.filter(r=>String(r.구분).trim()===g&&String(r.사용여부||"Y").trim()!=="N")}
+function fill(id,rows){const el=$(id);el.innerHTML="<option value=''>선택</option>";rows.sort((a,b)=>Number(a.정렬||9999)-Number(b.정렬||9999)||String(a.한글명).localeCompare(String(b.한글명),"ko"));rows.forEach(r=>{const o=document.createElement("option");o.value=String(r.한글명).trim();o.textContent=String(r.한글명).trim();el.appendChild(o)})}
+function buildProductSelects(){["라인","재질","제품","마감","컬러","라미","면"].forEach(g=>fill("p_"+g,getGroup(g)))} 
+function buildCodeGroupSelect(){$("c_구분").innerHTML="";GROUP_ORDER.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=g;$("c_구분").appendChild(o)})}
+function codeFrom(g,l){const r=state.codeMap.find(x=>String(x.구분).trim()===g&&String(x.한글명).trim()===String(l).trim()&&String(x.사용여부||"Y").trim()!=="N");return r?String(r.코드).trim():""}
+function buildPreviewCode(){state.previewCode=[codeFrom("라인",val("p_라인")),codeFrom("재질",val("p_재질")),codeFrom("제품",val("p_제품")),codeFrom("마감",val("p_마감")),codeFrom("컬러",val("p_컬러")),codeFrom("라미",val("p_라미")),codeFrom("면",val("p_면"))].filter(Boolean).join("");$("previewBox").textContent=state.previewCode||"항목을 선택하면 코드가 보여";const old=val("p_기존코드");let txt="기존 코드를 선택하면 비교 결과가 여기 표시됨";if(old||state.previewCode){if(!old)txt="기존코드 없음\n신규코드: "+(state.previewCode||"-");else if(old===state.previewCode)txt="비교 결과: 일치\n기존코드: "+old+"\n신규코드: "+state.previewCode;else txt="비교 결과: 불일치\n기존코드: "+old+"\n신규코드: "+state.previewCode;}$("compareBox").innerHTML=txt.includes("일치")?'<strong class="ok">'+txt.replace(/\n/g,"<br>")+'</strong>':(txt.includes("불일치")?'<strong class="bad">'+txt.replace(/\n/g,"<br>")+'</strong>':txt.replace(/\n/g,"<br>"));$("thumbBox").textContent=state.previewCode?[state.previewCode+"_T_01",state.previewCode+"_T_02",state.previewCode+"_C_01",state.previewCode+"_C_02"].join("\n"):"코드가 생성되면 여기 표시됨"}
+function buildTabs(){const wrap=$("groupTabs");const groups=["전체",...GROUP_ORDER.filter(g=>getGroup(g).length>0)];wrap.innerHTML="";groups.forEach(g=>{const b=document.createElement("button");b.type="button";b.className="sub-tab"+(state.activeGroup===g?" active":"");b.textContent=g;b.onclick=()=>{state.activeGroup=g;buildTabs();renderCodeTable()};wrap.appendChild(b)})}
+function renderCodeTable(){const q=val("codeSearchInput").toLowerCase();let rows=state.codeMap.filter(r=>String(r.사용여부||"Y").trim()!=="N");if(state.activeGroup!=="전체")rows=rows.filter(r=>String(r.구분).trim()===state.activeGroup);if(q)rows=rows.filter(r=>[r.구분,r.한글명,r.코드,r.조회키,r.비고].join(" ").toLowerCase().includes(q));rows.sort((a,b)=>{const ga=GROUP_ORDER.indexOf(String(a.구분).trim()),gb=GROUP_ORDER.indexOf(String(b.구분).trim());if(ga!==gb)return ga-gb;return Number(a.정렬||9999)-Number(b.정렬||9999)});$("codeTableBody").innerHTML="";$("codeEmptyBox").style.display=rows.length?"none":"";rows.forEach(r=>{const tr=document.createElement("tr");tr.className="clickable-row";tr.innerHTML=`<td>${esc(r.구분)}</td><td>${esc(r.한글명)}</td><td><strong>${esc(r.코드)}</strong></td><td>${esc(r.조회키)}</td><td>${esc(r.정렬)}</td>`;tr.onclick=()=>{$("c_lookupKey").value=String(r.조회키||"");$("c_구분").value=String(r.구분||"");$("c_한글명").value=String(r.한글명||"");$("c_코드").value=String(r.코드||"");$("c_정렬").value=String(r.정렬||"");$("c_비고").value=String(r.비고||"");switchPage("codePage")};$("codeTableBody").appendChild(tr)})}
+function renderProductTable(){const q=val("productSearchInput").toLowerCase();let rows=state.products.slice();if(q)rows=rows.filter(r=>[r.id,r.카테고리,r.기존코드,r.제품코드,r.파생코드,r.코드비교].join(" ").toLowerCase().includes(q));$("productTableBody").innerHTML="";$("productEmptyBox").style.display=rows.length?"none":"";rows.forEach(r=>{const tr=document.createElement("tr");tr.className="clickable-row";tr.innerHTML=`<td>${esc(r.id)}</td><td>${esc(r.카테고리)}</td><td>${esc(r.기존코드)}</td><td><strong>${esc(r.제품코드)}</strong></td><td>${esc(r.코드비교)}</td><td>${esc(r.사용여부||"Y")}</td>`;tr.onclick=()=>{$("p_id").value=String(r.id||"");$("p_카테고리").value=String(r.카테고리||"");$("p_기존코드").value=String(r.기존코드||"");["라인","재질","제품","마감","컬러","라미","면"].forEach(g=>{$("p_"+g).value=String(r[g]||"")});buildPreviewCode();switchPage("productPage")};$("productTableBody").appendChild(tr)})}
+function renderLegacyTable(){const q=val("legacySearchInput").toLowerCase();let rows=state.legacyCodes.filter(r=>String(r.사용여부||"Y").trim()!=="N");if(q)rows=rows.filter(r=>[r.id,r.기존코드,r.카테고리,r.제품명,r.비고].join(" ").toLowerCase().includes(q));$("legacyTableBody").innerHTML="";$("legacyEmptyBox").style.display=rows.length?"none":"";rows.forEach(r=>{const tr=document.createElement("tr");tr.className="clickable-row";tr.innerHTML=`<td>${esc(r.id)}</td><td><strong>${esc(r.기존코드)}</strong></td><td>${esc(r.카테고리)}</td><td>${esc(r.제품명)}</td><td>${esc(r.비고)}</td>`;tr.onclick=()=>{$("l_id").value=String(r.id||"");$("l_기존코드").value=String(r.기존코드||"");$("l_카테고리").value=String(r.카테고리||"");$("l_제품명").value=String(r.제품명||"");$("l_비고").value=String(r.비고||"");$("p_기존코드").value=String(r.기존코드||"");buildPreviewCode()};$("legacyTableBody").appendChild(tr)})}
+async function postJson(p){const res=await fetch(API,{method:"POST",body:JSON.stringify(p)});const text=await res.text();try{return JSON.parse(text)}catch{return {raw:text}}}
+async function syncAfterWrite(kind){await delay(450);if(kind==="meta"||kind==="all")await loadMeta();if(kind==="products"||kind==="all")await loadProducts();if(kind==="legacy"||kind==="all")await loadLegacy()}
+async function loadMeta(){const res=await fetch(`${API}?action=meta`);const json=await res.json();state.codeMap=Array.isArray(json.data&&json.data.codeMap)?json.data.codeMap:[];state.legacyCodes=Array.isArray(json.data&&json.data.legacyCodes)?json.data.legacyCodes:[];buildProductSelects();buildCodeGroupSelect();buildTabs();renderCodeTable();renderLegacyTable();buildPreviewCode()}
+async function loadProducts(){const res=await fetch(`${API}?action=products`);const json=await res.json();state.products=Array.isArray(json.data)?json.data:[];renderProductTable()}
+async function loadLegacy(){const res=await fetch(`${API}?action=legacy`);const json=await res.json();state.legacyCodes=Array.isArray(json.data)?json.data:[];renderLegacyTable()}
+function switchPage(id){document.querySelectorAll(".page").forEach(e=>e.classList.remove("active"));document.querySelectorAll(".main-tab").forEach(e=>e.classList.remove("active"));$(id).classList.add("active");document.querySelector(`.main-tab[data-page="${id}"]`).classList.add("active")}
+function resetProductForm(){$("p_id").value="";$("p_카테고리").value="";$("p_기존코드").value="";["라인","재질","제품","마감","컬러","라미","면"].forEach(g=>{$("p_"+g).value=""});buildPreviewCode()}
+function resetCodeForm(){$("c_lookupKey").value="";$("c_구분").value=GROUP_ORDER[0];$("c_한글명").value="";$("c_코드").value="";$("c_정렬").value="";$("c_비고").value=""}
+function resetLegacyForm(){$("l_id").value="";$("l_기존코드").value="";$("l_카테고리").value="";$("l_제품명").value="";$("l_비고").value=""}
+function showError(err){setLoading(false);setStatus("오류");alert("오류\n"+(err&&err.message?err.message:err))}
+async function act(label,fn){setLoading(true,label);try{await fn()}finally{setLoading(false)}}
+function payloadProduct(action){return {action,id:val("p_id"),카테고리:val("p_카테고리"),기존코드:val("p_기존코드"),라인:val("p_라인"),재질:val("p_재질"),제품:val("p_제품"),마감:val("p_마감"),컬러:val("p_컬러"),라미:val("p_라미"),면:val("p_면")}}
+function payloadCode(action){return {action,lookupKey:val("c_lookupKey"),구분:val("c_구분"),한글명:val("c_한글명"),코드:val("c_코드"),정렬:val("c_정렬"),비고:val("c_비고"),사용여부:"Y"}}
+function payloadLegacy(action){return {action,id:val("l_id"),기존코드:val("l_기존코드"),카테고리:val("l_카테고리"),제품명:val("l_제품명"),비고:val("l_비고")}}
+document.querySelectorAll(".main-tab").forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
+["p_라인","p_재질","p_제품","p_마감","p_컬러","p_라미","p_면","p_카테고리"].forEach(id=>{$(id).addEventListener("change",buildPreviewCode);$(id).addEventListener("input",buildPreviewCode)});
+$("goLegacyBtn").onclick=()=>switchPage("legacyPage");
+$("productSearchInput").oninput=renderProductTable;$("codeSearchInput").oninput=renderCodeTable;$("legacySearchInput").oninput=renderLegacyTable;
+$("reloadProductsBtn").onclick=()=>loadProducts().catch(showError);$("reloadCodeBtn").onclick=()=>loadMeta().catch(showError);$("reloadLegacyBtn").onclick=()=>loadLegacy().catch(showError);
+$("saveProductBtn").onclick=()=>act("상품 저장 중...",async()=>{await postJson(payloadProduct("saveProduct"));setStatus("저장 완료",true);await syncAfterWrite("products");resetProductForm()}).catch(showError);
+$("updateProductBtn").onclick=()=>{if(!val("p_id")) return alert("수정할 상품 ID가 없어"); act("상품 수정 중...",async()=>{await postJson(payloadProduct("updateProduct"));setStatus("수정 완료",true);await syncAfterWrite("products")}).catch(showError)};
+$("deleteProductBtn").onclick=()=>{if(!val("p_id")) return alert("삭제할 상품 ID가 없어"); if(!confirm("이 상품을 삭제할까?")) return; act("상품 삭제 중...",async()=>{await postJson({action:"deactivateProduct",id:val("p_id")});setStatus("삭제 완료",true);await syncAfterWrite("products");resetProductForm()}).catch(showError)};
+$("resetProductBtn").onclick=resetProductForm;
+$("addCodeBtn").onclick=()=>act("약어 추가 중...",async()=>{await postJson(payloadCode("addCodeMap"));setStatus("약어 추가 완료",true);await syncAfterWrite("meta");resetCodeForm()}).catch(showError);
+$("updateCodeBtn").onclick=()=>{if(!val("c_lookupKey")) return alert("수정할 조회키가 없어"); act("약어 수정 중...",async()=>{await postJson(payloadCode("updateCodeMap"));setStatus("약어 수정 완료",true);await syncAfterWrite("meta")}).catch(showError)};
+$("deleteCodeBtn").onclick=()=>{if(!val("c_lookupKey")) return alert("삭제할 조회키가 없어"); if(!confirm("이 약어를 삭제할까?")) return; act("약어 삭제 중...",async()=>{await postJson({action:"deactivateCodeMap",lookupKey:val("c_lookupKey")});setStatus("약어 삭제 완료",true);await syncAfterWrite("meta");resetCodeForm()}).catch(showError)};
+$("resetCodeBtn").onclick=resetCodeForm;
+$("addLegacyBtn").onclick=()=>act("기존 코드 추가 중...",async()=>{await postJson(payloadLegacy("addLegacyCode"));setStatus("기존 코드 추가 완료",true);await syncAfterWrite("legacy");resetLegacyForm()}).catch(showError);
+$("updateLegacyBtn").onclick=()=>{if(!val("l_id")) return alert("수정할 기존 코드 ID가 없어"); act("기존 코드 수정 중...",async()=>{await postJson(payloadLegacy("updateLegacyCode"));setStatus("기존 코드 수정 완료",true);await syncAfterWrite("legacy")}).catch(showError)};
+$("deleteLegacyBtn").onclick=()=>{if(!val("l_id")) return alert("삭제할 기존 코드 ID가 없어"); if(!confirm("이 기존 코드를 삭제할까?")) return; act("기존 코드 삭제 중...",async()=>{await postJson({action:"deactivateLegacyCode",id:val("l_id")});setStatus("기존 코드 삭제 완료",true);await syncAfterWrite("legacy");resetLegacyForm()}).catch(showError)};
+$("resetLegacyBtn").onclick=resetLegacyForm;
+$("copyCodeBtn").onclick=async()=>{if(!state.previewCode) return alert("복사할 코드가 없어"); await navigator.clipboard.writeText(state.previewCode); alert("신규 코드 복사 완료")};
+$("copyThumbBtn").onclick=async()=>{if(!state.previewCode) return alert("복사할 썸네일 코드가 없어"); await navigator.clipboard.writeText([state.previewCode+"_T_01",state.previewCode+"_T_02",state.previewCode+"_C_01",state.previewCode+"_C_02"].join("\n")); alert("썸네일 코드 복사 완료")};
+(async()=>{try{setLoading(true,"불러오는 중...");await loadMeta();await loadProducts();resetCodeForm();resetLegacyForm();setStatus("연결됨",true)}catch(e){showError(e)}finally{setLoading(false)}})();
+</script></body></html>
