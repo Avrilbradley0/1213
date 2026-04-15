@@ -39,7 +39,6 @@
     <div class="topbar">
       <div>
         <h1 class="title">HUSK 코드 매니저</h1>
-        <p class="desc">상품 관리, 약어 관리, 코드 생성을 한 화면에서 정리하는 연동형 관리자</p>
       </div>
       <div class="status-badge" aria-live="polite">
         <span class="status-dot" id="statusDot"></span>
@@ -109,7 +108,6 @@
       <div class="grid-2">
         <div class="card">
           <h2 class="section-title">상품 등록</h2>
-          <p class="section-desc">상품 기본 정보를 등록하고 코드 생성용 목록으로 사용한다.</p>
           <div class="field"><label>상품명</label><input class="input" id="pName" placeholder="예: 맥세이프 글라스범퍼케이스 유광" /></div>
           <div class="row">
             <div class="field"><label>라인</label><input class="input" id="pLine" placeholder="예: 맥세이프" /></div>
@@ -127,7 +125,6 @@
         </div>
         <div class="card">
           <h2 class="section-title">상품 목록</h2>
-          <p class="section-desc">검색 후 바로 수정하거나 삭제할 수 있다.</p>
           <div class="toolbar"><input class="input" id="productSearch" placeholder="상품명 검색" oninput="renderProducts()" /></div>
           <table>
             <thead><tr><th style="width:22%">상품명</th><th style="width:18%">라인 / 재질</th><th style="width:16%">structure / 마감</th><th>비고</th><th style="width:128px">작업</th></tr></thead>
@@ -141,13 +138,12 @@
       <div class="grid-2">
         <div class="card">
           <h2 class="section-title">약어 등록</h2>
-          <p class="section-desc">시트 구분 기준에 맞춰 line, material, structure, product, finish, color, lamination, side를 관리한다.</p>
           <div class="row">
             <div class="field"><label>구분</label><select class="select" id="aCategory"></select></div>
             <div class="field"><label>코드</label><input class="input" id="aCode" placeholder="예: MG / PC / BP / WH" /></div>
           </div>
           <div class="field"><label>한글명</label><input class="input" id="aName" placeholder="예: 맥세이프 / PC / 범퍼 / 화이트" /></div>
-          <div class="field"><label>비고</label><textarea class="textarea" id="aNote" placeholder="필요한 설명을 적어두기"></textarea></div>
+          <div class="field"><label>비고</label><textarea class="textarea" id="aNote" placeholder="필요한 설명"></textarea></div>
           <div class="actions">
             <button class="btn primary" type="button" onclick="saveAbbr()">약어 저장</button>
             <button class="btn" type="button" onclick="resetAbbrForm()">취소</button>
@@ -155,7 +151,6 @@
         </div>
         <div class="card">
           <h2 class="section-title">약어 목록</h2>
-          <p class="section-desc">구분별로 정리해서 확인하고 바로 수정할 수 있다.</p>
           <div class="toolbar">
             <input class="input" id="abbrSearch" placeholder="한글명 / 코드 검색" oninput="renderAbbrs()" />
             <select class="select" id="abbrFilter" onchange="renderAbbrs()"></select>
@@ -281,24 +276,24 @@
 
     async function saveProduct(){
       const data={ id: state.editingProductId || "", name:pName.value.trim(), line:pLine.value.trim(), material:pMaterial.value.trim(), structure:pStructure.value.trim(), finish:pFinish.value.trim(), note:pNote.value.trim(), use_yn:"Y" };
-      if(!data.name){ alert("상품명을 입력해줘."); return; }
+      if(!data.name){ alert("상품명 입력"); return; }
       try{ await postJSON({ action:"saveProduct", ...data }); alert("시트에 반영되었습니다."); state.editingProductId = null; resetProductForm(false); await loadAllFromSheet(); }
-      catch(e){ alert("저장 중 오류가 발생했어: " + e.message); }
+      catch(e){ alert("저장 중 오류: " + e.message); }
     }
 
     function editProduct(id){ const item=state.products.find(row=>String(row.id)===String(id)); if(!item) return; state.editingProductId=id; pName.value=item.name||""; pLine.value=item.line||""; pMaterial.value=item.material||""; pStructure.value=item.structure||""; pFinish.value=item.finish||""; pNote.value=item.note||""; }
-    async function deleteProduct(id){ if(!confirm("이 상품을 삭제할까?")) return; try{ await postJSON({ action:"deleteProduct", id }); alert("시트에 반영되었습니다."); await loadAllFromSheet(); }catch(e){ alert("삭제 중 오류가 발생했어: " + e.message); } }
+    async function deleteProduct(id){ if(!confirm("상품 삭제")) return; try{ await postJSON({ action:"deleteProduct", id }); alert("시트에 반영되었습니다."); await loadAllFromSheet(); }catch(e){ alert("삭제 중 오류: " + e.message); } }
     function resetProductForm(clearEditing=true){ if(clearEditing) state.editingProductId=null; ["pName","pLine","pMaterial","pStructure","pFinish","pNote"].forEach(id=>document.getElementById(id).value=""); }
 
     async function saveAbbr(){
       const data={ id: state.editingAbbrId || "", category:aCategory.value, code:aCode.value.trim().toUpperCase(), name:aName.value.trim(), note:aNote.value.trim(), use_yn:"Y" };
-      if(!data.category || !data.name){ alert("구분, 한글명을 입력해줘."); return; }
+      if(!data.category || !data.name){ alert("구분, 한글명 입력"); return; }
       try{ await postJSON({ action:"saveCode", ...data }); alert("시트에 반영되었습니다."); state.editingAbbrId = null; resetAbbrForm(false); await loadAllFromSheet(); }
-      catch(e){ alert("저장 중 오류가 발생했어: " + e.message); }
+      catch(e){ alert("저장 중 오류: " + e.message); }
     }
 
     function editAbbr(id){ const item=state.abbrs.find(row=>String(row.id)===String(id)); if(!item) return; state.editingAbbrId=id; aCategory.value=item.category||"line"; aCode.value=item.code||""; aName.value=item.name||""; aNote.value=item.note||""; }
-    async function deleteAbbr(id){ if(!confirm("이 약어를 삭제할까?")) return; try{ await postJSON({ action:"deleteCode", id }); alert("시트에 반영되었습니다."); await loadAllFromSheet(); }catch(e){ alert("삭제 중 오류가 발생했어: " + e.message); } }
+    async function deleteAbbr(id){ if(!confirm("약어 삭제")) return; try{ await postJSON({ action:"deleteCode", id }); alert("시트에 반영되었습니다."); await loadAllFromSheet(); }catch(e){ alert("삭제 중 오류: " + e.message); } }
     function resetAbbrForm(clearEditing=true){ if(clearEditing) state.editingAbbrId=null; aCategory.value="line"; aCode.value=""; aName.value=""; aNote.value=""; }
 
     function generateCode(){
@@ -311,7 +306,7 @@
       const side = document.getElementById("cgSide").value || "";
       const baseCode = [line, material, structure, color].filter(Boolean).join("");
       const extraCode = [finish, lamination, side].filter(Boolean);
-      if (!baseCode && extraCode.length === 0) { alert("코드 생성에 필요한 항목을 선택해줘."); return; }
+      if (!baseCode && extraCode.length === 0) { alert("코드 생성에 필요한 항목 선택."); return; }
       const productCode = baseCode + (extraCode.length ? "_" + extraCode.join("_") : "");
       pvCode.textContent = productCode; pvThumb.textContent = `${productCode}_T_01`; pvStore.textContent = `${productCode}_T_01_STORE`; pvCarousel.textContent = `${productCode}_C_01`;
     }
@@ -322,7 +317,7 @@
     async function init(){
       bindTabs(); fillCategorySelects(); checkConnection();
       try{ await loadAllFromSheet(); }
-      catch(e){ console.error(e); setConnection(false); alert("시트 데이터를 불러오지 못했어. Apps Script 교체 후 다시 배포해줘."); }
+      catch(e){ console.error(e); setConnection(false); alert("시트 데이터 Apps Script 교체 필요"); }
     }
     window.addEventListener("load", init);
   </script>
