@@ -161,6 +161,7 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx358dDm9sD6wctLEPEESZW5lxZHaWkv6HK7KFm0QBdJXo5LRdHt5Z3dWWRhK_LlbVi/exec";
     const categoryLabelMap = { line:"라인", material:"재질", shape:"형태", finish:"마감", lamination:"인쇄", side:"면 구분", product:"상품" };
     const state = { products: [], abbrs: [], editingProductId: null, editingAbbrId: null };
+
     const defaultAbbrs = [
       { id: 1, category: "line", code: "MG", name: "맥세이프", note: "" },
       { id: 2, category: "material", code: "GL", name: "글라스", note: "" },
@@ -169,9 +170,11 @@
       { id: 5, category: "lamination", code: "LM", name: "라미", note: "" },
       { id: 6, category: "side", code: "D", name: "단면", note: "" }
     ];
+
     const defaultProducts = [
       { id: 1, name: "맥세이프 글라스범퍼케이스 유광", line: "맥세이프", material: "글라스", shape: "범퍼케이스", finish: "유광", note: "" }
     ];
+
     const uid = () => Date.now() + Math.floor(Math.random() * 1000);
 
     function setConnection(ok){
@@ -179,13 +182,20 @@
       document.getElementById("statusText").textContent = ok ? "연결됨" : "연결 안 됨";
       document.getElementById("connectLabel").textContent = ok ? "연결됨" : "연결 안 됨";
     }
+
     async function checkConnection(){
       try{
-        const res = await fetch(SCRIPT_URL,{method:"GET",cache:"no-store"});
-        if(!res.ok) throw new Error("HTTP "+res.status);
+        await fetch(SCRIPT_URL, {
+          method:"GET",
+          mode:"no-cors",
+          cache:"no-store"
+        });
         setConnection(true);
-      }catch(e){ setConnection(false); }
+      }catch(e){
+        setConnection(false);
+      }
     }
+
     function bindTabs(){
       document.querySelectorAll(".tab-btn").forEach(btn=>{
         btn.addEventListener("click",()=>{
@@ -196,12 +206,15 @@
         });
       });
     }
+
     function fillCategorySelects(){
       const cats=["line","material","shape","finish","lamination","side"];
       document.getElementById("aCategory").innerHTML = cats.map(cat=>`<option value="${cat}">${categoryLabelMap[cat]}</option>`).join("");
       document.getElementById("abbrFilter").innerHTML = `<option value="">전체 구분</option>` + cats.map(cat=>`<option value="${cat}">${categoryLabelMap[cat]}</option>`).join("");
     }
+
     function getAbbrOptions(category){ return state.abbrs.filter(item=>item.category===category); }
+
     function fillCodeGeneratorSelects(){
       const mapping = { cgLine:"line", cgMaterial:"material", cgShape:"shape", cgFinish:"finish", cgLamination:"lamination", cgSide:"side" };
       Object.entries(mapping).forEach(([id,category])=>{
@@ -211,13 +224,16 @@
       });
       document.getElementById("cgProduct").innerHTML = `<option value="">선택</option>` + state.products.map(item=>`<option value="${item.id}">${item.name}</option>`).join("");
     }
+
     function updateCounts(){
       document.getElementById("productCount").textContent = state.products.length;
       document.getElementById("abbrCount").textContent = state.abbrs.length;
     }
+
     function escapeHtml(value){
       return String(value ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
     }
+
     function renderProducts(){
       const keyword=document.getElementById("productSearch").value.trim().toLowerCase();
       const rows=state.products.filter(item=>!keyword || [item.name,item.line,item.material,item.shape,item.finish,item.note].join(" ").toLowerCase().includes(keyword));
@@ -232,6 +248,7 @@
           <td><button class="small-btn" type="button" onclick="editProduct(${item.id})">수정</button><button class="small-btn" type="button" onclick="deleteProduct(${item.id})">삭제</button></td>
         </tr>`).join("");
     }
+
     function renderAbbrs(){
       const keyword=document.getElementById("abbrSearch").value.trim().toLowerCase();
       const filter=document.getElementById("abbrFilter").value;
@@ -247,51 +264,127 @@
           <td><button class="small-btn" type="button" onclick="editAbbr(${item.id})">수정</button><button class="small-btn" type="button" onclick="deleteAbbr(${item.id})">삭제</button></td>
         </tr>`).join("");
     }
+
     function saveProduct(){
       const data={name:pName.value.trim(),line:pLine.value.trim(),material:pMaterial.value.trim(),shape:pShape.value.trim(),finish:pFinish.value.trim(),note:pNote.value.trim()};
       if(!data.name){ alert("상품명을 입력해줘."); return; }
       if(state.editingProductId){
         const idx=state.products.findIndex(item=>item.id===state.editingProductId);
         if(idx>-1) state.products[idx]={...state.products[idx],...data};
-      } else state.products.unshift({id:uid(),...data});
-      state.editingProductId=null; resetProductForm(false); fillCodeGeneratorSelects(); renderProducts(); updateCounts();
+      } else {
+        state.products.unshift({id:uid(),...data});
+      }
+      state.editingProductId=null;
+      resetProductForm(false);
+      fillCodeGeneratorSelects();
+      renderProducts();
+      updateCounts();
     }
+
     function editProduct(id){
-      const item=state.products.find(row=>row.id===id); if(!item) return;
-      state.editingProductId=id; pName.value=item.name||""; pLine.value=item.line||""; pMaterial.value=item.material||""; pShape.value=item.shape||""; pFinish.value=item.finish||""; pNote.value=item.note||"";
+      const item=state.products.find(row=>row.id===id);
+      if(!item) return;
+      state.editingProductId=id;
+      pName.value=item.name||"";
+      pLine.value=item.line||"";
+      pMaterial.value=item.material||"";
+      pShape.value=item.shape||"";
+      pFinish.value=item.finish||"";
+      pNote.value=item.note||"";
     }
+
     function deleteProduct(id){
       if(!confirm("이 상품을 삭제할까?")) return;
-      state.products=state.products.filter(item=>item.id!==id); fillCodeGeneratorSelects(); renderProducts(); updateCounts();
+      state.products=state.products.filter(item=>item.id!==id);
+      fillCodeGeneratorSelects();
+      renderProducts();
+      updateCounts();
     }
-    function resetProductForm(clearEditing=true){ if(clearEditing) state.editingProductId=null; ["pName","pLine","pMaterial","pShape","pFinish","pNote"].forEach(id=>document.getElementById(id).value=""); }
+
+    function resetProductForm(clearEditing=true){
+      if(clearEditing) state.editingProductId=null;
+      ["pName","pLine","pMaterial","pShape","pFinish","pNote"].forEach(id=>document.getElementById(id).value="");
+    }
+
     function saveAbbr(){
       const data={category:aCategory.value,code:aCode.value.trim().toUpperCase(),name:aName.value.trim(),note:aNote.value.trim()};
       if(!data.category||!data.code||!data.name){ alert("구분, 코드, 한글명을 입력해줘."); return; }
       if(state.editingAbbrId){
         const idx=state.abbrs.findIndex(item=>item.id===state.editingAbbrId);
         if(idx>-1) state.abbrs[idx]={...state.abbrs[idx],...data};
-      } else state.abbrs.unshift({id:uid(),...data});
-      state.editingAbbrId=null; resetAbbrForm(false); fillCodeGeneratorSelects(); renderAbbrs(); updateCounts();
+      } else {
+        state.abbrs.unshift({id:uid(),...data});
+      }
+      state.editingAbbrId=null;
+      resetAbbrForm(false);
+      fillCodeGeneratorSelects();
+      renderAbbrs();
+      updateCounts();
     }
+
     function editAbbr(id){
-      const item=state.abbrs.find(row=>row.id===id); if(!item) return;
-      state.editingAbbrId=id; aCategory.value=item.category||"line"; aCode.value=item.code||""; aName.value=item.name||""; aNote.value=item.note||"";
+      const item=state.abbrs.find(row=>row.id===id);
+      if(!item) return;
+      state.editingAbbrId=id;
+      aCategory.value=item.category||"line";
+      aCode.value=item.code||"";
+      aName.value=item.name||"";
+      aNote.value=item.note||"";
     }
+
     function deleteAbbr(id){
       if(!confirm("이 약어를 삭제할까?")) return;
-      state.abbrs=state.abbrs.filter(item=>item.id!==id); fillCodeGeneratorSelects(); renderAbbrs(); updateCounts();
+      state.abbrs=state.abbrs.filter(item=>item.id!==id);
+      fillCodeGeneratorSelects();
+      renderAbbrs();
+      updateCounts();
     }
-    function resetAbbrForm(clearEditing=true){ if(clearEditing) state.editingAbbrId=null; aCategory.value="line"; aCode.value=""; aName.value=""; aNote.value=""; }
+
+    function resetAbbrForm(clearEditing=true){
+      if(clearEditing) state.editingAbbrId=null;
+      aCategory.value="line";
+      aCode.value="";
+      aName.value="";
+      aNote.value="";
+    }
+
     function generateCode(){
       const values=[cgLine.value,cgMaterial.value,cgShape.value,cgFinish.value,cgLamination.value,cgSide.value].filter(Boolean);
       if(!values.length){ alert("코드 생성에 필요한 항목을 하나 이상 선택해줘."); return; }
-      const productCode=values.join("_"); pvCode.textContent=productCode; pvThumb.textContent=`${productCode}_T_01`; pvStore.textContent=`${productCode}_T_01_STORE`; pvCarousel.textContent=`${productCode}_C_01`;
+      const productCode=values.join("_");
+      pvCode.textContent=productCode;
+      pvThumb.textContent=`${productCode}_T_01`;
+      pvStore.textContent=`${productCode}_T_01_STORE`;
+      pvCarousel.textContent=`${productCode}_C_01`;
     }
-    function resetCodeForm(){ ["cgLine","cgMaterial","cgShape","cgFinish","cgLamination","cgSide","cgProduct"].forEach(id=>document.getElementById(id).value=""); ["pvCode","pvThumb","pvStore","pvCarousel"].forEach(id=>document.getElementById(id).textContent="-"); }
-    async function copyText(id){ const value=document.getElementById(id).textContent.trim(); if(!value||value===" - "||value==="-") return; try{ await navigator.clipboard.writeText(value); }catch(e){} }
-    function seedData(){ state.abbrs=[...defaultAbbrs]; state.products=[...defaultProducts]; }
-    function init(){ bindTabs(); fillCategorySelects(); seedData(); fillCodeGeneratorSelects(); renderProducts(); renderAbbrs(); updateCounts(); checkConnection(); }
+
+    function resetCodeForm(){
+      ["cgLine","cgMaterial","cgShape","cgFinish","cgLamination","cgSide","cgProduct"].forEach(id=>document.getElementById(id).value="");
+      ["pvCode","pvThumb","pvStore","pvCarousel"].forEach(id=>document.getElementById(id).textContent="-");
+    }
+
+    async function copyText(id){
+      const value=document.getElementById(id).textContent.trim();
+      if(!value||value==="-") return;
+      try{ await navigator.clipboard.writeText(value); }catch(e){}
+    }
+
+    function seedData(){
+      state.abbrs=[...defaultAbbrs];
+      state.products=[...defaultProducts];
+    }
+
+    function init(){
+      bindTabs();
+      fillCategorySelects();
+      seedData();
+      fillCodeGeneratorSelects();
+      renderProducts();
+      renderAbbrs();
+      updateCounts();
+      checkConnection();
+    }
+
     window.addEventListener("load", init);
   </script>
 </body>
