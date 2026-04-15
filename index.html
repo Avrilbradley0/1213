@@ -5,123 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HUSK 코드 매니저</title>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Pretendard", "Noto Sans KR", sans-serif;
-      background: #f5f5f7;
-      color: #111;
-    }
-
-    .wrap {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 40px 28px 80px;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 20px;
-      margin-bottom: 28px;
-    }
-
-    .title {
-      font-size: 42px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin: 0 0 10px;
-    }
-
-    .desc {
-      margin: 0;
-      font-size: 17px;
-      color: #666;
-      line-height: 1.6;
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 126px;
-      justify-content: center;
-      padding: 14px 18px;
-      border-radius: 999px;
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-      white-space: nowrap;
-    }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #bdbdbd;
-      flex: 0 0 auto;
-    }
-
-    .status-text {
-      font-size: 16px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .panel {
-      background: #fff;
-      border: 1px solid #e9e9e9;
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-    }
-
-    .panel h2 {
-      margin: 0 0 8px;
-      font-size: 24px;
-      letter-spacing: -0.02em;
-    }
-
-    .panel p {
-      margin: 0 0 20px;
-      color: #666;
-      line-height: 1.6;
-    }
-
-    .code-box {
-      padding: 16px 18px;
-      background: #f8f8f8;
-      border: 1px solid #ececec;
-      border-radius: 16px;
-      font-family: Consolas, monospace;
-      font-size: 14px;
-      color: #333;
-      word-break: break-all;
-      margin-bottom: 16px;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      appearance: none;
-      border: 1px solid #d9d9d9;
-      background: #fff;
-      color: #111;
-      padding: 12px 18px;
-      border-radius: 14px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #f7f7f7;
-    }
+    *{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:#f3f4f6;color:#111827}
+    .wrap{max-width:1280px;margin:0 auto;padding:32px 24px 72px}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:24px}
+    .title{margin:0;font-size:32px;font-weight:800;line-height:1.2;letter-spacing:-.03em}.desc{margin:10px 0 0;color:#6b7280;line-height:1.6;font-size:16px}
+    .status-badge{display:inline-flex;align-items:center;gap:9px;padding:12px 18px;background:#fff;border:1px solid #e5e7eb;border-radius:999px;white-space:nowrap;box-shadow:0 1px 2px rgba(17,24,39,.03);flex-shrink:0}
+    .status-dot{width:9px;height:9px;border-radius:50%;background:#9ca3af}.status-text{font-size:15px;font-weight:600;color:#374151}
+    .tabs{display:inline-flex;background:#eceff3;border:1px solid #e5e7eb;border-radius:999px;padding:4px;gap:4px;margin-bottom:20px}
+    .tab-btn{border:0;background:transparent;color:#374151;padding:12px 20px;border-radius:999px;font-size:16px;font-weight:700;cursor:pointer}
+    .tab-btn.active{background:#fff;box-shadow:0 1px 2px rgba(17,24,39,.06)}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:24px;padding:22px;box-shadow:0 6px 18px rgba(17,24,39,.04)}
+    .card-label{margin:0 0 10px;color:#6b7280;font-size:14px}.card-value{margin:0;font-size:30px;font-weight:800;letter-spacing:-.03em}.tab-panel{display:none}.tab-panel.active{display:block}
+    .grid-2{display:grid;grid-template-columns:1fr 1.25fr;gap:18px}.section-title{margin:0 0 6px;font-size:20px;font-weight:800;letter-spacing:-.02em}.section-desc{margin:0 0 18px;color:#6b7280;font-size:14px;line-height:1.6}
+    .field{margin-bottom:14px}.field label{display:block;margin-bottom:7px;font-size:14px;font-weight:700}.input,.select,.textarea{width:100%;border:1px solid #d1d5db;background:#fff;border-radius:14px;padding:13px 14px;font-size:15px;color:#111827;outline:none}
+    .textarea{min-height:110px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{border:1px solid #d1d5db;background:#fff;color:#111827;border-radius:14px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer}.btn.primary{background:#111827;color:#fff;border-color:#111827}
+    .preview-box{background:#f9fafb;border:1px dashed #d1d5db;border-radius:18px;padding:16px;margin-top:10px}.preview-item{margin-bottom:12px}.preview-item:last-child{margin-bottom:0}.preview-label{color:#6b7280;font-size:13px;margin-bottom:4px}.preview-value{font-size:18px;font-weight:800;letter-spacing:-.02em;word-break:break-all}
+    .toolbar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}.toolbar .input,.toolbar .select{flex:1 1 220px}table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden}
+    th,td{border-bottom:1px solid #e5e7eb;padding:14px 12px;text-align:left;font-size:14px;vertical-align:top}th{background:#fafafa;color:#4b5563;font-weight:700}tr:last-child td{border-bottom:0}.empty{padding:24px 12px;color:#6b7280;text-align:center}
+    .small-btn{border:1px solid #d1d5db;background:#fff;border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;cursor:pointer;margin-right:6px}.muted{color:#6b7280;font-size:13px}
+    @media (max-width:1024px){.grid-2,.cards{grid-template-columns:1fr}}@media (max-width:720px){.wrap{padding:24px 16px 56px}.topbar{flex-direction:column;align-items:flex-start}.title{font-size:28px}.row{grid-template-columns:1fr}.tabs{display:flex;width:100%;overflow:auto}.tab-btn{white-space:nowrap}}
   </style>
 </head>
 <body>
@@ -131,58 +33,266 @@
         <h1 class="title">HUSK 코드 매니저</h1>
         <p class="desc">상품 관리, 약어 관리, 코드 생성을 한 화면에서 정리하는 연동형 관리자</p>
       </div>
-
-      <div class="status-badge" id="connectionBadge">
+      <div class="status-badge" aria-live="polite">
         <span class="status-dot" id="statusDot"></span>
         <span class="status-text" id="statusText">확인 중</span>
       </div>
     </div>
 
-    <div class="panel">
-      <h2>연동 상태</h2>
-      <p>HTML 안에 고정된 Apps Script 배포 URL 기준으로 연결 가능 여부만 확인한다.</p>
-
-      <div class="code-box" id="scriptUrlText"></div>
-
-      <div class="actions">
-        <button type="button" onclick="checkConnection()">다시 확인</button>
-      </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="code">코드 생성</button>
+      <button class="tab-btn" data-tab="product">상품 관리</button>
+      <button class="tab-btn" data-tab="abbr">약어 관리</button>
     </div>
+
+    <div class="cards">
+      <div class="card"><p class="card-label">현재 등록 상품</p><p class="card-value" id="productCount">0</p></div>
+      <div class="card"><p class="card-label">현재 등록 약어</p><p class="card-value" id="abbrCount">0</p></div>
+      <div class="card"><p class="card-label">현재 상태</p><p class="card-value" id="connectLabel">대기 중</p></div>
+    </div>
+
+    <section class="tab-panel active" id="tab-code">
+      <div class="grid-2">
+        <div class="card">
+          <h2 class="section-title">코드 생성</h2>
+          <p class="section-desc">선택한 항목을 조합해서 제품 코드와 파생 파일명을 만든다.</p>
+          <div class="row">
+            <div class="field"><label>라인</label><select class="select" id="cgLine"></select></div>
+            <div class="field"><label>재질</label><select class="select" id="cgMaterial"></select></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>형태</label><select class="select" id="cgShape"></select></div>
+            <div class="field"><label>마감</label><select class="select" id="cgFinish"></select></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>인쇄</label><select class="select" id="cgLamination"></select></div>
+            <div class="field"><label>면 구분</label><select class="select" id="cgSide"></select></div>
+          </div>
+          <div class="field"><label>상품명</label><select class="select" id="cgProduct"></select></div>
+          <div class="actions">
+            <button class="btn primary" type="button" onclick="generateCode()">코드 생성</button>
+            <button class="btn" type="button" onclick="resetCodeForm()">초기화</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="section-title">생성 결과</h2>
+          <p class="section-desc">조합 결과를 바로 복사해서 코드명, 썸네일명, 스토어용 파일명으로 쓸 수 있다.</p>
+          <div class="preview-box">
+            <div class="preview-item"><div class="preview-label">제품 코드</div><div class="preview-value" id="pvCode">-</div></div>
+            <div class="preview-item"><div class="preview-label">썸네일 파일명</div><div class="preview-value" id="pvThumb">-</div></div>
+            <div class="preview-item"><div class="preview-label">스토어용 파일명</div><div class="preview-value" id="pvStore">-</div></div>
+            <div class="preview-item"><div class="preview-label">캐러셀 파일명</div><div class="preview-value" id="pvCarousel">-</div></div>
+          </div>
+          <div class="actions">
+            <button class="btn" type="button" onclick="copyText('pvCode')">제품 코드 복사</button>
+            <button class="btn" type="button" onclick="copyText('pvThumb')">썸네일명 복사</button>
+            <button class="btn" type="button" onclick="copyText('pvStore')">스토어명 복사</button>
+            <button class="btn" type="button" onclick="copyText('pvCarousel')">캐러셀명 복사</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="tab-product">
+      <div class="grid-2">
+        <div class="card">
+          <h2 class="section-title">상품 등록</h2>
+          <p class="section-desc">상품 기본 정보를 등록하고 코드 생성용 목록으로 사용한다.</p>
+          <div class="field"><label>상품명</label><input class="input" id="pName" placeholder="예: 맥세이프 글라스범퍼케이스 유광" /></div>
+          <div class="row">
+            <div class="field"><label>라인</label><input class="input" id="pLine" placeholder="예: 맥세이프" /></div>
+            <div class="field"><label>재질</label><input class="input" id="pMaterial" placeholder="예: 글라스" /></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>형태</label><input class="input" id="pShape" placeholder="예: 범퍼케이스" /></div>
+            <div class="field"><label>마감</label><input class="input" id="pFinish" placeholder="예: 유광" /></div>
+          </div>
+          <div class="field"><label>비고</label><textarea class="textarea" id="pNote" placeholder="필요한 설명을 적어두기"></textarea></div>
+          <div class="actions">
+            <button class="btn primary" type="button" onclick="saveProduct()">상품 저장</button>
+            <button class="btn" type="button" onclick="resetProductForm()">취소</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="section-title">상품 목록</h2>
+          <p class="section-desc">검색 후 바로 수정하거나 삭제할 수 있다.</p>
+          <div class="toolbar"><input class="input" id="productSearch" placeholder="상품명 검색" oninput="renderProducts()" /></div>
+          <table>
+            <thead><tr><th style="width:22%">상품명</th><th style="width:18%">라인 / 재질</th><th style="width:16%">형태 / 마감</th><th>비고</th><th style="width:128px">작업</th></tr></thead>
+            <tbody id="productTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="tab-abbr">
+      <div class="grid-2">
+        <div class="card">
+          <h2 class="section-title">약어 등록</h2>
+          <p class="section-desc">라인, 재질, 형태, 마감 등 코드 생성에 필요한 약어를 관리한다.</p>
+          <div class="row">
+            <div class="field"><label>구분</label><select class="select" id="aCategory"></select></div>
+            <div class="field"><label>코드</label><input class="input" id="aCode" placeholder="예: MG / GL / BK" /></div>
+          </div>
+          <div class="field"><label>한글명</label><input class="input" id="aName" placeholder="예: 맥세이프 / 글라스 / 유광" /></div>
+          <div class="field"><label>비고</label><textarea class="textarea" id="aNote" placeholder="필요한 설명을 적어두기"></textarea></div>
+          <div class="actions">
+            <button class="btn primary" type="button" onclick="saveAbbr()">약어 저장</button>
+            <button class="btn" type="button" onclick="resetAbbrForm()">취소</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="section-title">약어 목록</h2>
+          <p class="section-desc">구분별로 정리해서 확인하고 바로 수정할 수 있다.</p>
+          <div class="toolbar">
+            <input class="input" id="abbrSearch" placeholder="한글명 / 코드 검색" oninput="renderAbbrs()" />
+            <select class="select" id="abbrFilter" onchange="renderAbbrs()"></select>
+          </div>
+          <table>
+            <thead><tr><th style="width:16%">구분</th><th style="width:16%">코드</th><th style="width:20%">한글명</th><th>비고</th><th style="width:128px">작업</th></tr></thead>
+            <tbody id="abbrTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </div>
- 
+
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxrhQDDWClVYSl0lVYzolK04AgxsZtZgz3hZoCzzF_M5vYQ8iITj-u205N3lH5qPeG0/exec";
+    const categoryLabelMap = { line:"라인", material:"재질", shape:"형태", finish:"마감", lamination:"인쇄", side:"면 구분", product:"상품" };
+    const state = { products: [], abbrs: [], editingProductId: null, editingAbbrId: null };
+    const defaultAbbrs = [
+      { id: 1, category: "line", code: "MG", name: "맥세이프", note: "" },
+      { id: 2, category: "material", code: "GL", name: "글라스", note: "" },
+      { id: 3, category: "shape", code: "BP", name: "범퍼케이스", note: "" },
+      { id: 4, category: "finish", code: "BK", name: "유광", note: "" },
+      { id: 5, category: "lamination", code: "LM", name: "라미", note: "" },
+      { id: 6, category: "side", code: "D", name: "단면", note: "" }
+    ];
+    const defaultProducts = [
+      { id: 1, name: "맥세이프 글라스범퍼케이스 유광", line: "맥세이프", material: "글라스", shape: "범퍼케이스", finish: "유광", note: "" }
+    ];
+    const uid = () => Date.now() + Math.floor(Math.random() * 1000);
 
-    const statusDot = document.getElementById("statusDot");
-    const statusText = document.getElementById("statusText");
-    const scriptUrlText = document.getElementById("scriptUrlText");
-
-    scriptUrlText.textContent = SCRIPT_URL;
-
-    async function checkConnection() {
-      statusDot.style.background = "#bdbdbd";
-      statusText.textContent = "확인 중";
-
-      try {
-        const res = await fetch(SCRIPT_URL, {
-          method: "GET",
-          cache: "no-store"
-        });
-
-        if (!res.ok) {
-          throw new Error("HTTP " + res.status);
-        }
-
-        statusDot.style.background = "#2e7d32";
-        statusText.textContent = "연결됨";
-      } catch (err) {
-        statusDot.style.background = "#c62828";
-        statusText.textContent = "연결 안 됨";
-        console.error("연결 확인 실패:", err);
-      }
+    function setConnection(ok){
+      document.getElementById("statusDot").style.background = ok ? "#16a34a" : "#dc2626";
+      document.getElementById("statusText").textContent = ok ? "연결됨" : "연결 안 됨";
+      document.getElementById("connectLabel").textContent = ok ? "연결됨" : "연결 안 됨";
     }
-
-    window.addEventListener("load", checkConnection);
+    async function checkConnection(){
+      try{
+        const res = await fetch(SCRIPT_URL,{method:"GET",cache:"no-store"});
+        if(!res.ok) throw new Error("HTTP "+res.status);
+        setConnection(true);
+      }catch(e){ setConnection(false); }
+    }
+    function bindTabs(){
+      document.querySelectorAll(".tab-btn").forEach(btn=>{
+        btn.addEventListener("click",()=>{
+          document.querySelectorAll(".tab-btn").forEach(el=>el.classList.remove("active"));
+          document.querySelectorAll(".tab-panel").forEach(el=>el.classList.remove("active"));
+          btn.classList.add("active");
+          document.getElementById("tab-"+btn.dataset.tab).classList.add("active");
+        });
+      });
+    }
+    function fillCategorySelects(){
+      const cats=["line","material","shape","finish","lamination","side"];
+      document.getElementById("aCategory").innerHTML = cats.map(cat=>`<option value="${cat}">${categoryLabelMap[cat]}</option>`).join("");
+      document.getElementById("abbrFilter").innerHTML = `<option value="">전체 구분</option>` + cats.map(cat=>`<option value="${cat}">${categoryLabelMap[cat]}</option>`).join("");
+    }
+    function getAbbrOptions(category){ return state.abbrs.filter(item=>item.category===category); }
+    function fillCodeGeneratorSelects(){
+      const mapping = { cgLine:"line", cgMaterial:"material", cgShape:"shape", cgFinish:"finish", cgLamination:"lamination", cgSide:"side" };
+      Object.entries(mapping).forEach(([id,category])=>{
+        const el=document.getElementById(id);
+        const options=getAbbrOptions(category);
+        el.innerHTML = `<option value="">선택</option>` + options.map(item=>`<option value="${item.code}">${item.name} (${item.code})</option>`).join("");
+      });
+      document.getElementById("cgProduct").innerHTML = `<option value="">선택</option>` + state.products.map(item=>`<option value="${item.id}">${item.name}</option>`).join("");
+    }
+    function updateCounts(){
+      document.getElementById("productCount").textContent = state.products.length;
+      document.getElementById("abbrCount").textContent = state.abbrs.length;
+    }
+    function escapeHtml(value){
+      return String(value ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+    }
+    function renderProducts(){
+      const keyword=document.getElementById("productSearch").value.trim().toLowerCase();
+      const rows=state.products.filter(item=>!keyword || [item.name,item.line,item.material,item.shape,item.finish,item.note].join(" ").toLowerCase().includes(keyword));
+      const tbody=document.getElementById("productTable");
+      if(!rows.length){ tbody.innerHTML=`<tr><td colspan="5" class="empty">등록된 상품이 없습니다.</td></tr>`; return; }
+      tbody.innerHTML=rows.map(item=>`
+        <tr>
+          <td><strong>${escapeHtml(item.name)}</strong></td>
+          <td>${escapeHtml(item.line||"-")}<div class="muted">${escapeHtml(item.material||"-")}</div></td>
+          <td>${escapeHtml(item.shape||"-")}<div class="muted">${escapeHtml(item.finish||"-")}</div></td>
+          <td>${escapeHtml(item.note||"-")}</td>
+          <td><button class="small-btn" type="button" onclick="editProduct(${item.id})">수정</button><button class="small-btn" type="button" onclick="deleteProduct(${item.id})">삭제</button></td>
+        </tr>`).join("");
+    }
+    function renderAbbrs(){
+      const keyword=document.getElementById("abbrSearch").value.trim().toLowerCase();
+      const filter=document.getElementById("abbrFilter").value;
+      const rows=state.abbrs.filter(item=>(!filter||item.category===filter) && (!keyword||[item.category,item.code,item.name,item.note].join(" ").toLowerCase().includes(keyword)));
+      const tbody=document.getElementById("abbrTable");
+      if(!rows.length){ tbody.innerHTML=`<tr><td colspan="5" class="empty">등록된 약어가 없습니다.</td></tr>`; return; }
+      tbody.innerHTML=rows.map(item=>`
+        <tr>
+          <td>${categoryLabelMap[item.category]||item.category}</td>
+          <td><strong>${escapeHtml(item.code)}</strong></td>
+          <td>${escapeHtml(item.name)}</td>
+          <td>${escapeHtml(item.note||"-")}</td>
+          <td><button class="small-btn" type="button" onclick="editAbbr(${item.id})">수정</button><button class="small-btn" type="button" onclick="deleteAbbr(${item.id})">삭제</button></td>
+        </tr>`).join("");
+    }
+    function saveProduct(){
+      const data={name:pName.value.trim(),line:pLine.value.trim(),material:pMaterial.value.trim(),shape:pShape.value.trim(),finish:pFinish.value.trim(),note:pNote.value.trim()};
+      if(!data.name){ alert("상품명을 입력해줘."); return; }
+      if(state.editingProductId){
+        const idx=state.products.findIndex(item=>item.id===state.editingProductId);
+        if(idx>-1) state.products[idx]={...state.products[idx],...data};
+      } else state.products.unshift({id:uid(),...data});
+      state.editingProductId=null; resetProductForm(false); fillCodeGeneratorSelects(); renderProducts(); updateCounts();
+    }
+    function editProduct(id){
+      const item=state.products.find(row=>row.id===id); if(!item) return;
+      state.editingProductId=id; pName.value=item.name||""; pLine.value=item.line||""; pMaterial.value=item.material||""; pShape.value=item.shape||""; pFinish.value=item.finish||""; pNote.value=item.note||"";
+    }
+    function deleteProduct(id){
+      if(!confirm("이 상품을 삭제할까?")) return;
+      state.products=state.products.filter(item=>item.id!==id); fillCodeGeneratorSelects(); renderProducts(); updateCounts();
+    }
+    function resetProductForm(clearEditing=true){ if(clearEditing) state.editingProductId=null; ["pName","pLine","pMaterial","pShape","pFinish","pNote"].forEach(id=>document.getElementById(id).value=""); }
+    function saveAbbr(){
+      const data={category:aCategory.value,code:aCode.value.trim().toUpperCase(),name:aName.value.trim(),note:aNote.value.trim()};
+      if(!data.category||!data.code||!data.name){ alert("구분, 코드, 한글명을 입력해줘."); return; }
+      if(state.editingAbbrId){
+        const idx=state.abbrs.findIndex(item=>item.id===state.editingAbbrId);
+        if(idx>-1) state.abbrs[idx]={...state.abbrs[idx],...data};
+      } else state.abbrs.unshift({id:uid(),...data});
+      state.editingAbbrId=null; resetAbbrForm(false); fillCodeGeneratorSelects(); renderAbbrs(); updateCounts();
+    }
+    function editAbbr(id){
+      const item=state.abbrs.find(row=>row.id===id); if(!item) return;
+      state.editingAbbrId=id; aCategory.value=item.category||"line"; aCode.value=item.code||""; aName.value=item.name||""; aNote.value=item.note||"";
+    }
+    function deleteAbbr(id){
+      if(!confirm("이 약어를 삭제할까?")) return;
+      state.abbrs=state.abbrs.filter(item=>item.id!==id); fillCodeGeneratorSelects(); renderAbbrs(); updateCounts();
+    }
+    function resetAbbrForm(clearEditing=true){ if(clearEditing) state.editingAbbrId=null; aCategory.value="line"; aCode.value=""; aName.value=""; aNote.value=""; }
+    function generateCode(){
+      const values=[cgLine.value,cgMaterial.value,cgShape.value,cgFinish.value,cgLamination.value,cgSide.value].filter(Boolean);
+      if(!values.length){ alert("코드 생성에 필요한 항목을 하나 이상 선택해줘."); return; }
+      const productCode=values.join("_"); pvCode.textContent=productCode; pvThumb.textContent=`${productCode}_T_01`; pvStore.textContent=`${productCode}_T_01_STORE`; pvCarousel.textContent=`${productCode}_C_01`;
+    }
+    function resetCodeForm(){ ["cgLine","cgMaterial","cgShape","cgFinish","cgLamination","cgSide","cgProduct"].forEach(id=>document.getElementById(id).value=""); ["pvCode","pvThumb","pvStore","pvCarousel"].forEach(id=>document.getElementById(id).textContent="-"); }
+    async function copyText(id){ const value=document.getElementById(id).textContent.trim(); if(!value||value===" - "||value==="-") return; try{ await navigator.clipboard.writeText(value); }catch(e){} }
+    function seedData(){ state.abbrs=[...defaultAbbrs]; state.products=[...defaultProducts]; }
+    function init(){ bindTabs(); fillCategorySelects(); seedData(); fillCodeGeneratorSelects(); renderProducts(); renderAbbrs(); updateCounts(); checkConnection(); }
+    window.addEventListener("load", init);
   </script>
 </body>
 </html>
