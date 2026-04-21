@@ -1,541 +1,775 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HUSK 코드 매니저</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin:0; font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif; background:#f3f4f6; color:#111827; }
-    .wrap { max-width:1280px; margin:0 auto; padding:32px 24px 72px; }
-    .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:24px; }
-    .title { margin:0; font-size:32px; font-weight:800; }
-    .desc { margin:10px 0 0; color:#6b7280; line-height:1.6; font-size:16px; }
-    .status-badge { display:inline-flex; align-items:center; gap:9px; padding:12px 18px; background:#fff; border:1px solid #e5e7eb; border-radius:999px; }
-    .status-dot { width:9px; height:9px; border-radius:50%; background:#9ca3af; }
-    .tabs { display:inline-flex; background:#eceff3; border:1px solid #e5e7eb; border-radius:999px; padding:4px; gap:4px; margian-bottom:20px; }
-    .tab-btn { border:0; background:transparent; color:#374151; padding:12px 20px; border-radius:999px; font-size:16px; font-weight:700; cursor:pointer; }
-    .tab-btn.active { background:#fff; box-shadow:0 1px 2px rgba(17,24,39,.06); }
-    .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; }
-    .card { background:#fff; border:1px solid #e5e7eb; border-radius:24px; padding:22px; }
-    .card-label { margin:0 0 10px; color:#6b7280; font-size:14px; }
-    .card-value { margin:0; font-size:30px; font-weight:800; }
-    .tab-panel { display:none; }
-    .tab-panel.active { display:block; }
-    .grid-2 { display:grid; grid-template-columns:1fr 1.25fr; gap:18px; }
-    .section-title { margin:0 0 6px; font-size:20px; font-weight:800; }
-    .section-desc { margin:0 0 18px; color:#6b7280; font-size:14px; line-height:1.6; }
-    .field { margin-bottom:14px; }
-    .field label { display:block; margin-bottom:7px; font-size:14px; font-weight:700; }
-    .input, .select, .textarea { width:100%; border:1px solid #d1d5db; background:#fff; border-radius:14px; padding:13px 14px; font-size:15px; color:#111827; outline:none; }
-    .textarea { min-height:110px; resize:vertical; }
-    .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
-    .btn { border:1px solid #d1d5db; background:#fff; color:#111827; border-radius:14px; padding:12px 16px; font-size:14px; font-weight:700; cursor:pointer; }
-    .btn.primary { background:#111827; color:#fff; border-color:#111827; }
-    .preview-box { background:#f9fafb; border:1px dashed #d1d5db; border-radius:18px; padding:16px; }
-    .preview-item { margin-bottom:12px; }
-    .preview-item:last-child { margin-bottom:0; }
-    .preview-label { color:#6b7280; font-size:13px; margin-bottom:4px; }
-    .preview-value { font-size:18px; font-weight:800; word-break:break-all; }
-    .toolbar { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
-    .toolbar .input, .toolbar .select { flex:1 1 220px; }
-    table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #e5e7eb; border-radius:18px; overflow:hidden; }
-    th, td { border-bottom:1px solid #e5e7eb; padding:14px 12px; text-align:left; font-size:14px; vertical-align:top; }
-    th { background:#fafafa; color:#4b5563; font-weight:700; }
-    tr:last-child td { border-bottom:0; }
-    .empty { padding:24px 12px; color:#6b7280; text-align:center; }
-    .small-btn { border:1px solid #d1d5db; background:#fff; border-radius:10px; padding:8px 10px; font-size:13px; font-weight:700; cursor:pointer; margin-right:6px; margin-bottom:6px; }
-    .muted { color:#6b7280; font-size:13px; }
-    .code-rule { padding:12px 14px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:14px; margin-bottom:14px; font-size:13px; line-height:1.6; color:#4b5563; }
-    @media (max-width:1024px) { .grid-2,.cards { grid-template-columns:1fr; } }
-    @media (max-width:720px) { .topbar { flex-direction:column; } .row { grid-template-columns:1fr; } }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HUSK 코드 매니저</title>
+<style>
+:root{
+  --bg:#f3f4f6;
+  --panel:#ffffff;
+  --border:#d8dce3;
+  --text:#0f172a;
+  --sub:#64748b;
+  --navy:#0b1a3a;
+  --red:#dc2626;
+  --green:#16a34a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,"Malgun Gothic","맑은 고딕",sans-serif;
+}
+.wrap{max-width:1180px;margin:22px auto;padding:0 18px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-0.5px}
+.sub{margin-top:8px;color:var(--sub);font-size:14px}
+.status-pill{
+  background:#fff;border:1px solid var(--border);border-radius:999px;
+  padding:11px 16px;display:flex;align-items:center;gap:10px;min-width:124px;justify-content:center
+}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#9ca3af}
+.tabs{
+  display:flex;gap:8px;margin:22px 0 18px 0;background:#eceff3;border:1px solid var(--border);
+  width:max-content;padding:6px;border-radius:999px
+}
+.tab-btn{
+  border:none;background:transparent;padding:11px 18px;border-radius:999px;cursor:pointer;
+  font-weight:700;color:#334155
+}
+.tab-btn.active{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+.card{
+  background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:18px 20px
+}
+.stat-label{font-size:13px;color:var(--sub);margin-bottom:10px}
+.stat-value{font-size:22px;font-weight:800;color:var(--navy)}
+.grid-2{display:grid;grid-template-columns:1fr 1.25fr;gap:16px}
+.grid-forms{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field label{display:block;font-size:13px;font-weight:700;margin:0 0 8px 0}
+input[type="text"], select, textarea{
+  width:100%;height:40px;border:1px solid #cfd6df;border-radius:12px;padding:0 12px;background:#fff;font-size:14px
+}
+textarea{height:82px;padding:10px 12px;resize:vertical}
+.note-box{
+  background:#f8fafc;border:1px solid #d6dde7;border-radius:16px;padding:14px 16px;font-size:13px;color:#475569;line-height:1.65;margin:14px 0
+}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{
+  border:1px solid var(--border);background:#fff;color:#111827;padding:11px 16px;border-radius:12px;
+  cursor:pointer;font-weight:700
+}
+.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn.danger{background:#fff1f2;color:#be123c;border-color:#fecdd3}
+.btn.gray{background:#f8fafc}
+.result-box{
+  border:1px dashed #cfd6df;border-radius:18px;padding:18px;min-height:280px;background:#fafbfc
+}
+.result-item{margin-bottom:18px}
+.result-item .k{font-size:13px;color:var(--sub);margin-bottom:6px}
+.result-item .v{font-size:18px;font-weight:800;color:var(--navy);word-break:break-all}
+.hidden{display:none !important}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:18px;background:#fff}
+table{width:100%;border-collapse:collapse;min-width:960px}
+th,td{padding:12px 12px;border-bottom:1px solid #edf1f5;font-size:13px;text-align:left;vertical-align:top}
+th{background:#f8fafc;color:#475569;font-weight:800}
+.mini-btn{
+  border:1px solid #d7dce3;background:#fff;border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer
+}
+.mini-btn.delete{color:#b91c1c;border-color:#fecaca;background:#fff7f7}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.inline-flex{display:flex;align-items:center;gap:8px}
+.small{font-size:12px;color:#64748b}
+@media (max-width: 980px){
+  .stats{grid-template-columns:1fr}
+  .grid-2{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div>
-        <h1 class="title">HUSK 코드 매니저</h1>
-        <p class="desc">Apps Script + HTML + 구글시트로 직접 동작하는 관리자</p>
-      </div>
-      <div class="status-badge" aria-live="polite">
-        <span class="status-dot" id="statusDot"></span>
-        <span id="statusText">확인 중</span>
-      </div>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>HUSK 코드 매니저</h1>
+      <div class="sub">Apps Script + HTML + 구글시트로 직접 동작하는 관리자</div>
     </div>
-
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="code">코드 생성</button>
-      <button class="tab-btn" data-tab="product">상품 관리</button>
-      <button class="tab-btn" data-tab="abbr">약어 관리</button>
+    <div class="status-pill">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">연결 확인 중</span>
     </div>
-
-    <div class="cards">
-      <div class="card"><p class="card-label">현재 등록 상품</p><p class="card-value" id="productCount">0</p></div>
-      <div class="card"><p class="card-label">현재 등록 약어</p><p class="card-value" id="abbrCount">0</p></div>
-      <div class="card"><p class="card-label">현재 상태</p><p class="card-value" id="connectLabel">대기 중</p></div>
-    </div>
-
-    <section class="tab-panel active" id="tab-code">
-      <div class="grid-2">
-        <div class="card">
-          <h2 class="section-title">코드 생성</h2>
-          <p class="section-desc">FE_ 규칙과 컬러 파일명 suffix 규칙을 반영합니다.</p>
-          <div class="code-rule">
-            제품코드: 자유형이면 <strong>FE_</strong>를 앞에 붙이고, 제품 본체 코드는 컬러 옵션을 제외한 기본 코드로 생성합니다.<br>
-            썸네일: <strong>제품코드_T_ALL</strong> / <strong>제품코드_T_BK</strong><br>
-            캐러셀: <strong>제품코드_C_BK_01</strong> 형식으로 생성합니다.
-          </div>
-
-          <div class="row">
-            <div class="field"><label>유형</label><select class="select" id="cgType"></select></div>
-            <div class="field"><label>라인</label><select class="select" id="cgLine"></select></div>
-          </div>
-          <div class="row">
-            <div class="field"><label>재질</label><select class="select" id="cgMaterial"></select></div>
-            <div class="field"><label>형태</label><select class="select" id="cgStructure"></select></div>
-          </div>
-          <div class="row">
-            <div class="field"><label>컬러 옵션</label><select class="select" id="cgColor"></select></div>
-            <div class="field"><label>제품 고정 컬러코드</label><input class="input" id="cgFixedColorCode" placeholder="예: SVC, 없으면 비워두세요"></div>
-          </div>
-          <div class="row">
-            <div class="field"><label>마감</label><select class="select" id="cgFinish"></select></div>
-            <div class="field"><label>인쇄</label><select class="select" id="cgLamination"></select></div>
-          </div>
-          <div class="row">
-            <div class="field"><label>면 구분</label><select class="select" id="cgSide"></select></div>
-            <div class="field"><label>상품명</label><select class="select" id="cgProduct"></select></div>
-          </div>
-
-          <div class="actions">
-            <button class="btn primary" type="button" onclick="generateCode()">코드 생성</button>
-            <button class="btn" type="button" onclick="resetCodeForm()">초기화</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2 class="section-title">생성 결과</h2>
-          <p class="section-desc">컬러는 파일명 suffix로 분리해서 생성합니다.</p>
-          <div class="preview-box">
-            <div class="preview-item"><div class="preview-label">제품 코드</div><div class="preview-value" id="pvCode">-</div></div>
-            <div class="preview-item"><div class="preview-label">대표 썸네일 파일명</div><div class="preview-value" id="pvThumb">-</div></div>
-            <div class="preview-item"><div class="preview-label">색상별 썸네일 파일명</div><div class="preview-value" id="pvThumbColor">-</div></div>
-            <div class="preview-item"><div class="preview-label">스토어용 파일명</div><div class="preview-value" id="pvStore">-</div></div>
-            <div class="preview-item"><div class="preview-label">캐러셀 파일명 01</div><div class="preview-value" id="pvCarousel">-</div></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="tab-panel" id="tab-product">
-      <div class="grid-2">
-        <div class="card">
-          <h2 class="section-title">상품 등록</h2>
-          <p class="section-desc">사이트에서 저장 / 수정 / 삭제하면 시트에 바로 반영됩니다.</p>
-          <div class="field"><label>상품명</label><input class="input" id="pName"></div>
-          <div class="row">
-            <div class="field"><label>유형</label><input class="input" id="pType"></div>
-            <div class="field"><label>라인</label><input class="input" id="pLine"></div>
-          </div>
-          <div class="row">
-            <div class="field"><label>재질</label><input class="input" id="pMaterial"></div>
-            <div class="field"><label>형태</label><input class="input" id="pStructure"></div>
-          </div>
-          <div class="row">
-            <div class="field"><label>제품 고정 컬러코드</label><input class="input" id="pFixedColorCode"></div>
-            <div class="field"><label>마감</label><input class="input" id="pFinish"></div>
-          </div>
-          <div class="field"><label>비고</label><textarea class="textarea" id="pNote"></textarea></div>
-          <div class="actions">
-            <button class="btn primary" type="button" onclick="saveProduct()">상품 저장</button>
-            <button class="btn" type="button" onclick="resetProductForm()">취소</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2 class="section-title">상품 목록</h2>
-          <div class="toolbar"><input class="input" id="productSearch" placeholder="상품명 검색" oninput="renderProducts()"></div>
-          <table>
-            <thead><tr><th>상품명</th><th>유형 / 라인</th><th>재질 / 형태</th><th>고정 컬러 / 마감</th><th>비고</th><th>작업</th></tr></thead>
-            <tbody id="productTable"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section class="tab-panel" id="tab-abbr">
-      <div class="grid-2">
-        <div class="card">
-          <h2 class="section-title">약어 등록</h2>
-          <div class="row">
-            <div class="field"><label>구분</label><select class="select" id="aCategory"></select></div>
-            <div class="field"><label>코드</label><input class="input" id="aCode"></div>
-          </div>
-          <div class="field"><label>한글명</label><input class="input" id="aName"></div>
-          <div class="field"><label>비고</label><textarea class="textarea" id="aNote"></textarea></div>
-          <div class="actions">
-            <button class="btn primary" type="button" onclick="saveAbbr()">약어 저장</button>
-            <button class="btn" type="button" onclick="resetAbbrForm()">취소</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2 class="section-title">약어 목록</h2>
-          <div class="toolbar">
-            <input class="input" id="abbrSearch" placeholder="한글명 / 코드 검색" oninput="renderAbbrs()">
-            <select class="select" id="abbrFilter" onchange="renderAbbrs()"></select>
-          </div>
-          <table>
-            <thead><tr><th>구분</th><th>코드</th><th>한글명</th><th>비고</th><th>작업</th></tr></thead>
-            <tbody id="abbrTable"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
   </div>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4gSqUmDpqZl-BixmcziqBH2D6Cz37ZWquKryCJBhoUU23yvtJIOgH3laMvliFVwy5/exec";
-    const categoryLabelMap = {
-      type: "유형", line: "라인", material: "재질", structure: "형태", product: "상품",
-      finish: "마감", color: "컬러", lamination: "인쇄", side: "면 구분"
-    };
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab-code">코드 생성</button>
+    <button class="tab-btn" data-tab="tab-products">상품 관리</button>
+    <button class="tab-btn" data-tab="tab-options">약어 관리</button>
+  </div>
 
-    const state = { products: [], abbrs: [], editingProductId: null, editingAbbrId: null };
+  <div class="stats">
+    <div class="card">
+      <div class="stat-label">현재 등록 상품</div>
+      <div class="stat-value" id="statProducts">0</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">현재 등록 약어</div>
+      <div class="stat-value" id="statOptions">0</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">현재 상태</div>
+      <div class="stat-value" id="statStatus">연결 확인 중</div>
+    </div>
+  </div>
 
-    function setConnection(status) {
-      const dot = document.getElementById("statusDot");
-      const text = document.getElementById("statusText");
-      const label = document.getElementById("connectLabel");
-      if (status === "loading") {
-        dot.style.background = "#9ca3af";
-        text.textContent = "확인 중";
-        label.textContent = "대기 중";
-        return;
+  <section id="tab-code">
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:34px;font-weight:800;color:var(--navy);margin-bottom:4px">코드 생성</div>
+        <div class="small">FE_ 규칙과 컬러 파일명 suffix 규칙을 반영합니다.</div>
+
+        <div class="note-box">
+          제품코드: 자유형이면 <b>FE_</b> 를 앞에 붙이고, 제품 본체 코드는 컬러 옵션을 제외한 기본 코드로 생성합니다.<br/>
+          썸네일: 제품코드 <b>_T_01</b> / <b>_T_02</b><br/>
+          스토어용: 제품코드 <b>_T_01_STORE</b><br/>
+          패키지: 제품코드 <b>_C_01</b>
+        </div>
+
+        <div class="grid-forms">
+          <div class="field">
+            <label>유형</label>
+            <select id="is_free">
+              <option value="N">일반형</option>
+              <option value="Y">자유형</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>라인</label>
+            <select id="line"></select>
+          </div>
+
+          <div class="field">
+            <label>재질</label>
+            <select id="product"></select>
+          </div>
+          <div class="field">
+            <label>형태</label>
+            <select id="type"></select>
+          </div>
+
+          <div class="field">
+            <label>컬러 옵션</label>
+            <select id="color"></select>
+          </div>
+          <div class="field">
+            <label>제품 고정 컬러코드</label>
+            <input type="text" id="fixed_color_code" placeholder="예: SVC, 없으면 비워두세요" />
+          </div>
+
+          <div class="field">
+            <label>마감</label>
+            <select id="finish"></select>
+          </div>
+          <div class="field">
+            <label>인쇄</label>
+            <select id="print"></select>
+          </div>
+
+          <div class="field">
+            <label>면 구분</label>
+            <select id="side"></select>
+          </div>
+          <div class="field">
+            <label>상품명</label>
+            <input type="text" id="name" placeholder="상품명 입력" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" id="btnCreateProduct">코드 생성 + 저장</button>
+          <button class="btn gray" id="btnResetForm">초기화</button>
+          <button class="btn" id="btnRefresh">연결 재확인</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:34px;font-weight:800;color:var(--navy);margin-bottom:4px">생성 결과</div>
+        <div class="small">컬러는 파일명 suffix로 분리해서 생성합니다.</div>
+
+        <div class="result-box" style="margin-top:14px">
+          <div class="result-item">
+            <div class="k">제품 코드</div>
+            <div class="v" id="preview_code">-</div>
+          </div>
+          <div class="result-item">
+            <div class="k">대표 썸네일 파일명</div>
+            <div class="v" id="preview_thumb_main">-</div>
+          </div>
+          <div class="result-item">
+            <div class="k">색상별 썸네일 파일명</div>
+            <div class="v" id="preview_thumb_sub">-</div>
+          </div>
+          <div class="result-item">
+            <div class="k">스토어용 파일명</div>
+            <div class="v" id="preview_store_file">-</div>
+          </div>
+          <div class="result-item">
+            <div class="k">패키지 파일명 01</div>
+            <div class="v" id="preview_package_file_01">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-products" class="hidden">
+    <div class="card">
+      <div class="toolbar">
+        <div>
+          <div style="font-size:28px;font-weight:800;color:var(--navy)">상품 관리</div>
+          <div class="small">시트에 저장된 상품을 수정/삭제할 수 있습니다.</div>
+        </div>
+        <div class="inline-flex">
+          <input type="text" id="productSearch" placeholder="상품명 또는 코드 검색" style="width:260px" />
+          <button class="btn" id="btnReloadProducts">새로고침</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>상품명</th>
+              <th>코드</th>
+              <th>라인</th>
+              <th>재질</th>
+              <th>형태</th>
+              <th>마감</th>
+              <th>컬러</th>
+              <th>인쇄</th>
+              <th>자유형</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="productsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div style="font-size:24px;font-weight:800;color:var(--navy);margin-bottom:10px">선택 상품 수정</div>
+      <div class="grid-forms">
+        <input type="hidden" id="edit_id" />
+        <div class="field"><label>상품명</label><input type="text" id="edit_name" /></div>
+        <div class="field"><label>유형</label><select id="edit_is_free"><option value="N">일반형</option><option value="Y">자유형</option></select></div>
+        <div class="field"><label>라인</label><select id="edit_line"></select></div>
+        <div class="field"><label>재질</label><select id="edit_product"></select></div>
+        <div class="field"><label>형태</label><select id="edit_type"></select></div>
+        <div class="field"><label>마감</label><select id="edit_finish"></select></div>
+        <div class="field"><label>컬러 옵션</label><select id="edit_color"></select></div>
+        <div class="field"><label>인쇄</label><select id="edit_print"></select></div>
+        <div class="field"><label>면 구분</label><select id="edit_side"></select></div>
+        <div class="field"><label>제품 고정 컬러코드</label><input type="text" id="edit_fixed_color_code" /></div>
+      </div>
+
+      <div class="result-box" style="margin-top:14px;min-height:auto">
+        <div class="result-item" style="margin-bottom:0">
+          <div class="k">수정 미리보기 코드</div>
+          <div class="v" id="edit_preview_code">-</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="btnUpdateProduct">수정 저장</button>
+        <button class="btn danger" id="btnDeleteSelected">선택 상품 삭제</button>
+        <button class="btn gray" id="btnClearEdit">선택 해제</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-options" class="hidden">
+    <div class="grid-2" style="grid-template-columns:1fr 1.2fr">
+      <div class="card">
+        <div style="font-size:28px;font-weight:800;color:var(--navy)">약어 관리</div>
+        <div class="small" style="margin-bottom:12px">OPTIONS 시트 항목을 추가/수정/삭제합니다.</div>
+
+        <input type="hidden" id="option_mode" value="create" />
+        <input type="hidden" id="original_group" />
+        <input type="hidden" id="original_code" />
+
+        <div class="grid-forms">
+          <div class="field"><label>구분</label><input type="text" id="opt_group" placeholder="예: line, product, finish" /></div>
+          <div class="field"><label>이름</label><input type="text" id="opt_name" placeholder="예: 맥세이프" /></div>
+          <div class="field"><label>코드</label><input type="text" id="opt_code" placeholder="예: M" /></div>
+          <div class="field"><label>정렬순서</label><input type="text" id="opt_sort_order" placeholder="예: 1" /></div>
+          <div class="field"><label>사용여부</label><select id="opt_use_yn"><option value="Y">Y</option><option value="N">N</option></select></div>
+          <div class="field"><label>비고</label><input type="text" id="opt_note" placeholder="선택 입력" /></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" id="btnSaveOption">약어 저장</button>
+          <button class="btn gray" id="btnResetOption">초기화</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="toolbar">
+          <div>
+            <div style="font-size:28px;font-weight:800;color:var(--navy)">등록 약어 목록</div>
+            <div class="small">행 클릭 시 수정 영역에 값이 들어갑니다.</div>
+          </div>
+          <input type="text" id="optionSearch" placeholder="구분, 이름, 코드 검색" style="width:240px" />
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>이름</th>
+                <th>코드</th>
+                <th>정렬</th>
+                <th>사용</th>
+                <th>비고</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody id="optionsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbx4gSqUmDpqZl-BixmcziqBH2D6Cz37ZWquKryCJBhoUU23yvtJIOgH3laMvliFVwy5/exec";
+
+let optionRows = [];
+let optionGrouped = {};
+let productRows = [];
+
+function q(id){ return document.getElementById(id); }
+
+function bindTabs(){
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('section[id^="tab-"]').forEach(sec => sec.classList.add('hidden'));
+      q(btn.dataset.tab).classList.remove('hidden');
+    });
+  });
+}
+
+async function apiGet(action){
+  const res = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`);
+  return await res.json();
+}
+
+async function apiPost(payload){
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  return await res.json();
+}
+
+async function checkConnection(){
+  try{
+    const result = await apiGet('ping');
+    const ok = !!result.success;
+    q('statusDot').style.background = ok ? 'var(--green)' : 'var(--red)';
+    q('statusText').textContent = ok ? '연결됨' : '연결 안 됨';
+    q('statStatus').textContent = ok ? '연결됨' : '연결 안 됨';
+  }catch(err){
+    q('statusDot').style.background = 'var(--red)';
+    q('statusText').textContent = '연결 안 됨';
+    q('statStatus').textContent = '연결 안 됨';
+  }
+}
+
+async function loadOptions(){
+  const result = await apiGet('getOptions');
+  if(!result.success){ alert(result.message || '약어 조회 실패'); return; }
+  optionRows = result.data.rows || [];
+  optionGrouped = result.data.grouped || {};
+  q('statOptions').textContent = optionRows.length;
+
+  fillSelect('line', optionGrouped.line || []);
+  fillSelect('product', optionGrouped.product || []);
+  fillSelect('type', optionGrouped.type || []);
+  fillSelect('finish', optionGrouped.finish || []);
+  fillSelect('color', optionGrouped.color || []);
+  fillSelect('print', optionGrouped.print || []);
+  fillSelect('side', optionGrouped.side || []);
+
+  fillSelect('edit_line', optionGrouped.line || []);
+  fillSelect('edit_product', optionGrouped.product || []);
+  fillSelect('edit_type', optionGrouped.type || []);
+  fillSelect('edit_finish', optionGrouped.finish || []);
+  fillSelect('edit_color', optionGrouped.color || []);
+  fillSelect('edit_print', optionGrouped.print || []);
+  fillSelect('edit_side', optionGrouped.side || []);
+
+  renderOptionsTable(optionRows);
+  updatePreview();
+  updateEditPreview();
+}
+
+function fillSelect(id, rows){
+  const el = q(id);
+  const current = el.value;
+  el.innerHTML = '';
+  rows.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.code || '';
+    opt.textContent = r.name + (r.code ? ` (${r.code})` : ' (빈값)');
+    el.appendChild(opt);
+  });
+  if([...el.options].some(o => o.value === current)) el.value = current;
+}
+
+function buildBundleFromForm(prefix=''){
+  const isFree = q(prefix + 'is_free').value === 'Y';
+  const line = q(prefix + 'line').value || '';
+  const product = q(prefix + 'product').value || '';
+  const type = q(prefix + 'type').value || '';
+  const finish = q(prefix + 'finish').value || '';
+  const color = q(prefix + 'color').value || '';
+  const fixedColor = q(prefix + 'fixed_color_code').value.trim();
+
+  let base = line + product + type + finish;
+  if(fixedColor) base += fixedColor;
+  else if(color) base += color;
+
+  const code = isFree ? 'FE_' + base : base;
+  return {
+    code,
+    thumb_main: code + '_T_01',
+    thumb_sub: code + '_T_02',
+    store_file: code + '_T_01_STORE',
+    package_file_01: code + '_C_01'
+  };
+}
+
+function updatePreview(){
+  const b = buildBundleFromForm('');
+  q('preview_code').textContent = b.code || '-';
+  q('preview_thumb_main').textContent = b.thumb_main || '-';
+  q('preview_thumb_sub').textContent = b.thumb_sub || '-';
+  q('preview_store_file').textContent = b.store_file || '-';
+  q('preview_package_file_01').textContent = b.package_file_01 || '-';
+}
+
+function updateEditPreview(){
+  const b = buildBundleFromForm('edit_');
+  q('edit_preview_code').textContent = b.code || '-';
+}
+
+function bindPreviewEvents(){
+  ['is_free','line','product','type','finish','color','fixed_color_code'].forEach(id => {
+    q(id).addEventListener('input', updatePreview);
+    q(id).addEventListener('change', updatePreview);
+  });
+  ['edit_is_free','edit_line','edit_product','edit_type','edit_finish','edit_color','edit_fixed_color_code'].forEach(id => {
+    q(id).addEventListener('input', updateEditPreview);
+    q(id).addEventListener('change', updateEditPreview);
+  });
+}
+
+function formPayload(){
+  const bundle = buildBundleFromForm('');
+  return {
+    action:'createProduct',
+    name:q('name').value.trim(),
+    line:q('line').value,
+    product:q('product').value,
+    type:q('type').value,
+    finish:q('finish').value,
+    color:q('color').value,
+    print:q('print').value,
+    side:q('side').value,
+    is_free:q('is_free').value === 'Y',
+    fixed_color_code:q('fixed_color_code').value.trim(),
+    code:bundle.code
+  };
+}
+
+function editPayload(){
+  const bundle = buildBundleFromForm('edit_');
+  return {
+    action:'updateProduct',
+    id:q('edit_id').value,
+    name:q('edit_name').value.trim(),
+    line:q('edit_line').value,
+    product:q('edit_product').value,
+    type:q('edit_type').value,
+    finish:q('edit_finish').value,
+    color:q('edit_color').value,
+    print:q('edit_print').value,
+    side:q('edit_side').value,
+    is_free:q('edit_is_free').value === 'Y',
+    fixed_color_code:q('edit_fixed_color_code').value.trim(),
+    code:bundle.code
+  };
+}
+
+async function createProduct(){
+  const payload = formPayload();
+  if(!payload.name){ alert('상품명을 입력해줘.'); return; }
+  const result = await apiPost(payload);
+  if(result.success){
+    const code = result.bundle?.code || payload.code;
+    alert('시트 저장 완료\n코드: ' + code);
+    resetForm();
+    await loadProducts();
+  } else {
+    alert(result.message || '저장 실패');
+  }
+}
+
+async function loadProducts(){
+  const result = await apiGet('getProducts');
+  if(!result.success){ alert(result.message || '상품 조회 실패'); return; }
+  productRows = result.data || [];
+  q('statProducts').textContent = productRows.length;
+  renderProductsTable(productRows);
+}
+
+function renderProductsTable(rows){
+  const keyword = q('productSearch').value.trim().toLowerCase();
+  const tbody = q('productsTbody');
+  tbody.innerHTML = '';
+
+  rows.filter(r => {
+    const text = [r.name,r.code,r.line,r.product,r.type,r.finish,r.color].join(' ').toLowerCase();
+    return !keyword || text.includes(keyword);
+  }).forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(r.name || '')}</td>
+      <td>${escapeHtml(r.code || '')}</td>
+      <td>${escapeHtml(r.line || '')}</td>
+      <td>${escapeHtml(r.product || '')}</td>
+      <td>${escapeHtml(r.type || '')}</td>
+      <td>${escapeHtml(r.finish || '')}</td>
+      <td>${escapeHtml(r.color || '')}</td>
+      <td>${escapeHtml(r.print || '')}</td>
+      <td>${r.is_free === 'Y' ? 'Y' : 'N'}</td>
+      <td>
+        <div class="row-actions">
+          <button class="mini-btn" data-id="${r.id}" data-act="edit">수정</button>
+          <button class="mini-btn delete" data-id="${r.id}" data-act="delete">삭제</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('button[data-act="edit"]').forEach(btn => {
+    btn.addEventListener('click', () => selectProduct(btn.dataset.id));
+  });
+  tbody.querySelectorAll('button[data-act="delete"]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if(!confirm('이 상품을 삭제할까?')) return;
+      const result = await apiPost({ action:'deleteProduct', id: btn.dataset.id });
+      alert(result.message || (result.success ? '삭제 완료' : '삭제 실패'));
+      if(result.success) {
+        clearEdit();
+        await loadProducts();
       }
-      if (status === "ok") {
-        dot.style.background = "#16a34a";
-        text.textContent = "연결됨";
-        label.textContent = "연결됨";
-        return;
+    });
+  });
+}
+
+function selectProduct(id){
+  const row = productRows.find(r => String(r.id) === String(id));
+  if(!row) return;
+  q('edit_id').value = row.id || '';
+  q('edit_name').value = row.name || '';
+  q('edit_is_free').value = row.is_free === 'Y' ? 'Y' : 'N';
+  q('edit_line').value = row.line || '';
+  q('edit_product').value = row.product || '';
+  q('edit_type').value = row.type || '';
+  q('edit_finish').value = row.finish || '';
+  q('edit_color').value = row.color || '';
+  q('edit_print').value = row.print || '';
+  q('edit_side').value = row.side || '';
+  q('edit_fixed_color_code').value = row.fixed_color_code || '';
+  updateEditPreview();
+  document.querySelector('[data-tab="tab-products"]').click();
+}
+
+async function updateProduct(){
+  if(!q('edit_id').value){ alert('수정할 상품을 먼저 선택해줘.'); return; }
+  const result = await apiPost(editPayload());
+  alert(result.message || (result.success ? '수정 완료' : '수정 실패'));
+  if(result.success) await loadProducts();
+}
+
+async function deleteSelected(){
+  if(!q('edit_id').value){ alert('삭제할 상품을 먼저 선택해줘.'); return; }
+  if(!confirm('선택한 상품을 삭제할까?')) return;
+  const result = await apiPost({ action:'deleteProduct', id:q('edit_id').value });
+  alert(result.message || (result.success ? '삭제 완료' : '삭제 실패'));
+  if(result.success){
+    clearEdit();
+    await loadProducts();
+  }
+}
+
+function clearEdit(){
+  ['edit_id','edit_name','edit_fixed_color_code'].forEach(id => q(id).value = '');
+  q('edit_is_free').value = 'N';
+  ['edit_line','edit_product','edit_type','edit_finish','edit_color','edit_print','edit_side'].forEach(id => {
+    if(q(id).options.length) q(id).selectedIndex = 0;
+  });
+  updateEditPreview();
+}
+
+function resetForm(){
+  q('name').value = '';
+  q('fixed_color_code').value = '';
+  q('is_free').value = 'N';
+  ['line','product','type','finish','color','print','side'].forEach(id => {
+    if(q(id).options.length) q(id).selectedIndex = 0;
+  });
+  updatePreview();
+}
+
+function renderOptionsTable(rows){
+  const keyword = q('optionSearch').value.trim().toLowerCase();
+  const tbody = q('optionsTbody');
+  tbody.innerHTML = '';
+
+  rows.filter(r => {
+    const text = [r.group,r.name,r.code,r.note].join(' ').toLowerCase();
+    return !keyword || text.includes(keyword);
+  }).forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(r.group || '')}</td>
+      <td>${escapeHtml(r.name || '')}</td>
+      <td>${escapeHtml(r.code || '')}</td>
+      <td>${escapeHtml(String(r.sort_order || ''))}</td>
+      <td>${escapeHtml(r.use_yn || '')}</td>
+      <td>${escapeHtml(r.note || '')}</td>
+      <td>
+        <div class="row-actions">
+          <button class="mini-btn" data-group="${escapeAttr(r.group || '')}" data-code="${escapeAttr(r.code || '')}" data-act="edit-opt">수정</button>
+          <button class="mini-btn delete" data-group="${escapeAttr(r.group || '')}" data-code="${escapeAttr(r.code || '')}" data-act="del-opt">삭제</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('button[data-act="edit-opt"]').forEach(btn => {
+    btn.addEventListener('click', () => selectOption(btn.dataset.group, btn.dataset.code));
+  });
+  tbody.querySelectorAll('button[data-act="del-opt"]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if(!confirm('이 약어를 삭제할까?')) return;
+      const result = await apiPost({ action:'deleteOption', group:btn.dataset.group, code:btn.dataset.code });
+      alert(result.message || (result.success ? '삭제 완료' : '삭제 실패'));
+      if(result.success){
+        resetOptionForm();
+        await loadOptions();
       }
-      dot.style.background = "#dc2626";
-      text.textContent = "연결 안 됨";
-      label.textContent = "연결 안 됨";
-    }
+    });
+  });
+}
 
-    function bindTabs() {
-      document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.onclick = () => {
-          document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
-          document.querySelectorAll(".tab-panel").forEach(el => el.classList.remove("active"));
-          btn.classList.add("active");
-          document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
-        };
-      });
-    }
+function selectOption(group, code){
+  const row = optionRows.find(r => String(r.group) === String(group) && String(r.code) === String(code));
+  if(!row) return;
+  q('option_mode').value = 'update';
+  q('original_group').value = row.group || '';
+  q('original_code').value = row.code || '';
+  q('opt_group').value = row.group || '';
+  q('opt_name').value = row.name || '';
+  q('opt_code').value = row.code || '';
+  q('opt_sort_order').value = row.sort_order || '';
+  q('opt_use_yn').value = row.use_yn || 'Y';
+  q('opt_note').value = row.note || '';
+  document.querySelector('[data-tab="tab-options"]').click();
+}
 
-    function escapeHtml(value) {
-      return String(value ?? "").replace(/[&<>"']/g, m => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      }[m]));
-    }
+function resetOptionForm(){
+  q('option_mode').value = 'create';
+  q('original_group').value = '';
+  q('original_code').value = '';
+  ['opt_group','opt_name','opt_code','opt_sort_order','opt_note'].forEach(id => q(id).value = '');
+  q('opt_use_yn').value = 'Y';
+}
 
-    function sortRows(rows) {
-      const order = { type:1, line:2, material:3, structure:4, product:5, finish:6, color:7, lamination:8, side:9 };
-      return [...rows].sort((a, b) =>
-        (order[a.category] || 99) - (order[b.category] || 99) ||
-        String(a.name || "").localeCompare(String(b.name || ""), "ko")
-      );
-    }
+async function saveOption(){
+  const mode = q('option_mode').value;
+  const payload = {
+    group:q('opt_group').value.trim(),
+    name:q('opt_name').value.trim(),
+    code:q('opt_code').value.trim(),
+    sort_order:q('opt_sort_order').value.trim() || '999',
+    use_yn:q('opt_use_yn').value,
+    note:q('opt_note').value.trim()
+  };
 
-    function fillCategorySelects() {
-      const categories = ["type", "line", "material", "structure", "product", "finish", "color", "lamination", "side"];
-      aCategory.innerHTML = categories.map(c => `<option value="${c}">${categoryLabelMap[c]}</option>`).join("");
-      abbrFilter.innerHTML = `<option value="">전체 구분</option>` + categories.map(c => `<option value="${c}">${categoryLabelMap[c]}</option>`).join("");
-    }
+  if(!payload.group || !payload.name){ alert('구분과 이름은 입력해줘.'); return; }
 
-    function getAbbrOptions(category) {
-      return sortRows((Array.isArray(state.abbrs) ? state.abbrs : []).filter(item => item && item.category === category && String(item.use_yn || "Y") !== "N"));
-    }
+  let result;
+  if(mode === 'update'){
+    result = await apiPost({
+      action:'updateOption',
+      original_group:q('original_group').value,
+      original_code:q('original_code').value,
+      ...payload
+    });
+  }else{
+    result = await apiPost({ action:'createOption', ...payload });
+  }
 
-    function fillCodeGeneratorSelects() {
-      const mapping = {
-        cgType: "type", cgLine: "line", cgMaterial: "material", cgStructure: "structure",
-        cgColor: "color", cgFinish: "finish", cgLamination: "lamination", cgSide: "side"
-      };
+  alert(result.message || (result.success ? '저장 완료' : '저장 실패'));
+  if(result.success){
+    resetOptionForm();
+    await loadOptions();
+  }
+}
 
-      Object.entries(mapping).forEach(([id, category]) => {
-        const el = document.getElementById(id);
-        const options = getAbbrOptions(category);
-        el.innerHTML = options.length
-          ? options.map(item => `<option value="${escapeHtml(item.code || "")}">${escapeHtml(item.code ? `${item.name} (${item.code})` : item.name)}</option>`).join("")
-          : `<option value="">선택</option>`;
-      });
+function escapeHtml(v){
+  return String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;");
+}
+function escapeAttr(v){ return escapeHtml(v); }
 
-      cgProduct.innerHTML = `<option value="">선택</option>` +
-        (Array.isArray(state.products) ? state.products : []).map(item => `<option value="${escapeHtml(item.id || "")}">${escapeHtml(item.name || "")}</option>`).join("");
-    }
+function bindEvents(){
+  q('btnCreateProduct').addEventListener('click', createProduct);
+  q('btnResetForm').addEventListener('click', resetForm);
+  q('btnRefresh').addEventListener('click', async () => { await checkConnection(); await loadOptions(); await loadProducts(); });
 
-    function updateCounts() {
-      productCount.textContent = Array.isArray(state.products) ? state.products.length : 0;
-      abbrCount.textContent = Array.isArray(state.abbrs) ? state.abbrs.length : 0;
-    }
+  q('btnReloadProducts').addEventListener('click', loadProducts);
+  q('productSearch').addEventListener('input', () => renderProductsTable(productRows));
+  q('btnUpdateProduct').addEventListener('click', updateProduct);
+  q('btnDeleteSelected').addEventListener('click', deleteSelected);
+  q('btnClearEdit').addEventListener('click', clearEdit);
 
-    function renderProducts() {
-      const keyword = productSearch.value.trim().toLowerCase();
-      const rows = (Array.isArray(state.products) ? state.products : []).filter(item =>
-        !keyword || [item?.name, item?.type, item?.line, item?.material, item?.structure, item?.fixed_color_code, item?.finish, item?.note].join(" ").toLowerCase().includes(keyword)
-      );
-      if (!rows.length) {
-        productTable.innerHTML = `<tr><td colspan="6" class="empty">등록된 상품이 없습니다.</td></tr>`;
-        return;
-      }
-      productTable.innerHTML = rows.map(item => `
-        <tr>
-          <td><strong>${escapeHtml(item?.name || "")}</strong></td>
-          <td>${escapeHtml(item?.type || "-")}<div class="muted">${escapeHtml(item?.line || "-")}</div></td>
-          <td>${escapeHtml(item?.material || "-")}<div class="muted">${escapeHtml(item?.structure || "-")}</div></td>
-          <td>${escapeHtml(item?.fixed_color_code || "-")}<div class="muted">${escapeHtml(item?.finish || "-")}</div></td>
-          <td>${escapeHtml(item?.note || "-")}</td>
-          <td>
-            <button class="small-btn" onclick="editProduct('${escapeHtml(item?.id || "")}')">수정</button>
-            <button class="small-btn" onclick="deleteProduct('${escapeHtml(item?.id || "")}')">삭제</button>
-          </td>
-        </tr>`).join("");
-    }
+  q('optionSearch').addEventListener('input', () => renderOptionsTable(optionRows));
+  q('btnSaveOption').addEventListener('click', saveOption);
+  q('btnResetOption').addEventListener('click', resetOptionForm);
+}
 
-    function renderAbbrs() {
-      const keyword = abbrSearch.value.trim().toLowerCase();
-      const filter = abbrFilter.value;
-      const rows = sortRows((Array.isArray(state.abbrs) ? state.abbrs : []).filter(item =>
-        item &&
-        (!filter || item.category === filter) &&
-        (!keyword || [item.category, item.code, item.name, item.note].join(" ").toLowerCase().includes(keyword))
-      ));
-      if (!rows.length) {
-        abbrTable.innerHTML = `<tr><td colspan="5" class="empty">등록된 약어가 없습니다.</td></tr>`;
-        return;
-      }
-      abbrTable.innerHTML = rows.map(item => `
-        <tr>
-          <td>${escapeHtml(categoryLabelMap[item.category] || item.category || "")}</td>
-          <td><strong>${escapeHtml(item.code || "-")}</strong></td>
-          <td>${escapeHtml(item.name || "")}</td>
-          <td>${escapeHtml(item.note || "-")}</td>
-          <td>
-            <button class="small-btn" onclick="editAbbr('${escapeHtml(item.id || "")}')">수정</button>
-            <button class="small-btn" onclick="deleteAbbr('${escapeHtml(item.id || "")}')">삭제</button>
-          </td>
-        </tr>`).join("");
-    }
-
-    function runServer(fnName, ...args) {
-      return new Promise((resolve, reject) => {
-        google.script.run
-          .withSuccessHandler(resolve)
-          .withFailureHandler(err => reject(new Error(err && err.message ? err.message : String(err))))
-          [fnName](...args);
-      });
-    }
-
-    async function loadAllFromSheet() {
-      const result = await runServer('getAllData');
-      if (!result || result.success !== true) throw new Error(result?.message || '데이터 불러오기 실패');
-      state.abbrs = Array.isArray(result.data?.codes) ? result.data.codes : [];
-      state.products = Array.isArray(result.data?.products) ? result.data.products : [];
-      fillCodeGeneratorSelects();
-      renderProducts();
-      renderAbbrs();
-      updateCounts();
-    }
-
-    async function saveProduct() {
-      const payload = {
-        id: pName.dataset.editingId || "",
-        name: pName.value.trim(),
-        type: pType.value.trim(),
-        line: pLine.value.trim(),
-        material: pMaterial.value.trim(),
-        structure: pStructure.value.trim(),
-        fixed_color_code: pFixedColorCode.value.trim().toUpperCase(),
-        finish: pFinish.value.trim(),
-        note: pNote.value.trim(),
-        use_yn: "Y"
-      };
-      if (!payload.name) {
-        alert("상품명을 입력해 주세요.");
-        return;
-      }
-      try {
-        const result = await runServer('saveProduct', payload);
-        if (!result || result.success !== true) throw new Error(result?.message || '저장 실패');
-        alert("시트에 반영되었습니다.");
-        resetProductForm();
-        await loadAllFromSheet();
-        setConnection("ok");
-      } catch (error) {
-        console.error(error);
-        setConnection("fail");
-        alert("저장 중 오류가 발생했습니다: " + error.message);
-      }
-    }
-
-    function editProduct(id) {
-      const item = (Array.isArray(state.products) ? state.products : []).find(row => String(row?.id) === String(id));
-      if (!item) return;
-      pName.dataset.editingId = id;
-      pName.value = item.name || "";
-      pType.value = item.type || "";
-      pLine.value = item.line || "";
-      pMaterial.value = item.material || "";
-      pStructure.value = item.structure || "";
-      pFixedColorCode.value = item.fixed_color_code || "";
-      pFinish.value = item.finish || "";
-      pNote.value = item.note || "";
-    }
-
-    async function deleteProduct(id) {
-      if (!confirm("이 상품을 삭제하시겠습니까?")) return;
-      try {
-        const result = await runServer('deleteProduct', id);
-        if (!result || result.success !== true) throw new Error(result?.message || '삭제 실패');
-        alert("시트에 반영되었습니다.");
-        await loadAllFromSheet();
-        setConnection("ok");
-      } catch (error) {
-        console.error(error);
-        setConnection("fail");
-        alert("삭제 중 오류가 발생했습니다: " + error.message);
-      }
-    }
-
-    function resetProductForm() {
-      delete pName.dataset.editingId;
-      ["pName","pType","pLine","pMaterial","pStructure","pFixedColorCode","pFinish","pNote"].forEach(id => document.getElementById(id).value = "");
-    }
-
-    async function saveAbbr() {
-      const payload = {
-        id: aName.dataset.editingId || "",
-        category: aCategory.value,
-        code: aCode.value.trim().toUpperCase(),
-        name: aName.value.trim(),
-        note: aNote.value.trim(),
-        use_yn: "Y"
-      };
-      if (!payload.category || !payload.name) {
-        alert("구분과 한글명을 입력해 주세요.");
-        return;
-      }
-      try {
-        const result = await runServer('saveCode', payload);
-        if (!result || result.success !== true) throw new Error(result?.message || '저장 실패');
-        alert("시트에 반영되었습니다.");
-        resetAbbrForm();
-        await loadAllFromSheet();
-        setConnection("ok");
-      } catch (error) {
-        console.error(error);
-        setConnection("fail");
-        alert("저장 중 오류가 발생했습니다: " + error.message);
-      }
-    }
-
-    function editAbbr(id) {
-      const item = (Array.isArray(state.abbrs) ? state.abbrs : []).find(row => String(row?.id) === String(id));
-      if (!item) return;
-      aName.dataset.editingId = id;
-      aCategory.value = item.category || "type";
-      aCode.value = item.code || "";
-      aName.value = item.name || "";
-      aNote.value = item.note || "";
-    }
-
-    async function deleteAbbr(id) {
-      if (!confirm("이 약어를 삭제하시겠습니까?")) return;
-      try {
-        const result = await runServer('deleteCode', id);
-        if (!result || result.success !== true) throw new Error(result?.message || '삭제 실패');
-        alert("시트에 반영되었습니다.");
-        await loadAllFromSheet();
-        setConnection("ok");
-      } catch (error) {
-        console.error(error);
-        setConnection("fail");
-        alert("삭제 중 오류가 발생했습니다: " + error.message);
-      }
-    }
-
-    function resetAbbrForm() {
-      delete aName.dataset.editingId;
-      aCategory.value = "type";
-      aCode.value = "";
-      aName.value = "";
-      aNote.value = "";
-    }
-
-    function generateCode() {
-      try {
-        const typeCode = cgType.value || "";
-        const line = cgLine.value || "";
-        const material = cgMaterial.value || "";
-        const structure = cgStructure.value || "";
-        const fixedColorCode = cgFixedColorCode.value.trim().toUpperCase();
-        const colorOption = cgColor.value || "";
-        const finish = cgFinish.value || "";
-        const lamination = cgLamination.value || "";
-        const side = cgSide.value || "";
-
-        const prefix = typeCode === "FE" ? "FE_" : "";
-        const baseCode = [line, material, structure, fixedColorCode].filter(Boolean).join("");
-        const extraCode = [finish, lamination, side].filter(Boolean);
-
-        if (!baseCode && extraCode.length === 0) {
-          alert("코드 생성에 필요한 항목을 선택해 주세요.");
-          return;
-        }
-
-        const productCode = prefix + baseCode + (extraCode.length ? "_" + extraCode.join("_") : "");
-        const colorSuffix = colorOption ? `_${colorOption}` : "";
-
-        pvCode.textContent = productCode;
-        pvThumb.textContent = `${productCode}_T_ALL`;
-        pvThumbColor.textContent = colorOption ? `${productCode}_T${colorSuffix}` : `${productCode}_T_ALL`;
-        pvStore.textContent = `${productCode}_T_ALL_STORE`;
-        pvCarousel.textContent = colorOption ? `${productCode}_C${colorSuffix}_01` : `${productCode}_C_01`;
-      } catch (error) {
-        console.error(error);
-        alert("코드 생성 중 오류가 발생했습니다.");
-      }
-    }
-
-    function resetCodeForm() {
-      ["cgType","cgLine","cgMaterial","cgStructure","cgColor","cgFinish","cgLamination","cgSide","cgProduct"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.selectedIndex = 0;
-      });
-      cgFixedColorCode.value = "";
-      ["pvCode","pvThumb","pvThumbColor","pvStore","pvCarousel"].forEach(id => document.getElementById(id).textContent = "-");
-    }
-
-    async function init() {
-      bindTabs();
-      fillCategorySelects();
-      setConnection("loading");
-      try {
-        await runServer('setupSheets');
-        await loadAllFromSheet();
-        setConnection("ok");
-      } catch (error) {
-        console.error("초기 로딩 오류", error);
-        setConnection("fail");
-      }
-    }
-
-    window.addEventListener("load", init);
-  </script>
+async function init(){
+  bindTabs();
+  bindEvents();
+  bindPreviewEvents();
+  await checkConnection();
+  await loadOptions();
+  await loadProducts();
+  resetForm();
+  clearEdit();
+}
+init();
+</script>
 </body>
 </html>
