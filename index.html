@@ -545,7 +545,6 @@ async function apiGet(action){
 async function apiPost(payload){
   const res = await fetch(API_URL, {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
     body: JSON.stringify(payload)
   });
   return await res.json();
@@ -696,9 +695,17 @@ function editPayload(){
 async function createProduct(){
   const payload = formPayload();
   if(!payload.name){ alert('상품명을 입력해줘.'); return; }
-  setLoading(true, '상품 저장 중...');
-  const result = await apiPost(payload);
-  setLoading(false);
+  let result;
+  try{
+    setLoading(true, '상품 저장 중...');
+    result = await apiPost(payload);
+  }catch(err){
+    setLoading(false);
+    showToast('상품 저장 요청 실패: ' + (err.message || err), 'error');
+    return;
+  }finally{
+    setLoading(false);
+  }
   if(result.success){
     const code = result.bundle?.code || payload.code;
     showToast('시트 저장 완료 · ' + code, 'success');
@@ -753,9 +760,17 @@ function renderProductsTable(rows){
   tbody.querySelectorAll('button[data-act="delete"]').forEach(btn => {
     btn.addEventListener('click', async () => {
       if(!confirm('이 상품을 삭제할까?')) return;
-      setLoading(true, '상품 삭제 중...');
-      const result = await apiPost({ action:'deleteProduct', id: btn.dataset.id, row_no: btn.dataset.row });
-      setLoading(false);
+      let result;
+      try{
+        setLoading(true, '상품 삭제 중...');
+        result = await apiPost({ action:'deleteProduct', id: btn.dataset.id, row_no: btn.dataset.row });
+      }catch(err){
+        setLoading(false);
+        showToast('상품 삭제 요청 실패: ' + (err.message || err), 'error');
+        return;
+      }finally{
+        setLoading(false);
+      }
       if(result.success){ showToast(result.message || '삭제 완료', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
       if(result.success) {
         clearEdit();
@@ -787,9 +802,17 @@ function selectProduct(id, rowNo){
 
 async function updateProduct(){
   if(!q('edit_id').value){ alert('수정할 상품을 먼저 선택해줘.'); return; }
-  setLoading(true, '상품 수정 중...');
-  const result = await apiPost(editPayload());
-  setLoading(false);
+  let result;
+  try{
+    setLoading(true, '상품 수정 중...');
+    result = await apiPost(editPayload());
+  }catch(err){
+    setLoading(false);
+    showToast('상품 수정 요청 실패: ' + (err.message || err), 'error');
+    return;
+  }finally{
+    setLoading(false);
+  }
   if(result.success){ showToast(result.message || '수정 완료', 'success'); } else { showToast(result.message || '수정 실패', 'error'); }
   if(result.success) await loadProducts();
 }
@@ -797,9 +820,17 @@ async function updateProduct(){
 async function deleteSelected(){
   if(!q('edit_id').value){ alert('삭제할 상품을 먼저 선택해줘.'); return; }
   if(!confirm('선택한 상품을 삭제할까?')) return;
-  setLoading(true, '상품 삭제 중...');
-  const result = await apiPost({ action:'deleteProduct', id:q('edit_id').value, row_no:q('edit_row_no').value });
-  setLoading(false);
+  let result;
+  try{
+    setLoading(true, '상품 삭제 중...');
+    result = await apiPost({ action:'deleteProduct', id:q('edit_id').value, row_no:q('edit_row_no').value });
+  }catch(err){
+    setLoading(false);
+    showToast('상품 삭제 요청 실패: ' + (err.message || err), 'error');
+    return;
+  }finally{
+    setLoading(false);
+  }
   if(result.success){ showToast(result.message || '삭제 완료', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
   if(result.success){
     clearEdit();
@@ -861,9 +892,17 @@ function renderOptionsTable(rows){
   tbody.querySelectorAll('button[data-act="del-opt"]').forEach(btn => {
     btn.addEventListener('click', async () => {
       if(!confirm('이 약어를 삭제할까?')) return;
-      setLoading(true, '약어 삭제 중...');
-      const result = await apiPost({ action:'deleteOption', group:btn.dataset.group, code:btn.dataset.code, row_no:btn.dataset.row });
-      setLoading(false);
+      let result;
+      try{
+        setLoading(true, '약어 삭제 중...');
+        result = await apiPost({ action:'deleteOption', group:btn.dataset.group, code:btn.dataset.code, row_no:btn.dataset.row });
+      }catch(err){
+        setLoading(false);
+        showToast('약어 삭제 요청 실패: ' + (err.message || err), 'error');
+        return;
+      }finally{
+        setLoading(false);
+      }
       if(result.success){ showToast(result.message || '삭제 완료', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
       if(result.success){
         resetOptionForm();
@@ -935,19 +974,25 @@ async function saveOption(){
   if(!payload.group || !payload.name){ alert('구분과 이름은 입력해줘.'); return; }
 
   let result;
-  if(mode === 'update'){
-    setLoading(true, '약어 수정 중...');
-    result = await apiPost({
-      action:'updateOption',
-      row_no:q('option_row_no').value,
-      original_group:q('original_group').value,
-      original_code:q('original_code').value,
-      ...payload
-    });
+  try{
+    if(mode === 'update'){
+      setLoading(true, '약어 수정 중...');
+      result = await apiPost({
+        action:'updateOption',
+        row_no:q('option_row_no').value,
+        original_group:q('original_group').value,
+        original_code:q('original_code').value,
+        ...payload
+      });
+    }else{
+      setLoading(true, '약어 저장 중...');
+      result = await apiPost({ action:'createOption', ...payload });
+    }
+  }catch(err){
     setLoading(false);
-  }else{
-    setLoading(true, '약어 저장 중...');
-    result = await apiPost({ action:'createOption', ...payload });
+    showToast('약어 저장 요청 실패: ' + (err.message || err), 'error');
+    return;
+  }finally{
     setLoading(false);
   }
 
