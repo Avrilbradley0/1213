@@ -47,7 +47,7 @@ h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-0.5px}
 .stat-label{font-size:13px;color:var(--sub);margin-bottom:10px}
 .stat-value{font-size:22px;font-weight:800;color:var(--navy)}
 .grid-2{display:grid;grid-template-columns:1fr 1.25fr;gap:16px}
-.grid-forms{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-forms{display:grid;grid-template-columns:1fr;gap:12px}
 .field label{display:block;font-size:13px;font-weight:700;margin:0 0 8px 0}
 input[type="text"], select, textarea{
   width:100%;height:40px;border:1px solid #cfd6df;border-radius:12px;padding:0 12px;background:#fff;font-size:14px
@@ -83,6 +83,13 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 .row-actions{display:flex;gap:6px;flex-wrap:wrap}
 .inline-flex{display:flex;align-items:center;gap:8px}
 .small{font-size:12px;color:#64748b}
+
+.field-row-2{display:grid;grid-template-columns:1fr;gap:12px}
+.card.compact{height:fit-content}
+@media (min-width: 981px){
+  .field-row-2{grid-template-columns:1fr 1fr}
+}
+
 @media (max-width: 980px){
   .stats{grid-template-columns:1fr}
   .grid-2{grid-template-columns:1fr}
@@ -137,52 +144,58 @@ th{background:#f8fafc;color:#475569;font-weight:800}
         </div>
 
         <div class="grid-forms">
-          <div class="field">
-            <label>유형</label>
-            <select id="is_free">
-              <option value="N">일반형</option>
-              <option value="Y">자유형</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>라인</label>
-            <select id="line"></select>
+          <div class="field"><label>상품명</label><input type="text" id="name" placeholder="상품명 입력" /></div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label>유형</label>
+              <select id="is_free">
+                <option value="N">일반형</option>
+                <option value="Y">자유형</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>라인</label>
+              <select id="line"></select>
+            </div>
           </div>
 
-          <div class="field">
-            <label>재질</label>
-            <select id="product"></select>
-          </div>
-          <div class="field">
-            <label>형태</label>
-            <select id="type"></select>
+          <div class="field-row-2">
+            <div class="field">
+              <label>재질</label>
+              <select id="product"></select>
+            </div>
+            <div class="field">
+              <label>형태</label>
+              <select id="type"></select>
+            </div>
           </div>
 
-          <div class="field">
-            <label>컬러 옵션</label>
-            <select id="color"></select>
+          <div class="field-row-2">
+            <div class="field">
+              <label>마감</label>
+              <select id="finish"></select>
+            </div>
+            <div class="field">
+              <label>인쇄</label>
+              <select id="print"></select>
+            </div>
           </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label>컬러 옵션</label>
+              <select id="color"></select>
+            </div>
+            <div class="field">
+              <label>면 구분</label>
+              <select id="side"></select>
+            </div>
+          </div>
+
           <div class="field">
             <label>제품 고정 컬러코드</label>
             <input type="text" id="fixed_color_code" placeholder="예: SVC, 없으면 비워두세요" />
-          </div>
-
-          <div class="field">
-            <label>마감</label>
-            <select id="finish"></select>
-          </div>
-          <div class="field">
-            <label>인쇄</label>
-            <select id="print"></select>
-          </div>
-
-          <div class="field">
-            <label>면 구분</label>
-            <select id="side"></select>
-          </div>
-          <div class="field">
-            <label>상품명</label>
-            <input type="text" id="name" placeholder="상품명 입력" />
           </div>
         </div>
 
@@ -262,14 +275,27 @@ th{background:#f8fafc;color:#475569;font-weight:800}
       <div class="grid-forms">
         <input type="hidden" id="edit_id" />
         <div class="field"><label>상품명</label><input type="text" id="edit_name" /></div>
-        <div class="field"><label>유형</label><select id="edit_is_free"><option value="N">일반형</option><option value="Y">자유형</option></select></div>
-        <div class="field"><label>라인</label><select id="edit_line"></select></div>
-        <div class="field"><label>재질</label><select id="edit_product"></select></div>
-        <div class="field"><label>형태</label><select id="edit_type"></select></div>
-        <div class="field"><label>마감</label><select id="edit_finish"></select></div>
-        <div class="field"><label>컬러 옵션</label><select id="edit_color"></select></div>
-        <div class="field"><label>인쇄</label><select id="edit_print"></select></div>
-        <div class="field"><label>면 구분</label><select id="edit_side"></select></div>
+
+        <div class="field-row-2">
+          <div class="field"><label>유형</label><select id="edit_is_free"><option value="N">일반형</option><option value="Y">자유형</option></select></div>
+          <div class="field"><label>라인</label><select id="edit_line"></select></div>
+        </div>
+
+        <div class="field-row-2">
+          <div class="field"><label>재질</label><select id="edit_product"></select></div>
+          <div class="field"><label>형태</label><select id="edit_type"></select></div>
+        </div>
+
+        <div class="field-row-2">
+          <div class="field"><label>마감</label><select id="edit_finish"></select></div>
+          <div class="field"><label>인쇄</label><select id="edit_print"></select></div>
+        </div>
+
+        <div class="field-row-2">
+          <div class="field"><label>컬러 옵션</label><select id="edit_color"></select></div>
+          <div class="field"><label>면 구분</label><select id="edit_side"></select></div>
+        </div>
+
         <div class="field"><label>제품 고정 컬러코드</label><input type="text" id="edit_fixed_color_code" /></div>
       </div>
 
@@ -289,8 +315,8 @@ th{background:#f8fafc;color:#475569;font-weight:800}
   </section>
 
   <section id="tab-options" class="hidden">
-    <div class="grid-2" style="grid-template-columns:1fr 1.2fr">
-      <div class="card">
+    <div class="grid-2" style="grid-template-columns:320px 1fr">
+      <div class="card compact">
         <div style="font-size:28px;font-weight:800;color:var(--navy)">약어 관리</div>
         <div class="small" style="margin-bottom:12px">OPTIONS 시트 항목을 추가/수정/삭제합니다.</div>
 
@@ -344,7 +370,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyDI68-ojnR5hhusmJ4g7aZWwwRAROk-8CJmZJVwmS1GTcsOJUXL-QffcGuXkfX9scB/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwW0A1EFzLD8hySRGHKenTS7kN0X5rMm3oLhViLsPamXhSLYtaqHNspHVbqjVHSndp_iQ/exec";
 
 let optionRows = [];
 let optionGrouped = {};
