@@ -89,6 +89,12 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 .multi-options{display:flex;flex-wrap:wrap;gap:8px 10px}
 .multi-option{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#334155}
 .multi-placeholder{font-size:12px;color:#94a3b8}
+.parse-chip{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;
+  background:#eef2ff;color:#3730a3;font-size:12px;font-weight:700;margin:0 8px 8px 0;
+}
+.parse-label{color:#64748b;font-size:12px;font-weight:700;margin-right:6px}
+
 
 @media (max-width: 980px){
   .stats,.grid-2,.grid-forms,.field-row-2,.product-manage-grid,#tab-options .grid-forms{grid-template-columns:1fr}
@@ -131,19 +137,37 @@ th{background:#f8fafc;color:#475569;font-weight:800}
   </div>
 
   
+
 <section id="tab-code">
   <div class="grid-2">
     <div class="card">
       <div style="font-size:34px;font-weight:800;color:var(--navy);margin-bottom:4px">코드 생성</div>
-      <div class="small">라인 / 재질 / 마감 / 형태를 다중 선택해서 코드 생성값을 만들 수 있습니다.</div>
+      <div class="small">상품명을 입력하면 자동 인식하고, 필요하면 다중 선택으로 보정할 수 있습니다.</div>
 
       <div class="note-box">
-        유형은 단일 선택, 나머지 라인 / 재질 / 마감 / 형태는 다중 선택 가능합니다.<br/>
+        상품명 자동 인식 + 다중 선택 보정 버전입니다.<br/>
+        유형은 단일 선택, 라인 / 재질 / 마감 / 형태는 다중 선택 가능합니다.<br/>
         코드 규칙은 <b>FE_ + 라인 + 재질 + 마감 + 형태</b> 이며, 같은 그룹 안에서는 선택한 순서대로 붙습니다.
       </div>
 
       <div class="grid-forms">
-        <div class="field span-2"><label>상품명</label><input type="text" id="name" placeholder="상품명 입력" /></div>
+        <div class="field span-2">
+          <label>상품명</label>
+          <input type="text" id="source_name" placeholder="예: 맥세이프 글라스범퍼케이스 무광 실버" />
+        </div>
+
+        <div class="field span-2">
+          <div class="actions" style="margin-top:0">
+            <button class="btn" id="btnParseName">상품명 자동 인식</button>
+          </div>
+        </div>
+
+        <div class="field span-2">
+          <label>자동 인식 결과</label>
+          <div class="note-box" id="parse_result_box" style="margin:0">
+            아직 분석 전입니다.
+          </div>
+        </div>
 
         <div class="field">
           <label>유형</label>
@@ -172,6 +196,11 @@ th{background:#f8fafc;color:#475569;font-weight:800}
           <label>형태</label>
           <div id="shape_multi" class="multi-select"></div>
         </div>
+
+        <div class="field span-2">
+          <label>저장용 상품명</label>
+          <input type="text" id="name" placeholder="자동 입력되며 필요하면 수정 가능" />
+        </div>
       </div>
 
       <div class="actions">
@@ -194,6 +223,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
     </div>
   </div>
 </section>
+
 
 
   <section id="tab-products" class="hidden">
@@ -336,7 +366,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 <div class="toast" id="toast"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbx0vaAxMDIOCVrcwmbOCb1VVF4Q9uro2kYZeFevoniIT1dzxhT9rSrQjVpBd5ndXlhn/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxdhlZ0-5bsbJSlatI4fX-GmCCjqYqo5Q-tuLtWXzyO544Z298NTjAN9CwXzB0JJjGR/exec";
 
 let optionRows = [];
 let optionGrouped = {};
@@ -645,6 +675,10 @@ async function refreshAfterWrite(target='all'){
 
 async function createProduct(){
   const payload = formPayload();
+  if(!payload.name && q('source_name').value.trim()){
+    q('name').value = q('source_name').value.trim();
+    payload.name = q('name').value.trim();
+  }
   if(!payload.name){ showToast('상품명을 입력해줘.', 'error'); return; }
   let result;
   try{
@@ -811,7 +845,9 @@ function clearEdit(){
 }
 
 
+
 function resetForm(){
+  q('source_name').value = '';
   q('name').value = '';
   q('is_free').value = 'N';
   setMultiState('line', []);
@@ -822,8 +858,10 @@ function resetForm(){
   renderMultiSelect('material', 'material');
   renderMultiSelect('finish', 'finish');
   renderMultiSelect('shape', 'shape');
+  q('parse_result_box').innerHTML = '아직 분석 전입니다.';
   updatePreview();
 }
+
 
 
 function renderOptionGroupTabs(){
@@ -981,10 +1019,128 @@ function escapeHtml(v){
 }
 function escapeAttr(v){ return escapeHtml(v); }
 
+
+function normalizeText(text){
+  return String(text || '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeFlat(text){
+  return normalizeText(text).replace(/\s+/g, '').toLowerCase();
+}
+
+function getBestMatchesFromGroup(groupName, source){
+  const rows = [...(optionGrouped[groupName] || [])];
+  if(!rows.length) return [];
+  const flat = normalizeFlat(source);
+
+  rows.sort((a, b) => {
+    const lenA = normalizeFlat(a.name || '').length;
+    const lenB = normalizeFlat(b.name || '').length;
+    if(lenA !== lenB) return lenB - lenA;
+    return Number(a.sort_order || 999) - Number(b.sort_order || 999);
+  });
+
+  const matched = [];
+  for(const row of rows){
+    const target = normalizeFlat(row.name || '');
+    if(!target) continue;
+    if(flat.includes(target)){
+      const code = String(row.code || '');
+      if(!matched.some(m => String(m.code || '') === code && String(m.name || '') === String(row.name || ''))){
+        matched.push(row);
+      }
+    }
+  }
+  return matched;
+}
+
+function renderParsedResult(parsed){
+  const wrap = q('parse_result_box');
+  const chipGroup = (label, rows) => {
+    if(!rows.length) return `<span class="parse-label">${label}</span><span class="parse-chip">없음</span>`;
+    return `<span class="parse-label">${label}</span>` + rows.map(r => `<span class="parse-chip">${r.name}${r.code ? ' (' + r.code + ')' : ''}</span>`).join('');
+  };
+
+  let html = '';
+  html += chipGroup('유형', [{ name: parsed.is_free ? '자유형' : '일반형', code: '' }]);
+  html += chipGroup('라인', parsed.lineRows);
+  html += chipGroup('재질', parsed.materialRows);
+  html += chipGroup('마감', parsed.finishRows);
+  html += chipGroup('형태', parsed.shapeRows);
+
+  const misses = [];
+  if(!parsed.materialRows.length) misses.push('재질');
+  if(!parsed.shapeRows.length) misses.push('형태');
+
+  if(parsed.matchedTerms.length){
+    html += `<div style="margin-top:10px" class="small">인식된 키워드: ${parsed.matchedTerms.join(', ')}</div>`;
+  }
+  if(misses.length){
+    html += `<div style="margin-top:8px;color:#b91c1c;font-size:12px;font-weight:700">확인 필요: ${misses.join(', ')}</div>`;
+  }
+  wrap.innerHTML = html || '분석 결과 없음';
+}
+
+function parseProductName(){
+  const source = normalizeText(q('source_name').value);
+  if(!source){
+    showToast('상품명을 입력해줘.', 'error');
+    return;
+  }
+
+  const parsed = {
+    source,
+    is_free: /자유형/.test(source),
+    lineRows: [],
+    materialRows: [],
+    finishRows: [],
+    shapeRows: [],
+    matchedTerms: []
+  };
+
+  const magsafeRows = getBestMatchesFromGroup('line', source).filter(r => normalizeFlat(r.name) === normalizeFlat('맥세이프'));
+  parsed.lineRows = magsafeRows;
+  parsed.materialRows = getBestMatchesFromGroup('material', source);
+  parsed.finishRows = getBestMatchesFromGroup('finish', source);
+  parsed.shapeRows = getBestMatchesFromGroup('shape', source);
+
+  parsed.matchedTerms = [
+    ...parsed.lineRows.map(r => r.name),
+    ...parsed.materialRows.map(r => r.name),
+    ...parsed.finishRows.map(r => r.name),
+    ...parsed.shapeRows.map(r => r.name)
+  ];
+
+  q('is_free').value = parsed.is_free ? 'Y' : 'N';
+  setMultiState('line', parsed.lineRows.map(r => String(r.code || '')));
+  setMultiState('material', parsed.materialRows.map(r => String(r.code || '')));
+  setMultiState('finish', parsed.finishRows.map(r => String(r.code || '')));
+  setMultiState('shape', parsed.shapeRows.map(r => String(r.code || '')));
+
+  renderMultiSelect('line', 'line');
+  renderMultiSelect('material', 'material');
+  renderMultiSelect('finish', 'finish');
+  renderMultiSelect('shape', 'shape');
+
+  if(!q('name').value.trim()) q('name').value = source;
+
+  renderParsedResult(parsed);
+  updatePreview();
+  showToast('상품명 자동 인식 완료', 'success');
+}
+
+
 function bindEvents(){
   q('btnCreateProduct').addEventListener('click', createProduct);
   q('btnResetForm').addEventListener('click', resetForm);
   q('btnRefresh').addEventListener('click', async () => { await checkConnection(); await loadOptions(); await loadProducts(); });
+  q('btnParseName').addEventListener('click', parseProductName);
+  q('source_name').addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      parseProductName();
+    }
+  });
 
   q('btnReloadProducts').addEventListener('click', loadProducts);
   q('productSearch').addEventListener('input', () => renderProductsTable(productRows));
