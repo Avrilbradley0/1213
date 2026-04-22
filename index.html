@@ -896,8 +896,13 @@ function escapeHtml(v){
 function escapeAttr(v){ return escapeHtml(v); }
 
 
+
 function normalizeText(text){
   return String(text || '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeFlat(text){
+  return normalizeText(text).replace(/\s+/g, '').toLowerCase();
 }
 
 function findOptionByName(groupName, candidates){
@@ -905,6 +910,29 @@ function findOptionByName(groupName, candidates){
   for(const candidate of candidates){
     const found = rows.find(r => String(r.name).replace(/\s+/g,'') === String(candidate).replace(/\s+/g,''));
     if(found) return found;
+  }
+  return null;
+}
+
+function getBestMatchFromGroup(groupName, source){
+  const rows = [...(optionGrouped[groupName] || [])];
+  if(!rows.length) return null;
+
+  const flat = normalizeFlat(source);
+
+  rows.sort((a, b) => {
+    const lenA = normalizeFlat(a.name || '').length;
+    const lenB = normalizeFlat(b.name || '').length;
+    if(lenA !== lenB) return lenB - lenA;
+    return Number(a.sort_order || 999) - Number(b.sort_order || 999);
+  });
+
+  for(const row of rows){
+    const target = normalizeFlat(row.name || '');
+    if(!target) continue;
+    if(flat.includes(target)){
+      return row;
+    }
   }
   return null;
 }
@@ -934,7 +962,6 @@ function renderParsedResult(parsed){
   pushChip('형태', parsed.shape_name || '없음');
 
   const misses = [];
-  if(!parsed.line_name && /맥세이프/.test(parsed.source)) misses.push('라인');
   if(!parsed.material_name) misses.push('재질');
   if(!parsed.shape_name) misses.push('형태');
 
@@ -955,7 +982,6 @@ function parseProductName(){
     return;
   }
 
-  const flat = source.replace(/\s+/g, '');
   const parsed = {
     source,
     is_free: /자유형/.test(source),
@@ -970,87 +996,38 @@ function parseProductName(){
     matched_terms: []
   };
 
-  if(/맥세이프/.test(source)){
-    const line = findOptionByName('line', ['맥세이프']);
-    if(line){
-      parsed.line_name = line.name;
-      parsed.line_code = line.code || '';
-      parsed.matched_terms.push('맥세이프');
-    }
+  const magsafeLine = findOptionByName('line', ['맥세이프']);
+  if(magsafeLine && normalizeFlat(source).includes(normalizeFlat(magsafeLine.name))){
+    parsed.line_name = magsafeLine.name;
+    parsed.line_code = magsafeLine.code || '';
+    parsed.matched_terms.push(magsafeLine.name);
   }
 
-  const materialKeywords = [
-    '투명젤하드케이스','젤하드케이스','젤하드',
-    '글라스범퍼케이스','글라스',
-    '에폭시범퍼케이스','에폭시스마트톡','에폭시 약통 틴케이스','에폭시 원형 메모클립 마그넷','에폭시',
-    '아크릴 슬라이드 포켓 스마트톡','아크릴 스마트톡 프로','아크릴 스마트톡','아크릴 프린트앤컷','아크릴 키링','아크릴 지비츠','아크릴 집게','아크릴 등신대','아크릴 자','아크릴',
-    '하드 유광 화이트하판','하드 유광 블랙하판','하드 무광 화이트하판','하드 무광 블랙하판','하드케이스','하드'
-  ];
-  for(const keyword of materialKeywords){
-    if(flat.includes(keyword.replace(/\s+/g,''))){
-      let target = null;
-      if(keyword.includes('젤하드')) target = findOptionByName('material', ['젤하드']);
-      else if(keyword.includes('글라스')) target = findOptionByName('material', ['글라스']);
-      else if(keyword.includes('에폭시')) target = findOptionByName('material', ['에폭시']);
-      else if(keyword.includes('아크릴')) target = findOptionByName('material', ['아크릴']);
-      else if(keyword.includes('하드')) target = findOptionByName('material', ['하드']);
-      if(target){
-        parsed.material_name = target.name;
-        parsed.material_code = target.code || '';
-        parsed.matched_terms.push(target.name);
-        break;
-      }
-    }
+  const materialMatch = getBestMatchFromGroup('material', source);
+  if(materialMatch){
+    parsed.material_name = materialMatch.name;
+    parsed.material_code = materialMatch.code || '';
+    parsed.matched_terms.push(materialMatch.name);
   }
 
-  const finishKeywords = [
-    ['홀로그램','홀로그램'],
-    ['미러','미러'],
-    ['무광','무광'],
-    ['유광','유광'],
-    ['스탠다드','스탠다드'],
-    ['프리미엄','프리미엄']
-  ];
-  for(const [kw, name] of finishKeywords){
-    if(flat.includes(kw.replace(/\s+/g,''))){
-      const target = findOptionByName('finish', [name]);
-      if(target){
-        parsed.finish_name = target.name;
-        parsed.finish_code = target.code || '';
-        parsed.matched_terms.push(target.name);
-        break;
-      }
-    }
+  const finishMatch = getBestMatchFromGroup('finish', source);
+  if(finishMatch){
+    parsed.finish_name = finishMatch.name;
+    parsed.finish_code = finishMatch.code || '';
+    parsed.matched_terms.push(finishMatch.name);
   }
 
-  const shapeKeywords = [
-    ['카드포켓케이스','카드포켓케이스'],
-    ['터프범퍼케이스','터프범퍼케이스'],
-    ['범퍼케이스','범퍼케이스'],
-    ['스마트톡프로','스마트톡프로'],
-    ['스마트톡 프로','스마트톡프로'],
-    ['스마트톡','스마트톡'],
-    ['키링','키링'],
-    ['지비츠','지비츠'],
-    ['케이스','케이스']
-  ];
-  for(const [kw, shapeName] of shapeKeywords){
-    if(flat.includes(kw.replace(/\s+/g,''))){
-      const target = findOptionByName('shape', [shapeName]);
-      if(target){
-        parsed.shape_name = target.name;
-        parsed.shape_code = target.code || '';
-        parsed.matched_terms.push(target.name);
-        break;
-      }
-    }
+  const shapeMatch = getBestMatchFromGroup('shape', source);
+  if(shapeMatch){
+    parsed.shape_name = shapeMatch.name;
+    parsed.shape_code = shapeMatch.code || '';
+    parsed.matched_terms.push(shapeMatch.name);
   }
 
   applyParsedResult(parsed);
   renderParsedResult(parsed);
   showToast('상품명 자동 인식 완료', 'success');
 }
-
 
 function bindEvents(){
   q('btnCreateProduct').addEventListener('click', createProduct);
