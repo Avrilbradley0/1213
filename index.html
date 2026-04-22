@@ -894,12 +894,21 @@ function renderOptionsTable(rows){
   const tbody = q('optionsTbody');
   tbody.innerHTML = '';
 
-  rows.filter(r => {
-    const text = [r.group,r.name,r.code,r.note].join(' ').toLowerCase();
-    const groupMatch = selectedOptionGroup === 'ALL' || String(r.group) === String(selectedOptionGroup);
-    const keywordMatch = !keyword || text.includes(keyword);
-    return groupMatch && keywordMatch;
-  }).forEach(r => {
+  const filtered = rows
+    .filter(r => {
+      const text = [r.group, r.name, r.code, r.note].join(' ').toLowerCase();
+      const groupMatch = selectedOptionGroup === 'ALL' || String(r.group) === String(selectedOptionGroup);
+      const keywordMatch = !keyword || text.includes(keyword);
+      return groupMatch && keywordMatch;
+    })
+    .sort((a, b) => {
+      const aSort = Number(a.sort_order || 999);
+      const bSort = Number(b.sort_order || 999);
+      if (aSort !== bSort) return aSort - bSort;
+      return String(a.name || '').localeCompare(String(b.name || ''), 'ko');
+    });
+
+  filtered.forEach(r => {
     const groupLabel = r.group === 'line' ? '라인' :
       r.group === 'material' ? '재질' :
       r.group === 'shape' ? '형태' :
