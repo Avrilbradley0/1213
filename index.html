@@ -193,6 +193,11 @@ th{background:#f8fafc;color:#475569;font-weight:800}
         </div>
 
         <div class="field span-2 multi-field">
+          <label>컬러</label>
+          <div id="color_multi" class="multi-select"></div>
+        </div>
+
+        <div class="field span-2 multi-field">
           <label>형태</label>
           <div id="shape_multi" class="multi-select"></div>
         </div>
@@ -243,6 +248,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
           <div class="field multi-field"><label>라인</label><div id="edit_line_multi" class="multi-select"></div></div>
           <div class="field multi-field"><label>재질</label><div id="edit_material_multi" class="multi-select"></div></div>
           <div class="field multi-field"><label>마감</label><div id="edit_finish_multi" class="multi-select"></div></div>
+          <div class="field multi-field"><label>컬러</label><div id="edit_color_multi" class="multi-select"></div></div>
           <div class="field multi-field"><label>형태</label><div id="edit_shape_multi" class="multi-select"></div></div>
         </div>
 
@@ -366,7 +372,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 <div class="toast" id="toast"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbz5UBXe_p6EIHt-h9vtQC-e-EMASVgdGiZhgcdYrb3J0SDqiL3K5wN1dSM1US1mFiK6/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwNFQtNrXs71dKoe8eZQD__AV2-OhPhb4CEOdrRows9hTxTk9AocxXQ3Q7cXceWMtmC/exec";
 
 let optionRows = [];
 let optionGrouped = {};
@@ -379,10 +385,12 @@ const MULTI_STATE = {
   line: [],
   material: [],
   finish: [],
+  color: [],
   shape: [],
   edit_line: [],
   edit_material: [],
   edit_finish: [],
+  edit_color: [],
   edit_shape: []
 };
 
@@ -497,6 +505,7 @@ function buildOrderedCodeSequence(prefix=''){
   pushRows(getSelectedRowsByKey(prefix + 'line', 'line'));
   pushRows(getSelectedRowsByKey(prefix + 'material', 'material'));
   pushRows(getSelectedRowsByKey(prefix + 'finish', 'finish'));
+  pushRows(getSelectedRowsByKey(prefix + 'color', 'color'));
   pushRows(getSelectedRowsByKey(prefix + 'shape', 'shape'));
 
   const matched = orderedItems.filter(item => item.idx > -1)
@@ -595,11 +604,13 @@ async function loadOptions(){
   renderMultiSelect('line', 'line');
   renderMultiSelect('material', 'material');
   renderMultiSelect('finish', 'finish');
+  renderMultiSelect('color', 'color');
   renderMultiSelect('shape', 'shape');
 
   renderMultiSelect('edit_line', 'line');
   renderMultiSelect('edit_material', 'material');
   renderMultiSelect('edit_finish', 'finish');
+  renderMultiSelect('edit_color', 'color');
   renderMultiSelect('edit_shape', 'shape');
 
   renderOptionGroupTabs();
@@ -627,6 +638,7 @@ function buildBundleFromForm(prefix=''){
         concatenateCodes(getMultiCodes(prefix + 'line')) +
         concatenateCodes(getMultiCodes(prefix + 'material')) +
         concatenateCodes(getMultiCodes(prefix + 'finish')) +
+        concatenateCodes(getMultiCodes(prefix + 'color')) +
         concatenateCodes(getMultiCodes(prefix + 'shape'))
       );
   const code = (isFree ? 'FE_' : '') + baseCode;
@@ -664,7 +676,7 @@ function formPayload(){
     material:joinCodes(getMultiCodes('material')),
     shape:joinCodes(getMultiCodes('shape')),
     finish:joinCodes(getMultiCodes('finish')),
-    color:'',
+    color:joinCodes(getMultiCodes('color')),
     print:'',
     side:'',
     is_free:q('is_free').value === 'Y',
@@ -687,7 +699,7 @@ function editPayload(){
     material:joinCodes(getMultiCodes('edit_material')),
     shape:joinCodes(getMultiCodes('edit_shape')),
     finish:joinCodes(getMultiCodes('edit_finish')),
-    color:'',
+    color:joinCodes(getMultiCodes('edit_color')),
     print:'',
     side:'',
     is_free:q('edit_is_free').value === 'Y',
@@ -777,7 +789,7 @@ function renderProductsTable(rows){
   tbody.innerHTML = '';
 
   rows.filter(r => {
-    const text = [r.name,r.code,r.line,r.material,r.finish,r.shape].join(' ').toLowerCase();
+    const text = [r.name,r.code,r.line,r.material,r.finish,r.color,r.shape].join(' ').toLowerCase();
     return !keyword || text.includes(keyword);
   }).forEach(r => {
     const tr = document.createElement('tr');
@@ -839,11 +851,13 @@ function selectProduct(id, rowNo){
   setMultiState('edit_line', splitStoredCodes(row.line));
   setMultiState('edit_material', splitStoredCodes(row.material));
   setMultiState('edit_finish', splitStoredCodes(row.finish));
+  setMultiState('edit_color', splitStoredCodes(row.color));
   setMultiState('edit_shape', splitStoredCodes(row.shape));
 
   renderMultiSelect('edit_line', 'line');
   renderMultiSelect('edit_material', 'material');
   renderMultiSelect('edit_finish', 'finish');
+  renderMultiSelect('edit_color', 'color');
   renderMultiSelect('edit_shape', 'shape');
 
   updateEditPreview();
@@ -905,10 +919,12 @@ function clearEdit(){
   setMultiState('edit_line', []);
   setMultiState('edit_material', []);
   setMultiState('edit_finish', []);
+  setMultiState('edit_color', []);
   setMultiState('edit_shape', []);
   renderMultiSelect('edit_line', 'line');
   renderMultiSelect('edit_material', 'material');
   renderMultiSelect('edit_finish', 'finish');
+  renderMultiSelect('edit_color', 'color');
   renderMultiSelect('edit_shape', 'shape');
   updateEditPreview();
 }
@@ -922,10 +938,12 @@ function resetForm(){
   setMultiState('line', []);
   setMultiState('material', []);
   setMultiState('finish', []);
+  setMultiState('color', []);
   setMultiState('shape', []);
   renderMultiSelect('line', 'line');
   renderMultiSelect('material', 'material');
   renderMultiSelect('finish', 'finish');
+  renderMultiSelect('color', 'color');
   renderMultiSelect('shape', 'shape');
   q('parse_result_box').innerHTML = '아직 분석 전입니다.';
   updatePreview();
@@ -1154,6 +1172,7 @@ function renderParsedResult(parsed){
   html += chipGroup('라인', parsed.lineRows);
   html += chipGroup('재질', parsed.materialRows);
   html += chipGroup('마감', parsed.finishRows);
+  html += chipGroup('컬러', parsed.colorRows);
   html += chipGroup('형태', parsed.shapeRows);
 
   const misses = [];
@@ -1182,6 +1201,7 @@ function parseProductName(){
     lineRows: [],
     materialRows: [],
     finishRows: [],
+    colorRows: [],
     shapeRows: [],
     matchedTerms: []
   };
@@ -1190,12 +1210,14 @@ function parseProductName(){
   parsed.lineRows = magsafeRows;
   parsed.materialRows = getBestMatchesFromGroup('material', source);
   parsed.finishRows = getBestMatchesFromGroup('finish', source);
+  parsed.colorRows = getBestMatchesFromGroup('color', source);
   parsed.shapeRows = getBestMatchesFromGroup('shape', source);
 
   parsed.matchedTerms = [
     ...parsed.lineRows.map(r => r.name),
     ...parsed.materialRows.map(r => r.name),
     ...parsed.finishRows.map(r => r.name),
+    ...parsed.colorRows.map(r => r.name),
     ...parsed.shapeRows.map(r => r.name)
   ];
 
@@ -1203,11 +1225,13 @@ function parseProductName(){
   setMultiState('line', parsed.lineRows.map(r => String(r.code || '')));
   setMultiState('material', parsed.materialRows.map(r => String(r.code || '')));
   setMultiState('finish', parsed.finishRows.map(r => String(r.code || '')));
+  setMultiState('color', parsed.colorRows.map(r => String(r.code || '')));
   setMultiState('shape', parsed.shapeRows.map(r => String(r.code || '')));
 
   renderMultiSelect('line', 'line');
   renderMultiSelect('material', 'material');
   renderMultiSelect('finish', 'finish');
+  renderMultiSelect('color', 'color');
   renderMultiSelect('shape', 'shape');
 
   if(!q('name').value.trim()) q('name').value = source;
