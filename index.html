@@ -293,20 +293,14 @@ th{background:#f8fafc;color:#475569;font-weight:800}
               <select id="product"></select>
             </div>
             <div class="field">
-              <label>형태</label>
-              <select id="type"></select>
-            </div>
-          </div>
-
-          <div class="field-row-2">
-            <div class="field">
               <label>마감</label>
               <select id="finish"></select>
             </div>
-            <div class="field">
-              <label>제품 고정 컬러코드</label>
-              <input type="text" id="fixed_color_code" placeholder="예: SVC, 없으면 비워두세요" />
-            </div>
+          </div>
+
+          <div class="field">
+            <label>형태</label>
+            <select id="type"></select>
           </div>
         </div>
 
@@ -579,13 +573,10 @@ function buildBundleFromForm(prefix=''){
   const isFree = q(prefix + 'is_free').value === 'Y';
   const line = q(prefix + 'line').value || '';
   const product = q(prefix + 'product').value || '';
-  const type = q(prefix + 'type').value || '';
   const finish = q(prefix + 'finish').value || '';
-  const fixedColor = q(prefix + 'fixed_color_code').value.trim();
+  const type = q(prefix + 'type').value || '';
 
-  let base = line + product + type + finish;
-  if(fixedColor) base += fixedColor;
-
+  let base = line + product + finish + type;
   const code = isFree ? 'FE_' + base : base;
 
   return { code };
@@ -602,7 +593,7 @@ function updateEditPreview(){
 }
 
 function bindPreviewEvents(){
-  ['is_free','line','product','type','finish','fixed_color_code'].forEach(id => {
+  ['is_free','line','product','type','finish'].forEach(id => {
     if(q(id)){
       q(id).addEventListener('input', updatePreview);
       q(id).addEventListener('change', updatePreview);
@@ -627,7 +618,7 @@ function formPayload(){
     print:'',
     side:'',
     is_free:q('is_free').value === 'Y',
-    fixed_color_code:q('fixed_color_code').value.trim(),
+    fixed_color_code:'',
     code:bundle.code
   };
 }
