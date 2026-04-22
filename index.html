@@ -560,12 +560,22 @@ function fillSelect(id, rows){
   const el = q(id);
   const current = el.value;
   el.innerHTML = '';
+
+  const includeEmpty = ['line','product','finish','type','edit_line','edit_product','edit_finish','edit_type'].includes(id);
+  if(includeEmpty){
+    const emptyOpt = document.createElement('option');
+    emptyOpt.value = '';
+    emptyOpt.textContent = '< 없음(빈값) >';
+    el.appendChild(emptyOpt);
+  }
+
   rows.forEach(r => {
     const opt = document.createElement('option');
     opt.value = r.code || '';
     opt.textContent = r.name + (r.code ? ` (${r.code})` : ' (빈값)');
     el.appendChild(opt);
   });
+
   if([...el.options].some(o => o.value === current)) el.value = current;
 }
 
