@@ -366,7 +366,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 <div class="toast" id="toast"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxdhlZ0-5bsbJSlatI4fX-GmCCjqYqo5Q-tuLtWXzyO544Z298NTjAN9CwXzB0JJjGR/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz5UBXe_p6EIHt-h9vtQC-e-EMASVgdGiZhgcdYrb3J0SDqiL3K5wN1dSM1US1mFiK6/exec";
 
 let optionRows = [];
 let optionGrouped = {};
@@ -450,6 +450,65 @@ function joinCodes(codes){
 
 function concatenateCodes(codes){
   return (codes || []).filter(v => String(v).trim() !== '').join('');
+}
+
+function getSelectedRowsByKey(key, groupName){
+  const rows = getGroupRows(groupName);
+  const selected = getMultiCodes(key) || [];
+  return selected
+    .map(code => rows.find(r => String(r.code || '') === String(code)))
+    .filter(Boolean);
+}
+
+function getSourceTextForOrder(prefix=''){
+  const sourceEl = q(prefix + 'source_name');
+  if(sourceEl && String(sourceEl.value || '').trim()) return String(sourceEl.value || '').trim();
+  const nameEl = q(prefix + 'name');
+  if(nameEl && String(nameEl.value || '').trim()) return String(nameEl.value || '').trim();
+  return '';
+}
+
+function buildOrderedCodeSequence(prefix=''){
+  const source = getSourceTextForOrder(prefix);
+  const flat = normalizeFlat(source);
+
+  const orderedItems = [];
+  const seen = new Set();
+
+  const pushRows = (rows) => {
+    rows.forEach((row, indexInGroup) => {
+      const code = String(row.code || '').trim();
+      const name = String(row.name || '').trim();
+      if(!code || !name) return;
+      const key = name + '||' + code;
+      if(seen.has(key)) return;
+      const idx = flat ? flat.indexOf(normalizeFlat(name)) : -1;
+      orderedItems.push({
+        code,
+        name,
+        idx,
+        groupOrder: orderedItems.length,
+        indexInGroup
+      });
+      seen.add(key);
+    });
+  };
+
+  pushRows(getSelectedRowsByKey(prefix + 'line', 'line'));
+  pushRows(getSelectedRowsByKey(prefix + 'material', 'material'));
+  pushRows(getSelectedRowsByKey(prefix + 'finish', 'finish'));
+  pushRows(getSelectedRowsByKey(prefix + 'shape', 'shape'));
+
+  const matched = orderedItems.filter(item => item.idx > -1)
+    .sort((a, b) => {
+      if(a.idx !== b.idx) return a.idx - b.idx;
+      return a.groupOrder - b.groupOrder;
+    });
+
+  const unmatched = orderedItems.filter(item => item.idx === -1)
+    .sort((a, b) => a.groupOrder - b.groupOrder);
+
+  return [...matched, ...unmatched].map(item => item.code);
 }
 
 
@@ -561,12 +620,17 @@ async function loadProducts(){
 
 function buildBundleFromForm(prefix=''){
   const isFree = q(prefix + 'is_free').value === 'Y';
-  const line = concatenateCodes(getMultiCodes(prefix + 'line'));
-  const material = concatenateCodes(getMultiCodes(prefix + 'material'));
-  const finish = concatenateCodes(getMultiCodes(prefix + 'finish'));
-  const shape = concatenateCodes(getMultiCodes(prefix + 'shape'));
-  const code = (isFree ? 'FE_' : '') + line + material + finish + shape;
-  return { code };
+  const orderedCodes = buildOrderedCodeSequence(prefix);
+  const baseCode = orderedCodes.length
+    ? orderedCodes.join('')
+    : (
+        concatenateCodes(getMultiCodes(prefix + 'line')) +
+        concatenateCodes(getMultiCodes(prefix + 'material')) +
+        concatenateCodes(getMultiCodes(prefix + 'finish')) +
+        concatenateCodes(getMultiCodes(prefix + 'shape'))
+      );
+  const code = (isFree ? 'FE_' : '') + baseCode;
+  return { code, ordered_code_sequence: orderedCodes.join(',') };
 }
 
 
@@ -605,6 +669,8 @@ function formPayload(){
     side:'',
     is_free:q('is_free').value === 'Y',
     fixed_color_code:'',
+    source_name:(q('source_name') ? q('source_name').value.trim() : q('name').value.trim()),
+    ordered_code_sequence:bundle.ordered_code_sequence,
     code:bundle.code
   };
 }
@@ -626,6 +692,8 @@ function editPayload(){
     side:'',
     is_free:q('edit_is_free').value === 'Y',
     fixed_color_code:'',
+    source_name:q('edit_name').value.trim(),
+    ordered_code_sequence:bundle.ordered_code_sequence,
     code:bundle.code
   };
 }
