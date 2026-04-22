@@ -127,6 +127,8 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 .toast.error{background:#b91c1c}
 .toast.success{background:#166534}
 
+
+
 .product-manage-grid{
   display:grid;
   grid-template-columns:320px minmax(0,1fr);
@@ -263,10 +265,9 @@ th{background:#f8fafc;color:#475569;font-weight:800}
         <div class="small">FE_ 규칙과 컬러 파일명 suffix 규칙을 반영합니다.</div>
 
         <div class="note-box">
-          제품코드: 자유형이면 <b>FE_</b> 를 앞에 붙이고, 제품 본체 코드는 컬러 옵션을 제외한 기본 코드로 생성합니다.<br/>
-          썸네일: 제품코드 <b>_T_01</b> / <b>_T_02</b><br/>
-          스토어용: 제품코드 <b>_T_01_STORE</b><br/>
-          패키지: 제품코드 <b>_C_01</b>
+          제품코드와 파일명 옵션을 분리한 
+          제품코드: 자유형이면 <b>FE_</b> 를 앞에 붙이고, 제품 본체 코드는 파일명 파생 옵션과 분리해서 생성합니다.<br/>
+          파일명 파생 옵션: 컬러 / 인쇄(라미·일반) / 면구분(단면·양면) 을 따로 선택해서 캐러셀/스토어 결과를 테스트합니다.
         </div>
 
         <div class="grid-forms">
@@ -303,25 +304,9 @@ th{background:#f8fafc;color:#475569;font-weight:800}
               <select id="finish"></select>
             </div>
             <div class="field">
-              <label>인쇄</label>
-              <select id="print"></select>
+              <label>제품 고정 컬러코드</label>
+              <input type="text" id="fixed_color_code" placeholder="예: SVC, 없으면 비워두세요" />
             </div>
-          </div>
-
-          <div class="field-row-2">
-            <div class="field">
-              <label>컬러 옵션</label>
-              <select id="color"></select>
-            </div>
-            <div class="field">
-              <label>면 구분</label>
-              <select id="side"></select>
-            </div>
-          </div>
-
-          <div class="field span-2">
-            <label>제품 고정 컬러코드</label>
-            <input type="text" id="fixed_color_code" placeholder="예: SVC, 없으면 비워두세요" />
           </div>
         </div>
 
@@ -340,22 +325,6 @@ th{background:#f8fafc;color:#475569;font-weight:800}
           <div class="result-item">
             <div class="k">제품 코드</div>
             <div class="v" id="preview_code">-</div>
-          </div>
-          <div class="result-item">
-            <div class="k">대표 썸네일 파일명</div>
-            <div class="v" id="preview_thumb_main">-</div>
-          </div>
-          <div class="result-item">
-            <div class="k">색상별 썸네일 파일명</div>
-            <div class="v" id="preview_thumb_sub">-</div>
-          </div>
-          <div class="result-item">
-            <div class="k">스토어용 파일명</div>
-            <div class="v" id="preview_store_file">-</div>
-          </div>
-          <div class="result-item">
-            <div class="k">패키지 파일명 01</div>
-            <div class="v" id="preview_package_file_01">-</div>
           </div>
         </div>
       </div>
@@ -612,30 +581,19 @@ function buildBundleFromForm(prefix=''){
   const product = q(prefix + 'product').value || '';
   const type = q(prefix + 'type').value || '';
   const finish = q(prefix + 'finish').value || '';
-  const color = q(prefix + 'color').value || '';
   const fixedColor = q(prefix + 'fixed_color_code').value.trim();
 
   let base = line + product + type + finish;
   if(fixedColor) base += fixedColor;
-  else if(color) base += color;
 
   const code = isFree ? 'FE_' + base : base;
-  return {
-    code,
-    thumb_main: code + '_T_01',
-    thumb_sub: code + '_T_02',
-    store_file: code + '_T_01_STORE',
-    package_file_01: code + '_C_01'
-  };
+
+  return { code };
 }
 
 function updatePreview(){
   const b = buildBundleFromForm('');
   q('preview_code').textContent = b.code || '-';
-  q('preview_thumb_main').textContent = b.thumb_main || '-';
-  q('preview_thumb_sub').textContent = b.thumb_sub || '-';
-  q('preview_store_file').textContent = b.store_file || '-';
-  q('preview_package_file_01').textContent = b.package_file_01 || '-';
 }
 
 function updateEditPreview(){
@@ -644,9 +602,11 @@ function updateEditPreview(){
 }
 
 function bindPreviewEvents(){
-  ['is_free','line','product','type','finish','color','fixed_color_code'].forEach(id => {
-    q(id).addEventListener('input', updatePreview);
-    q(id).addEventListener('change', updatePreview);
+  ['is_free','line','product','type','finish','fixed_color_code'].forEach(id => {
+    if(q(id)){
+      q(id).addEventListener('input', updatePreview);
+      q(id).addEventListener('change', updatePreview);
+    }
   });
   ['edit_is_free','edit_line','edit_product','edit_type','edit_finish','edit_color','edit_fixed_color_code'].forEach(id => {
     q(id).addEventListener('input', updateEditPreview);
@@ -663,9 +623,9 @@ function formPayload(){
     product:q('product').value,
     type:q('type').value,
     finish:q('finish').value,
-    color:q('color').value,
-    print:q('print').value,
-    side:q('side').value,
+    color:'',
+    print:'',
+    side:'',
     is_free:q('is_free').value === 'Y',
     fixed_color_code:q('fixed_color_code').value.trim(),
     code:bundle.code
