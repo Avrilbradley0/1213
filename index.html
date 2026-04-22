@@ -121,8 +121,11 @@ th{background:#f8fafc;color:#475569;font-weight:800}
   box-shadow:0 10px 30px rgba(15,23,42,.12);font-weight:800;color:var(--navy)
 }
 .toast{
-  position:fixed;right:22px;bottom:22px;z-index:10000;display:none;
-  background:#0b1a3a;color:#fff;padding:14px 16px;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.18);font-size:14px
+  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:10000;display:none;
+  background:#0b1a3a;color:#fff;padding:16px 20px;border-radius:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,.18);font-size:15px;font-weight:700;
+  min-width:240px;text-align:center;
 }
 .toast.error{background:#b91c1c}
 .toast.success{background:#166534}
@@ -494,6 +497,87 @@ async function refreshAfterWrite(target='all'){
   await Promise.all([loadOptions(), loadProducts()]);
 }
 
+function optimisticUpsertOption(payload, mode){
+  if(mode === 'update'){
+    const idx = optionRows.findIndex(r => String(r.row_no) === String(q('option_row_no').value));
+    if(idx > -1){
+      optionRows[idx] = {
+        ...optionRows[idx],
+        group: payload.group,
+        name: payload.name,
+        code: payload.code,
+        sort_order: payload.sort_order,
+        use_yn: payload.use_yn,
+        note: payload.note
+      };
+    }
+  }else{
+    optionRows.push({
+      group: payload.group,
+      name: payload.name,
+      code: payload.code,
+      sort_order: payload.sort_order,
+      use_yn: payload.use_yn,
+      note: payload.note,
+      row_no: 'temp_' + Date.now()
+    });
+  }
+  q('statOptions').textContent = optionRows.length;
+  renderOptionsTable(optionRows);
+}
+
+function optimisticDeleteOption(rowNo){
+  optionRows = optionRows.filter(r => String(r.row_no) !== String(rowNo));
+  q('statOptions').textContent = optionRows.length;
+  renderOptionsTable(optionRows);
+}
+
+function optimisticUpsertProduct(payload, mode){
+  if(mode === 'update'){
+    const idx = productRows.findIndex(r => String(r.row_no) === String(q('edit_row_no').value));
+    if(idx > -1){
+      productRows[idx] = {
+        ...productRows[idx],
+        name: payload.name,
+        line: payload.line,
+        product: payload.product,
+        type: payload.type,
+        finish: payload.finish,
+        color: payload.color,
+        print: payload.print,
+        side: payload.side,
+        is_free: payload.is_free ? 'Y' : 'N',
+        fixed_color_code: payload.fixed_color_code || '',
+        code: payload.code
+      };
+    }
+  }else{
+    productRows.push({
+      id: 'temp_' + Date.now(),
+      row_no: 'temp_' + Date.now(),
+      name: payload.name,
+      line: payload.line,
+      product: payload.product,
+      type: payload.type,
+      finish: payload.finish,
+      color: payload.color,
+      print: payload.print,
+      side: payload.side,
+      is_free: payload.is_free ? 'Y' : 'N',
+      fixed_color_code: payload.fixed_color_code || '',
+      code: payload.code
+    });
+  }
+  q('statProducts').textContent = productRows.length;
+  renderProductsTable(productRows);
+}
+
+function optimisticDeleteProduct(rowNo){
+  productRows = productRows.filter(r => String(r.row_no) !== String(rowNo));
+  q('statProducts').textContent = productRows.length;
+  renderProductsTable(productRows);
+}
+
 function showToast(message, type='success'){
   const el = q('toast');
   el.className = 'toast ' + (type === 'error' ? 'error' : 'success');
@@ -685,6 +769,7 @@ async function createProduct(){
   }
   if(result.success){
     const code = result.bundle?.code || payload.code;
+    optimisticUpsertProduct({...payload, code}, 'create');
     showToast('시트 저장 완료 · ' + code, 'success');
     resetForm();
     await refreshAfterWrite('products');
@@ -750,6 +835,7 @@ function renderProductsTable(rows){
       }
       if(result.success){ showToast(result.message || '삭제 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
       if(result.success) {
+        optimisticDeleteProduct(btn.dataset.row);
         clearEdit();
         await refreshAfterWrite('products');
       }
@@ -790,7 +876,10 @@ async function updateProduct(){
   }finally{
     setLoading(false);
   }
-  if(result.success){ showToast(result.message || '수정 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '수정 실패', 'error'); }
+  if(result.success){
+    optimisticUpsertProduct({...editPayload(), code: editPayload().code}, 'update');
+    showToast(result.message || '수정 완료 · 바로 반영 중', 'success');
+  } else { showToast(result.message || '수정 실패', 'error'); }
   if(result.success) await refreshAfterWrite('products');
 }
 
@@ -810,6 +899,7 @@ async function deleteSelected(){
   }
   if(result.success){ showToast(result.message || '삭제 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
   if(result.success){
+    optimisticDeleteProduct(q('edit_row_no').value);
     clearEdit();
     await refreshAfterWrite('products');
   }
@@ -882,6 +972,7 @@ function renderOptionsTable(rows){
       }
       if(result.success){ showToast(result.message || '삭제 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
       if(result.success){
+        optimisticDeleteOption(btn.dataset.row);
         resetOptionForm();
         await refreshAfterWrite('options');
       }
@@ -975,6 +1066,7 @@ async function saveOption(){
 
   if(result.success){ showToast(result.message || '저장 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '저장 실패', 'error'); }
   if(result.success){
+    optimisticUpsertOption(payload, mode);
     resetOptionForm();
     await refreshAfterWrite('options');
   }
