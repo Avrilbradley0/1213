@@ -1033,7 +1033,9 @@ function getBestMatchesFromGroup(groupName, source){
   if(!rows.length) return [];
   const flat = normalizeFlat(source);
 
-  rows.sort((a, b) => {
+  // 먼저 긴 이름 우선으로 겹치는 토큰을 안정적으로 찾고,
+  // 최종 반환은 상품명 등장 순서대로 정렬한다.
+  const scanRows = [...rows].sort((a, b) => {
     const lenA = normalizeFlat(a.name || '').length;
     const lenB = normalizeFlat(b.name || '').length;
     if(lenA !== lenB) return lenB - lenA;
@@ -1041,17 +1043,25 @@ function getBestMatchesFromGroup(groupName, source){
   });
 
   const matched = [];
-  for(const row of rows){
+  for(const row of scanRows){
     const target = normalizeFlat(row.name || '');
     if(!target) continue;
-    if(flat.includes(target)){
+    const idx = flat.indexOf(target);
+    if(idx > -1){
       const code = String(row.code || '');
       if(!matched.some(m => String(m.code || '') === code && String(m.name || '') === String(row.name || ''))){
-        matched.push(row);
+        matched.push({ ...row, __matchIndex: idx, __matchLength: target.length });
       }
     }
   }
-  return matched;
+
+  matched.sort((a, b) => {
+    if(a.__matchIndex !== b.__matchIndex) return a.__matchIndex - b.__matchIndex;
+    if(a.__matchLength !== b.__matchLength) return b.__matchLength - a.__matchLength;
+    return Number(a.sort_order || 999) - Number(b.sort_order || 999);
+  });
+
+  return matched.map(({__matchIndex, __matchLength, ...rest}) => rest);
 }
 
 function renderParsedResult(parsed){
