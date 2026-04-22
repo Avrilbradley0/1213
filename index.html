@@ -480,6 +480,20 @@ function setLoading(show, text='처리 중...'){
   q('loadingText').textContent = text;
 }
 
+
+async function refreshAfterWrite(target='all'){
+  await new Promise(resolve => setTimeout(resolve, 180));
+  if(target === 'options'){
+    await loadOptions();
+    return;
+  }
+  if(target === 'products'){
+    await loadProducts();
+    return;
+  }
+  await Promise.all([loadOptions(), loadProducts()]);
+}
+
 function showToast(message, type='success'){
   const el = q('toast');
   el.className = 'toast ' + (type === 'error' ? 'error' : 'success');
@@ -501,13 +515,15 @@ function bindTabs(){
 }
 
 async function apiGet(action){
-  const res = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`);
+  const url = `${API_URL}?action=${encodeURIComponent(action)}&_ts=${Date.now()}`;
+  const res = await fetch(url, { cache:'no-store' });
   return await res.json();
 }
 
 async function apiPost(payload){
   const res = await fetch(API_URL, {
     method:'POST',
+    cache:'no-store',
     body: JSON.stringify(payload)
   });
   return await res.json();
@@ -671,7 +687,7 @@ async function createProduct(){
     const code = result.bundle?.code || payload.code;
     showToast('시트 저장 완료 · ' + code, 'success');
     resetForm();
-    await loadProducts();
+    await refreshAfterWrite('products');
   } else {
     showToast(result.message || '저장 실패', 'error');
   }
@@ -732,10 +748,10 @@ function renderProductsTable(rows){
       }finally{
         setLoading(false);
       }
-      if(result.success){ showToast(result.message || '삭제 완료', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
+      if(result.success){ showToast(result.message || '삭제 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
       if(result.success) {
         clearEdit();
-        await loadProducts();
+        await refreshAfterWrite('products');
       }
     });
   });
@@ -774,8 +790,8 @@ async function updateProduct(){
   }finally{
     setLoading(false);
   }
-  if(result.success){ showToast(result.message || '수정 완료', 'success'); } else { showToast(result.message || '수정 실패', 'error'); }
-  if(result.success) await loadProducts();
+  if(result.success){ showToast(result.message || '수정 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '수정 실패', 'error'); }
+  if(result.success) await refreshAfterWrite('products');
 }
 
 async function deleteSelected(){
@@ -792,10 +808,10 @@ async function deleteSelected(){
   }finally{
     setLoading(false);
   }
-  if(result.success){ showToast(result.message || '삭제 완료', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
+  if(result.success){ showToast(result.message || '삭제 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
   if(result.success){
     clearEdit();
-    await loadProducts();
+    await refreshAfterWrite('products');
   }
 }
 
@@ -864,10 +880,10 @@ function renderOptionsTable(rows){
       }finally{
         setLoading(false);
       }
-      if(result.success){ showToast(result.message || '삭제 완료', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
+      if(result.success){ showToast(result.message || '삭제 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
       if(result.success){
         resetOptionForm();
-        await loadOptions();
+        await refreshAfterWrite('options');
       }
     });
   });
@@ -957,10 +973,10 @@ async function saveOption(){
     setLoading(false);
   }
 
-  if(result.success){ showToast(result.message || '저장 완료', 'success'); } else { showToast(result.message || '저장 실패', 'error'); }
+  if(result.success){ showToast(result.message || '저장 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '저장 실패', 'error'); }
   if(result.success){
     resetOptionForm();
-    await loadOptions();
+    await refreshAfterWrite('options');
   }
 }
 
