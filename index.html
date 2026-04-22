@@ -3,88 +3,43 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HUSK 코드 매니저</title>
+<title>허스크 코드 매니저</title>
 <style>
 :root{
-  --bg:#f3f4f6;
-  --panel:#ffffff;
-  --border:#d8dce3;
-  --text:#0f172a;
-  --sub:#64748b;
-  --navy:#0b1a3a;
-  --red:#dc2626;
-  --green:#16a34a;
+  --bg:#f3f4f6; --panel:#ffffff; --border:#d8dce3; --text:#0f172a; --sub:#64748b;
+  --navy:#0b1a3a; --red:#dc2626; --green:#16a34a;
 }
 *{box-sizing:border-box}
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,"Malgun Gothic","맑은 고딕",sans-serif;
-}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,"Malgun Gothic","맑은 고딕",sans-serif}
 .wrap{max-width:1180px;margin:22px auto;padding:0 18px}
 .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-0.5px}
 .sub{margin-top:8px;color:var(--sub);font-size:14px}
-.status-pill{
-  background:#fff;border:1px solid var(--border);border-radius:999px;
-  padding:11px 16px;display:flex;align-items:center;gap:10px;min-width:124px;justify-content:center
-}
+.status-pill{background:#fff;border:1px solid var(--border);border-radius:999px;padding:11px 16px;display:flex;align-items:center;gap:10px;min-width:124px;justify-content:center}
 .status-dot{width:8px;height:8px;border-radius:50%;background:#9ca3af}
-.tabs{
-  display:flex;gap:8px;margin:22px 0 18px 0;background:#eceff3;border:1px solid var(--border);
-  width:max-content;padding:6px;border-radius:999px
-}
-.tab-btn{
-  border:none;background:transparent;padding:11px 18px;border-radius:999px;cursor:pointer;
-  font-weight:700;color:#334155
-}
+.tabs{display:flex;gap:8px;margin:22px 0 18px 0;background:#eceff3;border:1px solid var(--border);width:max-content;padding:6px;border-radius:999px}
+.tab-btn{border:none;background:transparent;padding:11px 18px;border-radius:999px;cursor:pointer;font-weight:700;color:#334155}
 .tab-btn.active{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.05)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
-.card{
-  background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:18px 20px
-}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:18px 20px}
+.card.compact{height:fit-content}
 .stat-label{font-size:13px;color:var(--sub);margin-bottom:10px}
 .stat-value{font-size:22px;font-weight:800;color:var(--navy)}
 .grid-2{display:grid;grid-template-columns:1fr 1.25fr;gap:16px}
 .grid-forms{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-#tab-options .grid-forms{
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-#tab-options .field{
-  min-width:0;
-}
-#tab-options input[type="text"],
-#tab-options select{
-  min-width:0;
-}
-@media (max-width: 980px){
-  #tab-options .grid-forms{
-    grid-template-columns:1fr;
-  }
-}
-
+.field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field.span-2{grid-column:1 / -1}
 .field label{display:block;font-size:13px;font-weight:700;margin:0 0 8px 0}
-input[type="text"], select, textarea{
+input[type="text"], select{
   width:100%;height:40px;border:1px solid #cfd6df;border-radius:12px;padding:0 12px;background:#fff;font-size:14px
 }
-textarea{height:82px;padding:10px 12px;resize:vertical}
-.note-box{
-  background:#f8fafc;border:1px solid #d6dde7;border-radius:16px;padding:14px 16px;font-size:13px;color:#475569;line-height:1.65;margin:14px 0
-}
+.note-box{background:#f8fafc;border:1px solid #d6dde7;border-radius:16px;padding:14px 16px;font-size:13px;color:#475569;line-height:1.65;margin:14px 0}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.btn{
-  border:1px solid var(--border);background:#fff;color:#111827;padding:11px 16px;border-radius:12px;
-  cursor:pointer;font-weight:700
-}
+.btn{border:1px solid var(--border);background:#fff;color:#111827;padding:11px 16px;border-radius:12px;cursor:pointer;font-weight:700}
 .btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
 .btn.danger{background:#fff1f2;color:#be123c;border-color:#fecdd3}
 .btn.gray{background:#f8fafc}
-.result-box{
-  border:1px dashed #cfd6df;border-radius:18px;padding:18px;min-height:280px;background:#fafbfc
-}
+.result-box{border:1px dashed #cfd6df;border-radius:18px;padding:18px;min-height:280px;background:#fafbfc}
 .result-item{margin-bottom:18px}
 .result-item .k{font-size:13px;color:var(--sub);margin-bottom:6px}
 .result-item .v{font-size:18px;font-weight:800;color:var(--navy);word-break:break-all}
@@ -94,136 +49,33 @@ textarea{height:82px;padding:10px 12px;resize:vertical}
 table{width:100%;border-collapse:collapse;min-width:960px}
 th,td{padding:12px 12px;border-bottom:1px solid #edf1f5;font-size:13px;text-align:left;vertical-align:top}
 th{background:#f8fafc;color:#475569;font-weight:800}
-.mini-btn{
-  border:1px solid #d7dce3;background:#fff;border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer
-}
+.mini-btn{border:1px solid #d7dce3;background:#fff;border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer}
 .mini-btn.delete{color:#b91c1c;border-color:#fecaca;background:#fff7f7}
 .row-actions{display:flex;gap:6px;flex-wrap:wrap}
 .inline-flex{display:flex;align-items:center;gap:8px}
-
-.subtabs{
-  display:flex;gap:8px;flex-wrap:wrap
-}
-.subtab-btn{
-  border:1px solid var(--border);background:#fff;padding:8px 12px;border-radius:999px;
-  cursor:pointer;font-size:12px;font-weight:700;color:#334155
-}
-.subtab-btn.active{
-  background:var(--navy);border-color:var(--navy);color:#fff
-}
-.field.span-2{grid-column:1 / -1}
-
-.loading-overlay{
-  position:fixed;inset:0;background:rgba(15,23,42,.22);display:none;align-items:center;justify-content:center;z-index:9999
-}
-.loading-box{
-  background:#fff;border:1px solid var(--border);border-radius:18px;padding:18px 22px;min-width:240px;
-  box-shadow:0 10px 30px rgba(15,23,42,.12);font-weight:800;color:var(--navy)
-}
-.toast{
-  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-  z-index:10000;display:none;
-  background:#0b1a3a;color:#fff;padding:16px 20px;border-radius:14px;
-  box-shadow:0 10px 25px rgba(0,0,0,.18);font-size:15px;font-weight:700;
-  min-width:240px;text-align:center;
-}
+.small{font-size:12px;color:#64748b}
+.product-manage-grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:stretch}
+.product-manage-grid .card{min-height:560px;height:560px;display:flex;flex-direction:column}
+.product-manage-grid .table-wrap{flex:1;overflow:auto}
+.product-manage-grid .edit-form-vertical{display:grid;grid-template-columns:1fr;gap:12px;flex:1;overflow:auto;padding-right:4px}
+.product-manage-grid .result-box,.product-manage-grid .actions{flex:0 0 auto}
+.option-tabs-wrap{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px 0}
+.option-tab-btn{border:1px solid var(--border);background:#fff;color:#334155;border-radius:999px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;line-height:1}
+.option-tab-btn.active{background:var(--navy);border-color:var(--navy);color:#fff}
+#tab-options .card{min-height:560px}
+#tab-options .card.compact{min-height:560px;display:flex;flex-direction:column}
+#tab-options .table-wrap{flex:1;overflow:auto}
+#tab-options .grid-forms{grid-template-columns:1fr 1fr;gap:12px}
+#tab-options .field{min-width:0}
+#tab-options input[type="text"], #tab-options select{min-width:0}
+.loading-overlay{position:fixed;inset:0;background:rgba(15,23,42,.22);display:none;align-items:center;justify-content:center;z-index:9999}
+.loading-box{background:#fff;border:1px solid var(--border);border-radius:18px;padding:18px 22px;min-width:240px;box-shadow:0 10px 30px rgba(15,23,42,.12);font-weight:800;color:var(--navy)}
+.toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10000;display:none;background:#0b1a3a;color:#fff;padding:16px 20px;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.18);font-size:15px;font-weight:700;min-width:240px;text-align:center}
 .toast.error{background:#b91c1c}
 .toast.success{background:#166534}
-
-
-
-.product-manage-grid{
-  display:grid;
-  grid-template-columns:320px minmax(0,1fr);
-  gap:16px;
-  align-items:stretch;
-}
-.product-manage-grid .card{
-  min-height:560px;
-  height:560px;
-  display:flex;
-  flex-direction:column;
-}
-.product-manage-grid .table-wrap{
-  flex:1;
-  overflow:auto;
-}
-.product-manage-grid .edit-form-vertical{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-  flex:1;
-  overflow:auto;
-  padding-right:4px;
-}
-.product-manage-grid .result-box{
-  flex:0 0 auto;
-}
-.product-manage-grid .actions{
-  flex:0 0 auto;
-}
-.edit-form-vertical{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-}
-.option-tabs-wrap{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin:12px 0 14px 0;
-}
-.option-tab-btn{
-  border:1px solid var(--border);
-  background:#fff;
-  color:#334155;
-  border-radius:999px;
-  padding:9px 14px;
-  font-size:12px;
-  font-weight:700;
-  cursor:pointer;
-  line-height:1;
-}
-.option-tab-btn.active{
-  background:var(--navy);
-  border-color:var(--navy);
-  color:#fff;
-}
-#tab-options .card{
-  min-height:560px;
-}
-#tab-options .card.compact{
-  min-height:560px;
-  display:flex;
-  flex-direction:column;
-}
-#tab-options .table-wrap{
-  flex:1;
-  overflow:auto;
-}
 @media (max-width: 980px){
-  .product-manage-grid{grid-template-columns:1fr}
-  .product-manage-grid .card,
-  #tab-options .card,
-  #tab-options .card.compact{
-    height:auto;
-    min-height:auto;
-  }
-}
-
-
-
-.small{font-size:12px;color:#64748b}
-
-.field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.card.compact{height:fit-content}
-@media (min-width: 981px){
-  .field-row-2{grid-template-columns:1fr 1fr}
-}
-
-@media (max-width: 980px){
-  .stats{grid-template-columns:1fr}
-  .grid-2{grid-template-columns:1fr}
+  .stats,.grid-2,.grid-forms,.field-row-2,.product-manage-grid,#tab-options .grid-forms{grid-template-columns:1fr}
+  .product-manage-grid .card,#tab-options .card,#tab-options .card.compact{height:auto;min-height:auto}
 }
 </style>
 </head>
@@ -231,7 +83,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 <div class="wrap">
   <div class="topbar">
     <div>
-      <h1>HUSK 코드 매니저</h1>
+      <h1>허스크 코드 매니저</h1>
       <div class="sub">Apps Script + HTML + 구글시트로 직접 동작하는 관리자</div>
     </div>
     <div class="status-pill">
@@ -265,12 +117,12 @@ th{background:#f8fafc;color:#475569;font-weight:800}
     <div class="grid-2">
       <div class="card">
         <div style="font-size:34px;font-weight:800;color:var(--navy);margin-bottom:4px">코드 생성</div>
-        <div class="small">FE_ 규칙과 컬러 파일명 suffix 규칙을 반영합니다.</div>
+        <div class="small">제품코드 전용 생성 화면</div>
 
         <div class="note-box">
-          제품코드와 파일명 옵션을 분리한 
-          제품코드: 자유형이면 <b>FE_</b> 를 앞에 붙이고, 제품 본체 코드는 파일명 파생 옵션과 분리해서 생성합니다.<br/>
-          파일명 파생 옵션: 컬러 / 인쇄(라미·일반) / 면구분(단면·양면) 을 따로 선택해서 캐러셀/스토어 결과를 테스트합니다.
+          제품코드 전용 생성 화면입니다.<br/>
+          자유형이면 <b>FE_</b> 를 앞에 붙여 생성합니다.<br/>
+          코드 규칙은 <b>라인 + 재질 + 마감 + 형태</b> 입니다.
         </div>
 
         <div class="grid-forms">
@@ -293,7 +145,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
           <div class="field-row-2">
             <div class="field">
               <label>재질</label>
-              <select id="product"></select>
+              <select id="material"></select>
             </div>
             <div class="field">
               <label>마감</label>
@@ -303,7 +155,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 
           <div class="field">
             <label>형태</label>
-            <select id="type"></select>
+            <select id="shape"></select>
           </div>
         </div>
 
@@ -316,7 +168,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 
       <div class="card">
         <div style="font-size:34px;font-weight:800;color:var(--navy);margin-bottom:4px">생성 결과</div>
-        <div class="small">컬러는 파일명 suffix로 분리해서 생성합니다.</div>
+        <div class="small">제품 코드만 생성합니다.</div>
 
         <div class="result-box" style="margin-top:14px">
           <div class="result-item">
@@ -328,93 +180,92 @@ th{background:#f8fafc;color:#475569;font-weight:800}
     </div>
   </section>
 
-  
+  <section id="tab-products" class="hidden">
+    <div class="product-manage-grid">
+      <div class="card compact">
+        <div style="font-size:28px;font-weight:800;color:var(--navy);line-height:1.25">선택 상품 수정</div>
+        <div class="small" style="margin:8px 0 12px 0">왼쪽 카드에서 수정 후 바로 저장할 수 있습니다.</div>
 
-<section id="tab-products" class="hidden">
-  <div class="product-manage-grid">
-    <div class="card compact">
-      <div style="font-size:28px;font-weight:800;color:var(--navy);line-height:1.25">선택 상품 수정</div>
-      <div class="small" style="margin:8px 0 12px 0">약어 관리 왼쪽 카드와 같은 폭 기준으로 정리했습니다.</div>
+        <div class="edit-form-vertical">
+          <input type="hidden" id="edit_id" />
+          <input type="hidden" id="edit_row_no" />
 
-      <div class="edit-form-vertical">
-        <input type="hidden" id="edit_id" />
-        <input type="hidden" id="edit_row_no" />
+          <div class="field"><label>상품명</label><input type="text" id="edit_name" /></div>
+          <div class="field"><label>유형</label><select id="edit_is_free"><option value="N">일반형</option><option value="Y">자유형</option></select></div>
+          <div class="field"><label>라인</label><select id="edit_line"></select></div>
+          <div class="field"><label>재질</label><select id="edit_material"></select></div>
+          <div class="field"><label>마감</label><select id="edit_finish"></select></div>
+          <div class="field"><label>형태</label><select id="edit_shape"></select></div>
+        </div>
 
-        <div class="field"><label>상품명</label><input type="text" id="edit_name" /></div>
-        <div class="field"><label>유형</label><select id="edit_is_free"><option value="N">일반형</option><option value="Y">자유형</option></select></div>
-        <div class="field"><label>라인</label><select id="edit_line"></select></div>
-        <div class="field"><label>재질</label><select id="edit_product"></select></div>
-        <div class="field"><label>형태</label><select id="edit_type"></select></div>
-        <div class="field"><label>마감</label><select id="edit_finish"></select></div>
-        <div class="field"><label>컬러 옵션</label><select id="edit_color"></select></div>
-        <div class="field"><label>인쇄</label><select id="edit_print"></select></div>
-        <div class="field"><label>면 구분</label><select id="edit_side"></select></div>
-        <div class="field"><label>제품 고정 컬러코드</label><input type="text" id="edit_fixed_color_code" /></div>
-      </div>
+        <div class="result-box" style="margin-top:14px;min-height:auto">
+          <div class="result-item" style="margin-bottom:0">
+            <div class="k">수정 미리보기 코드</div>
+            <div class="v" id="edit_preview_code">-</div>
+          </div>
+        </div>
 
-      <div class="result-box" style="margin-top:14px;min-height:auto">
-        <div class="result-item" style="margin-bottom:0">
-          <div class="k">수정 미리보기 코드</div>
-          <div class="v" id="edit_preview_code">-</div>
+        <div class="actions">
+          <button class="btn primary" id="btnUpdateProduct">수정 저장</button>
+          <button class="btn danger" id="btnDeleteSelected">선택 상품 삭제</button>
+          <button class="btn gray" id="btnClearEdit">선택 해제</button>
         </div>
       </div>
 
-      <div class="actions">
-        <button class="btn primary" id="btnUpdateProduct">수정 저장</button>
-        <button class="btn danger" id="btnDeleteSelected">선택 상품 삭제</button>
-        <button class="btn gray" id="btnClearEdit">선택 해제</button>
+      <div class="card">
+        <div class="toolbar">
+          <div>
+            <div style="font-size:28px;font-weight:800;color:var(--navy)">상품 관리</div>
+            <div class="small">시트에 저장된 상품을 수정/삭제할 수 있습니다.</div>
+          </div>
+          <div class="inline-flex">
+            <input type="text" id="productSearch" placeholder="상품명 또는 코드 검색" style="width:240px" />
+            <button class="btn" id="btnReloadProducts">새로고침</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>상품명</th>
+                <th>코드</th>
+                <th>라인</th>
+                <th>재질</th>
+                <th>마감</th>
+                <th>형태</th>
+                <th>자유형</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody id="productsTbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
-
-    <div class="card">
-      <div class="toolbar">
-        <div>
-          <div style="font-size:28px;font-weight:800;color:var(--navy)">상품 관리</div>
-          <div class="small">시트에 저장된 상품을 수정/삭제할 수 있습니다.</div>
-        </div>
-        <div class="inline-flex">
-          <input type="text" id="productSearch" placeholder="상품명 또는 코드 검색" style="width:240px" />
-          <button class="btn" id="btnReloadProducts">새로고침</button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>상품명</th>
-              <th>코드</th>
-              <th>라인</th>
-              <th>재질</th>
-              <th>형태</th>
-              <th>마감</th>
-              <th>컬러</th>
-              <th>인쇄</th>
-              <th>자유형</th>
-              <th>관리</th>
-            </tr>
-          </thead>
-          <tbody id="productsTbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</section>
-
+  </section>
 
   <section id="tab-options" class="hidden">
     <div class="grid-2" style="grid-template-columns:320px 1fr">
       <div class="card compact">
         <div style="font-size:28px;font-weight:800;color:var(--navy)">약어 관리</div>
-        <div class="small" style="margin-bottom:12px">OPTIONS 시트 항목을 추가/수정/삭제합니다.</div>
+        <div class="small" style="margin-bottom:12px">구분은 드롭다운으로 선택합니다.</div>
 
         <input type="hidden" id="option_mode" value="create" />
-        <input type="hidden" id="original_group" />
-        <input type="hidden" id="original_code" />
         <input type="hidden" id="option_row_no" />
 
         <div class="grid-forms">
-          <div class="field"><label>구분</label><input type="text" id="opt_group" placeholder="예: line, product, finish" /></div>
+          <div class="field"><label>구분</label>
+            <select id="opt_group">
+              <option value="line">라인</option>
+              <option value="material">재질</option>
+              <option value="shape">형태</option>
+              <option value="finish">마감</option>
+              <option value="color">컬러</option>
+              <option value="print">인쇄</option>
+              <option value="side">면구분</option>
+            </select>
+          </div>
           <div class="field"><label>이름</label><input type="text" id="opt_name" placeholder="예: 맥세이프" /></div>
           <div class="field"><label>코드</label><input type="text" id="opt_code" placeholder="예: M" /></div>
           <div class="field"><label>정렬순서</label><input type="text" id="opt_sort_order" placeholder="예: 1" /></div>
@@ -437,7 +288,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
           <input type="text" id="optionSearch" placeholder="구분, 이름, 코드 검색" style="width:240px" />
         </div>
 
-        <div id="optionGroupTabs" class="subtabs" style="margin-bottom:12px"></div>
+        <div class="option-tabs-wrap" id="optionGroupTabs"></div>
 
         <div class="table-wrap">
           <table>
@@ -460,21 +311,18 @@ th{background:#f8fafc;color:#475569;font-weight:800}
   </section>
 </div>
 
-
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-box" id="loadingText">처리 중...</div>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyHmH-iQG9E4nGAFvvd-upHrlesHL0VZtlC29yCfeEq1iuItwnHVhPUj5jQc3WX0uOqcw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyLnw62U4cSV8bobYCvQfFz11V1-DCHGbZvO9uLXlvIjTMFri49q80vjhNQsq9ZSN4f/exec";
 
 let optionRows = [];
 let optionGrouped = {};
 let productRows = [];
 let selectedOptionGroup = 'ALL';
-let selectedOptionRowNo = '';
-let selectedProductRowNo = '';
 
 function q(id){ return document.getElementById(id); }
 
@@ -482,109 +330,23 @@ function setLoading(show, text='처리 중...'){
   q('loadingOverlay').style.display = show ? 'flex' : 'none';
   q('loadingText').textContent = text;
 }
-
-
-async function refreshAfterWrite(target='all'){
-  await new Promise(resolve => setTimeout(resolve, 180));
-  if(target === 'options'){
-    await loadOptions();
-    return;
-  }
-  if(target === 'products'){
-    await loadProducts();
-    return;
-  }
-  await Promise.all([loadOptions(), loadProducts()]);
-}
-
-function optimisticUpsertOption(payload, mode){
-  if(mode === 'update'){
-    const idx = optionRows.findIndex(r => String(r.row_no) === String(q('option_row_no').value));
-    if(idx > -1){
-      optionRows[idx] = {
-        ...optionRows[idx],
-        group: payload.group,
-        name: payload.name,
-        code: payload.code,
-        sort_order: payload.sort_order,
-        use_yn: payload.use_yn,
-        note: payload.note
-      };
-    }
-  }else{
-    optionRows.push({
-      group: payload.group,
-      name: payload.name,
-      code: payload.code,
-      sort_order: payload.sort_order,
-      use_yn: payload.use_yn,
-      note: payload.note,
-      row_no: 'temp_' + Date.now()
-    });
-  }
-  q('statOptions').textContent = optionRows.length;
-  renderOptionsTable(optionRows);
-}
-
-function optimisticDeleteOption(rowNo){
-  optionRows = optionRows.filter(r => String(r.row_no) !== String(rowNo));
-  q('statOptions').textContent = optionRows.length;
-  renderOptionsTable(optionRows);
-}
-
-function optimisticUpsertProduct(payload, mode){
-  if(mode === 'update'){
-    const idx = productRows.findIndex(r => String(r.row_no) === String(q('edit_row_no').value));
-    if(idx > -1){
-      productRows[idx] = {
-        ...productRows[idx],
-        name: payload.name,
-        line: payload.line,
-        product: payload.product,
-        type: payload.type,
-        finish: payload.finish,
-        color: payload.color,
-        print: payload.print,
-        side: payload.side,
-        is_free: payload.is_free ? 'Y' : 'N',
-        fixed_color_code: payload.fixed_color_code || '',
-        code: payload.code
-      };
-    }
-  }else{
-    productRows.push({
-      id: 'temp_' + Date.now(),
-      row_no: 'temp_' + Date.now(),
-      name: payload.name,
-      line: payload.line,
-      product: payload.product,
-      type: payload.type,
-      finish: payload.finish,
-      color: payload.color,
-      print: payload.print,
-      side: payload.side,
-      is_free: payload.is_free ? 'Y' : 'N',
-      fixed_color_code: payload.fixed_color_code || '',
-      code: payload.code
-    });
-  }
-  q('statProducts').textContent = productRows.length;
-  renderProductsTable(productRows);
-}
-
-function optimisticDeleteProduct(rowNo){
-  productRows = productRows.filter(r => String(r.row_no) !== String(rowNo));
-  q('statProducts').textContent = productRows.length;
-  renderProductsTable(productRows);
-}
-
 function showToast(message, type='success'){
   const el = q('toast');
   el.className = 'toast ' + (type === 'error' ? 'error' : 'success');
   el.textContent = message;
   el.style.display = 'block';
   clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(() => { el.style.display = 'none'; }, 2200);
+  window.__toastTimer = setTimeout(() => { el.style.display = 'none'; }, 1800);
+}
+
+async function apiGet(action){
+  const url = `${API_URL}?action=${encodeURIComponent(action)}&_ts=${Date.now()}`;
+  const res = await fetch(url, { cache:'no-store' });
+  return await res.json();
+}
+async function apiPost(payload){
+  const res = await fetch(API_URL, { method:'POST', cache:'no-store', body: JSON.stringify(payload) });
+  return await res.json();
 }
 
 function bindTabs(){
@@ -598,62 +360,19 @@ function bindTabs(){
   });
 }
 
-async function apiGet(action){
-  const url = `${API_URL}?action=${encodeURIComponent(action)}&_ts=${Date.now()}`;
-  const res = await fetch(url, { cache:'no-store' });
-  return await res.json();
-}
-
-async function apiPost(payload){
-  const res = await fetch(API_URL, {
-    method:'POST',
-    cache:'no-store',
-    body: JSON.stringify(payload)
-  });
-  return await res.json();
+function setStatus(ok) {
+  q('statusDot').style.background = ok ? 'var(--green)' : 'var(--red)';
+  q('statusText').textContent = ok ? '연결됨' : '연결 안 됨';
+  q('statStatus').textContent = ok ? '연결됨' : '연결 안 됨';
 }
 
 async function checkConnection(){
   try{
     const result = await apiGet('ping');
-    const ok = !!result.success;
-    q('statusDot').style.background = ok ? 'var(--green)' : 'var(--red)';
-    q('statusText').textContent = ok ? '연결됨' : '연결 안 됨';
-    q('statStatus').textContent = ok ? '연결됨' : '연결 안 됨';
+    setStatus(!!result.success);
   }catch(err){
-    q('statusDot').style.background = 'var(--red)';
-    q('statusText').textContent = '연결 안 됨';
-    q('statStatus').textContent = '연결 안 됨';
+    setStatus(false);
   }
-}
-
-async function loadOptions(){
-  const result = await apiGet('getOptions');
-  if(!result.success){ alert(result.message || '약어 조회 실패'); return; }
-  optionRows = result.data.rows || [];
-  optionGrouped = result.data.grouped || {};
-  q('statOptions').textContent = optionRows.length;
-
-  fillSelect('line', optionGrouped.line || []);
-  fillSelect('product', optionGrouped.product || []);
-  fillSelect('type', optionGrouped.type || []);
-  fillSelect('finish', optionGrouped.finish || []);
-  fillSelect('color', optionGrouped.color || []);
-  fillSelect('print', optionGrouped.print || []);
-  fillSelect('side', optionGrouped.side || []);
-
-  fillSelect('edit_line', optionGrouped.line || []);
-  fillSelect('edit_product', optionGrouped.product || []);
-  fillSelect('edit_type', optionGrouped.type || []);
-  fillSelect('edit_finish', optionGrouped.finish || []);
-  fillSelect('edit_color', optionGrouped.color || []);
-  fillSelect('edit_print', optionGrouped.print || []);
-  fillSelect('edit_side', optionGrouped.side || []);
-
-  renderOptionGroupTabs();
-  renderOptionsTable(optionRows);
-  updatePreview();
-  updateEditPreview();
 }
 
 function fillSelect(id, rows){
@@ -661,7 +380,7 @@ function fillSelect(id, rows){
   const current = el.value;
   el.innerHTML = '';
 
-  const includeEmpty = ['line','product','finish','type','edit_line','edit_product','edit_finish','edit_type'].includes(id);
+  const includeEmpty = ['line','material','finish','shape','edit_line','edit_material','edit_finish','edit_shape'].includes(id);
   if(includeEmpty){
     const emptyOpt = document.createElement('option');
     emptyOpt.value = '';
@@ -679,16 +398,44 @@ function fillSelect(id, rows){
   if([...el.options].some(o => o.value === current)) el.value = current;
 }
 
+async function loadOptions(){
+  const result = await apiGet('getOptions');
+  if(!result.success){ showToast(result.message || '약어 조회 실패', 'error'); return; }
+  optionRows = result.data.rows || [];
+  optionGrouped = result.data.grouped || {};
+  q('statOptions').textContent = optionRows.length;
+
+  fillSelect('line', optionGrouped.line || []);
+  fillSelect('material', optionGrouped.material || []);
+  fillSelect('shape', optionGrouped.shape || []);
+  fillSelect('finish', optionGrouped.finish || []);
+
+  fillSelect('edit_line', optionGrouped.line || []);
+  fillSelect('edit_material', optionGrouped.material || []);
+  fillSelect('edit_shape', optionGrouped.shape || []);
+  fillSelect('edit_finish', optionGrouped.finish || []);
+
+  renderOptionGroupTabs();
+  renderOptionsTable(optionRows);
+  updatePreview();
+  updateEditPreview();
+}
+
+async function loadProducts(){
+  const result = await apiGet('getProducts');
+  if(!result.success){ showToast(result.message || '상품 조회 실패', 'error'); return; }
+  productRows = result.data || [];
+  q('statProducts').textContent = productRows.length;
+  renderProductsTable(productRows);
+}
+
 function buildBundleFromForm(prefix=''){
   const isFree = q(prefix + 'is_free').value === 'Y';
   const line = q(prefix + 'line').value || '';
-  const product = q(prefix + 'product').value || '';
+  const material = q(prefix + 'material').value || '';
   const finish = q(prefix + 'finish').value || '';
-  const type = q(prefix + 'type').value || '';
-
-  let base = line + product + finish + type;
-  const code = isFree ? 'FE_' + base : base;
-
+  const shape = q(prefix + 'shape').value || '';
+  const code = (isFree ? 'FE_' : '') + line + material + finish + shape;
   return { code };
 }
 
@@ -696,22 +443,16 @@ function updatePreview(){
   const b = buildBundleFromForm('');
   q('preview_code').textContent = b.code || '-';
 }
-
 function updateEditPreview(){
   const b = buildBundleFromForm('edit_');
   q('edit_preview_code').textContent = b.code || '-';
 }
-
 function bindPreviewEvents(){
-  ['is_free','line','product','type','finish'].forEach(id => {
-    if(q(id)){
-      q(id).addEventListener('input', updatePreview);
-      q(id).addEventListener('change', updatePreview);
-    }
+  ['is_free','line','material','finish','shape'].forEach(id => {
+    if(q(id)){ q(id).addEventListener('input', updatePreview); q(id).addEventListener('change', updatePreview); }
   });
-  ['edit_is_free','edit_line','edit_product','edit_type','edit_finish','edit_color','edit_fixed_color_code'].forEach(id => {
-    q(id).addEventListener('input', updateEditPreview);
-    q(id).addEventListener('change', updateEditPreview);
+  ['edit_is_free','edit_line','edit_material','edit_finish','edit_shape'].forEach(id => {
+    if(q(id)){ q(id).addEventListener('input', updateEditPreview); q(id).addEventListener('change', updateEditPreview); }
   });
 }
 
@@ -721,8 +462,8 @@ function formPayload(){
     action:'createProduct',
     name:q('name').value.trim(),
     line:q('line').value,
-    product:q('product').value,
-    type:q('type').value,
+    material:q('material').value,
+    shape:q('shape').value,
     finish:q('finish').value,
     color:'',
     print:'',
@@ -732,7 +473,6 @@ function formPayload(){
     code:bundle.code
   };
 }
-
 function editPayload(){
   const bundle = buildBundleFromForm('edit_');
   return {
@@ -741,21 +481,64 @@ function editPayload(){
     row_no:q('edit_row_no').value,
     name:q('edit_name').value.trim(),
     line:q('edit_line').value,
-    product:q('edit_product').value,
-    type:q('edit_type').value,
+    material:q('edit_material').value,
+    shape:q('edit_shape').value,
     finish:q('edit_finish').value,
-    color:q('edit_color').value,
-    print:q('edit_print').value,
-    side:q('edit_side').value,
+    color:'',
+    print:'',
+    side:'',
     is_free:q('edit_is_free').value === 'Y',
-    fixed_color_code:q('edit_fixed_color_code').value.trim(),
+    fixed_color_code:'',
     code:bundle.code
   };
 }
 
+function optimisticUpsertOption(payload, mode){
+  if(mode === 'update'){
+    const idx = optionRows.findIndex(r => String(r.row_no) === String(q('option_row_no').value));
+    if(idx > -1){
+      optionRows[idx] = {...optionRows[idx], group:payload.group, name:payload.name, code:payload.code, sort_order:payload.sort_order, use_yn:payload.use_yn, note:payload.note};
+    }
+  } else {
+    optionRows.push({...payload, row_no:'temp_' + Date.now()});
+  }
+  q('statOptions').textContent = optionRows.length;
+  renderOptionsTable(optionRows);
+}
+function optimisticDeleteOption(rowNo){
+  optionRows = optionRows.filter(r => String(r.row_no) !== String(rowNo));
+  q('statOptions').textContent = optionRows.length;
+  renderOptionsTable(optionRows);
+}
+function optimisticUpsertProduct(payload, mode){
+  if(mode === 'update'){
+    const idx = productRows.findIndex(r => String(r.row_no) === String(q('edit_row_no').value));
+    if(idx > -1){
+      productRows[idx] = {...productRows[idx], name:payload.name, line:payload.line, material:payload.material, shape:payload.shape, finish:payload.finish, is_free:payload.is_free ? 'Y' : 'N', code:payload.code};
+    }
+  } else {
+    const now = 'temp_' + Date.now();
+    productRows.push({id:now, row_no:now, name:payload.name, line:payload.line, material:payload.material, shape:payload.shape, finish:payload.finish, is_free:payload.is_free ? 'Y' : 'N', code:payload.code});
+  }
+  q('statProducts').textContent = productRows.length;
+  renderProductsTable(productRows);
+}
+function optimisticDeleteProduct(rowNo){
+  productRows = productRows.filter(r => String(r.row_no) !== String(rowNo));
+  q('statProducts').textContent = productRows.length;
+  renderProductsTable(productRows);
+}
+
+async function refreshAfterWrite(target='all'){
+  await new Promise(resolve => setTimeout(resolve, 180));
+  if(target === 'options'){ await loadOptions(); return; }
+  if(target === 'products'){ await loadProducts(); return; }
+  await Promise.all([loadOptions(), loadProducts()]);
+}
+
 async function createProduct(){
   const payload = formPayload();
-  if(!payload.name){ alert('상품명을 입력해줘.'); return; }
+  if(!payload.name){ showToast('상품명을 입력해줘.', 'error'); return; }
   let result;
   try{
     setLoading(true, '상품 저장 중...');
@@ -778,21 +561,13 @@ async function createProduct(){
   }
 }
 
-async function loadProducts(){
-  const result = await apiGet('getProducts');
-  if(!result.success){ alert(result.message || '상품 조회 실패'); return; }
-  productRows = result.data || [];
-  q('statProducts').textContent = productRows.length;
-  renderProductsTable(productRows);
-}
-
 function renderProductsTable(rows){
   const keyword = q('productSearch').value.trim().toLowerCase();
   const tbody = q('productsTbody');
   tbody.innerHTML = '';
 
   rows.filter(r => {
-    const text = [r.name,r.code,r.line,r.product,r.type,r.finish,r.color].join(' ').toLowerCase();
+    const text = [r.name,r.code,r.line,r.material,r.finish,r.shape].join(' ').toLowerCase();
     return !keyword || text.includes(keyword);
   }).forEach(r => {
     const tr = document.createElement('tr');
@@ -800,19 +575,16 @@ function renderProductsTable(rows){
       <td>${escapeHtml(r.name || '')}</td>
       <td>${escapeHtml(r.code || '')}</td>
       <td>${escapeHtml(r.line || '')}</td>
-      <td>${escapeHtml(r.product || '')}</td>
-      <td>${escapeHtml(r.type || '')}</td>
+      <td>${escapeHtml(r.material || '')}</td>
       <td>${escapeHtml(r.finish || '')}</td>
-      <td>${escapeHtml(r.color || '')}</td>
-      <td>${escapeHtml(r.print || '')}</td>
+      <td>${escapeHtml(r.shape || '')}</td>
       <td>${r.is_free === 'Y' ? 'Y' : 'N'}</td>
       <td>
         <div class="row-actions">
           <button class="mini-btn" data-id="${r.id}" data-row="${r.row_no || ''}" data-act="edit">수정</button>
           <button class="mini-btn delete" data-id="${r.id}" data-row="${r.row_no || ''}" data-act="delete">삭제</button>
         </div>
-      </td>
-    `;
+      </td>`;
     tbody.appendChild(tr);
   });
 
@@ -833,11 +605,13 @@ function renderProductsTable(rows){
       }finally{
         setLoading(false);
       }
-      if(result.success){ showToast(result.message || '삭제 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
-      if(result.success) {
+      if(result.success){
         optimisticDeleteProduct(btn.dataset.row);
         clearEdit();
+        showToast(result.message || '삭제 완료 · 바로 반영 중', 'success');
         await refreshAfterWrite('products');
+      } else {
+        showToast(result.message || '삭제 실패', 'error');
       }
     });
   });
@@ -845,30 +619,26 @@ function renderProductsTable(rows){
 
 function selectProduct(id, rowNo){
   const row = productRows.find(r => String(r.id) === String(id));
-  selectedProductRowNo = rowNo || (row ? row.row_no : '');
   if(!row) return;
   q('edit_id').value = row.id || '';
-  q('edit_row_no').value = selectedProductRowNo || row.row_no || '';
+  q('edit_row_no').value = rowNo || row.row_no || '';
   q('edit_name').value = row.name || '';
   q('edit_is_free').value = row.is_free === 'Y' ? 'Y' : 'N';
   q('edit_line').value = row.line || '';
-  q('edit_product').value = row.product || '';
-  q('edit_type').value = row.type || '';
+  q('edit_material').value = row.material || '';
   q('edit_finish').value = row.finish || '';
-  q('edit_color').value = row.color || '';
-  q('edit_print').value = row.print || '';
-  q('edit_side').value = row.side || '';
-  q('edit_fixed_color_code').value = row.fixed_color_code || '';
+  q('edit_shape').value = row.shape || '';
   updateEditPreview();
   document.querySelector('[data-tab="tab-products"]').click();
 }
 
 async function updateProduct(){
-  if(!q('edit_id').value){ alert('수정할 상품을 먼저 선택해줘.'); return; }
+  if(!q('edit_id').value){ showToast('수정할 상품을 먼저 선택해줘.', 'error'); return; }
   let result;
+  const payload = editPayload();
   try{
     setLoading(true, '상품 수정 중...');
-    result = await apiPost(editPayload());
+    result = await apiPost(payload);
   }catch(err){
     setLoading(false);
     showToast('상품 수정 요청 실패: ' + (err.message || err), 'error');
@@ -877,14 +647,16 @@ async function updateProduct(){
     setLoading(false);
   }
   if(result.success){
-    optimisticUpsertProduct({...editPayload(), code: editPayload().code}, 'update');
+    optimisticUpsertProduct(payload, 'update');
     showToast(result.message || '수정 완료 · 바로 반영 중', 'success');
-  } else { showToast(result.message || '수정 실패', 'error'); }
-  if(result.success) await refreshAfterWrite('products');
+    await refreshAfterWrite('products');
+  } else {
+    showToast(result.message || '수정 실패', 'error');
+  }
 }
 
 async function deleteSelected(){
-  if(!q('edit_id').value){ alert('삭제할 상품을 먼저 선택해줘.'); return; }
+  if(!q('edit_id').value){ showToast('삭제할 상품을 먼저 선택해줘.', 'error'); return; }
   if(!confirm('선택한 상품을 삭제할까?')) return;
   let result;
   try{
@@ -897,31 +669,52 @@ async function deleteSelected(){
   }finally{
     setLoading(false);
   }
-  if(result.success){ showToast(result.message || '삭제 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
   if(result.success){
     optimisticDeleteProduct(q('edit_row_no').value);
     clearEdit();
+    showToast(result.message || '삭제 완료 · 바로 반영 중', 'success');
     await refreshAfterWrite('products');
+  } else {
+    showToast(result.message || '삭제 실패', 'error');
   }
 }
 
 function clearEdit(){
-  ['edit_id','edit_row_no','edit_name','edit_fixed_color_code'].forEach(id => q(id).value = '');
+  ['edit_id','edit_row_no','edit_name'].forEach(id => q(id).value = '');
   q('edit_is_free').value = 'N';
-  ['edit_line','edit_product','edit_type','edit_finish','edit_color','edit_print','edit_side'].forEach(id => {
-    if(q(id).options.length) q(id).selectedIndex = 0;
-  });
+  ['edit_line','edit_material','edit_finish','edit_shape'].forEach(id => { if(q(id).options.length) q(id).selectedIndex = 0; });
   updateEditPreview();
 }
-
 function resetForm(){
   q('name').value = '';
-  q('fixed_color_code').value = '';
   q('is_free').value = 'N';
-  ['line','product','type','finish','color','print','side'].forEach(id => {
-    if(q(id).options.length) q(id).selectedIndex = 0;
-  });
+  ['line','material','finish','shape'].forEach(id => { if(q(id).options.length) q(id).selectedIndex = 0; });
   updatePreview();
+}
+
+function renderOptionGroupTabs(){
+  const wrap = q('optionGroupTabs');
+  if(!wrap) return;
+  const groups = ['ALL','line','material','shape','finish','color','print','side'];
+  wrap.innerHTML = '';
+  groups.forEach(group => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'option-tab-btn' + (selectedOptionGroup === group ? ' active' : '');
+    btn.textContent = group === 'ALL' ? '전체' :
+      group === 'line' ? '라인' :
+      group === 'material' ? '재질' :
+      group === 'shape' ? '형태' :
+      group === 'finish' ? '마감' :
+      group === 'color' ? '컬러' :
+      group === 'print' ? '인쇄' : '면구분';
+    btn.addEventListener('click', () => {
+      selectedOptionGroup = group;
+      renderOptionGroupTabs();
+      renderOptionsTable(optionRows);
+    });
+    wrap.appendChild(btn);
+  });
 }
 
 function renderOptionsTable(rows){
@@ -935,9 +728,16 @@ function renderOptionsTable(rows){
     const keywordMatch = !keyword || text.includes(keyword);
     return groupMatch && keywordMatch;
   }).forEach(r => {
+    const groupLabel = r.group === 'line' ? '라인' :
+      r.group === 'material' ? '재질' :
+      r.group === 'shape' ? '형태' :
+      r.group === 'finish' ? '마감' :
+      r.group === 'color' ? '컬러' :
+      r.group === 'print' ? '인쇄' : '면구분';
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${escapeHtml(r.group || '')}</td>
+      <td>${escapeHtml(groupLabel)}</td>
       <td>${escapeHtml(r.name || '')}</td>
       <td>${escapeHtml(r.code || '')}</td>
       <td>${escapeHtml(String(r.sort_order || ''))}</td>
@@ -948,8 +748,7 @@ function renderOptionsTable(rows){
           <button class="mini-btn" data-group="${escapeAttr(r.group || '')}" data-code="${escapeAttr(r.code || '')}" data-row="${escapeAttr(String(r.row_no || ''))}" data-act="edit-opt">수정</button>
           <button class="mini-btn delete" data-group="${escapeAttr(r.group || '')}" data-code="${escapeAttr(r.code || '')}" data-row="${escapeAttr(String(r.row_no || ''))}" data-act="del-opt">삭제</button>
         </div>
-      </td>
-    `;
+      </td>`;
     tbody.appendChild(tr);
   });
 
@@ -970,47 +769,24 @@ function renderOptionsTable(rows){
       }finally{
         setLoading(false);
       }
-      if(result.success){ showToast(result.message || '삭제 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '삭제 실패', 'error'); }
       if(result.success){
         optimisticDeleteOption(btn.dataset.row);
         resetOptionForm();
+        showToast(result.message || '삭제 완료 · 바로 반영 중', 'success');
         await refreshAfterWrite('options');
+      } else {
+        showToast(result.message || '삭제 실패', 'error');
       }
     });
   });
 }
 
-
-function renderOptionGroupTabs(){
-  const wrap = q('optionGroupTabs');
-  if(!wrap) return;
-
-  const groups = ['ALL','line','product','type','finish','color','print','side'];
-  wrap.innerHTML = '';
-
-  groups.forEach(group => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'option-tab-btn' + (selectedOptionGroup === group ? ' active' : '');
-    btn.textContent = group === 'ALL' ? '전체' : group;
-    btn.addEventListener('click', () => {
-      selectedOptionGroup = group;
-      renderOptionGroupTabs();
-      renderOptionsTable(optionRows);
-    });
-    wrap.appendChild(btn);
-  });
-}
-
 function selectOption(group, code, rowNo){
-  const row = optionRows.find(r => String(r.group) === String(group) && String(r.code) === String(code) && String(r.row_no) === String(rowNo || r.row_no));
-  selectedOptionRowNo = rowNo || '';
+  const row = optionRows.find(r => String(r.row_no) === String(rowNo));
   if(!row) return;
   q('option_mode').value = 'update';
-  q('option_row_no').value = selectedOptionRowNo || (row ? row.row_no : '');
-  q('original_group').value = row.group || '';
-  q('original_code').value = row.code || '';
-  q('opt_group').value = row.group || '';
+  q('option_row_no').value = row.row_no || '';
+  q('opt_group').value = row.group || 'line';
   q('opt_name').value = row.name || '';
   q('opt_code').value = row.code || '';
   q('opt_sort_order').value = row.sort_order || '';
@@ -1021,37 +797,29 @@ function selectOption(group, code, rowNo){
 
 function resetOptionForm(){
   q('option_mode').value = 'create';
-  q('original_group').value = '';
-  q('original_code').value = '';
   q('option_row_no').value = '';
-  ['opt_group','opt_name','opt_code','opt_sort_order','opt_note'].forEach(id => q(id).value = '');
+  q('opt_group').value = 'line';
+  ['opt_name','opt_code','opt_sort_order','opt_note'].forEach(id => q(id).value = '');
   q('opt_use_yn').value = 'Y';
 }
 
 async function saveOption(){
   const mode = q('option_mode').value;
   const payload = {
-    group:q('opt_group').value.trim(),
+    group:q('opt_group').value,
     name:q('opt_name').value.trim(),
     code:q('opt_code').value.trim(),
     sort_order:q('opt_sort_order').value.trim() || '999',
     use_yn:q('opt_use_yn').value,
     note:q('opt_note').value.trim()
   };
-
-  if(!payload.group || !payload.name){ alert('구분과 이름은 입력해줘.'); return; }
+  if(!payload.group || !payload.name){ showToast('구분과 이름은 입력해줘.', 'error'); return; }
 
   let result;
   try{
     if(mode === 'update'){
       setLoading(true, '약어 수정 중...');
-      result = await apiPost({
-        action:'updateOption',
-        row_no:q('option_row_no').value,
-        original_group:q('original_group').value,
-        original_code:q('original_code').value,
-        ...payload
-      });
+      result = await apiPost({ action:'updateOption', row_no:q('option_row_no').value, ...payload });
     }else{
       setLoading(true, '약어 저장 중...');
       result = await apiPost({ action:'createOption', ...payload });
@@ -1064,11 +832,13 @@ async function saveOption(){
     setLoading(false);
   }
 
-  if(result.success){ showToast(result.message || '저장 완료 · 바로 반영 중', 'success'); } else { showToast(result.message || '저장 실패', 'error'); }
   if(result.success){
     optimisticUpsertOption(payload, mode);
     resetOptionForm();
+    showToast(result.message || '저장 완료 · 바로 반영 중', 'success');
     await refreshAfterWrite('options');
+  } else {
+    showToast(result.message || '저장 실패', 'error');
   }
 }
 
