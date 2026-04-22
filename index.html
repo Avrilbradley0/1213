@@ -558,11 +558,6 @@ function bindPreviewEvents(){
   });
 }
 
-  });
-  ['edit_is_free','edit_line','edit_material','edit_finish','edit_shape'].forEach(id => {
-    if(q(id)){ q(id).addEventListener('input', updateEditPreview); q(id).addEventListener('change', updateEditPreview); }
-  });
-}
 
 
 function formPayload(){
