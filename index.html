@@ -396,8 +396,9 @@ function renderMultiSelect(key, groupName){
   const rows = getGroupRows(groupName);
   const selected = MULTI_STATE[key] || [];
 
-  const selectedLabels = rows
-    .filter(r => selected.includes(String(r.code || '')))
+  const selectedLabels = selected
+    .map(code => rows.find(r => String(r.code || '') === String(code)))
+    .filter(Boolean)
     .map(r => `<span class="multi-chip">${escapeHtml(r.name)}${r.code ? ' (' + escapeHtml(r.code) + ')' : ''}</span>`)
     .join('');
 
