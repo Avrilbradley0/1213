@@ -632,14 +632,50 @@ function showToast(message, type='success'){
   window.__toastTimer = setTimeout(() => { el.style.display = 'none'; }, 1800);
 }
 
-async function apiGet(action){
-  const url = `${API_URL}?action=${encodeURIComponent(action)}&_ts=${Date.now()}`;
-  const res = await fetch(url, { cache:'no-store' });
-  return await res.json();
+function buildApiUrl(action){
+  const joiner = API_URL.includes('?') ? '&' : '?';
+  return `${API_URL}${joiner}action=${encodeURIComponent(action)}&_ts=${Date.now()}`;
 }
+
+async function safeJson(res){
+  const text = await res.text();
+  try{
+    return JSON.parse(text);
+  }catch(err){
+    throw new Error(`JSON 응답 파싱 실패: ${text.slice(0, 200)}`);
+  }
+}
+
+async function apiGet(action){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try{
+    const res = await fetch(buildApiUrl(action), {
+      method:'GET',
+      cache:'no-store',
+      signal: controller.signal
+    });
+    return await safeJson(res);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function apiPost(payload){
-  const res = await fetch(API_URL, { method:'POST', cache:'no-store', body: JSON.stringify(payload) });
-  return await res.json();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try{
+    const res = await fetch(API_URL, {
+      method:'POST',
+      cache:'no-store',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    return await safeJson(res);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function bindTabs(){
@@ -664,7 +700,9 @@ async function checkConnection(){
     const result = await apiGet('ping');
     setStatus(!!result.success);
   }catch(err){
+    console.error(err);
     setStatus(false);
+    showToast('연결 확인 실패: ' + (err.message || '알 수 없는 오류'), 'error');
   }
 }
 
