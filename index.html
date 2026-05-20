@@ -668,7 +668,6 @@ async function apiPost(payload){
     const res = await fetch(API_URL, {
       method:'POST',
       cache:'no-store',
-      headers:{'Content-Type':'application/json'},
       body: JSON.stringify(payload),
       signal: controller.signal
     });
