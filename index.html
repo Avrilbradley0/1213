@@ -637,7 +637,7 @@ function buildApiUrl(action){
   return `${API_URL}${joiner}action=${encodeURIComponent(action)}&_ts=${Date.now()}`;
 }
 
-async function safeJson(res){
+async async function safeJson(res){
   const text = await res.text();
   try{
     return JSON.parse(text);
@@ -1514,7 +1514,7 @@ function bindEvents(){
   q('btnResetOption').addEventListener('click', resetOptionForm);
 }
 
-async async function init(){
+async async async function init(){
   bindTabs();
   bindEvents();
   bindPreviewEvents();
