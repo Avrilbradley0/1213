@@ -395,6 +395,8 @@ th{background:#f8fafc;color:#475569;font-weight:800}
               <option value="shape">형태</option>
               <option value="finish">마감</option>
               <option value="body_color">본체컬러</option>
+              <option value="print_type">인쇄방식</option>
+              <option value="print_side">인쇄면</option>
               <option value="accessory_type">부자재타입</option>
               <option value="accessory_color">부자재컬러</option>
             </select>
@@ -1146,7 +1148,7 @@ function resetForm(){
 function renderOptionGroupTabs(){
   const wrap = q('optionGroupTabs');
   if(!wrap) return;
-  const groups = ['ALL','line','material','shape','finish','body_color','accessory_type','accessory_color'];
+  const groups = ['ALL','line','material','shape','finish','body_color','print_type','print_side','accessory_type','accessory_color'];
   wrap.innerHTML = '';
   groups.forEach(group => {
     const btn = document.createElement('button');
@@ -1158,6 +1160,8 @@ function renderOptionGroupTabs(){
       group === 'shape' ? '형태' :
       group === 'finish' ? '마감' :
       group === 'body_color' ? '본체컬러' :
+      group === 'print_type' ? '인쇄방식' :
+      group === 'print_side' ? '인쇄면' :
       group === 'accessory_type' ? '부자재타입' : '부자재컬러';
     btn.addEventListener('click', () => {
       selectedOptionGroup = group;
@@ -1193,6 +1197,8 @@ function renderOptionsTable(rows){
       r.group === 'shape' ? '형태' :
       r.group === 'finish' ? '마감' :
       r.group === 'body_color' ? '본체컬러' :
+      r.group === 'print_type' ? '인쇄방식' :
+      r.group === 'print_side' ? '인쇄면' :
       r.group === 'accessory_type' ? '부자재타입' : '부자재컬러';
 
     const tr = document.createElement('tr');
