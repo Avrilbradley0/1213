@@ -283,7 +283,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
         <div class="result-box">
           <div class="k">제품코드 <span class="badge">파생</span></div>
           <div class="v-sub" id="preview_product_code">-</div>
-          <div class="desc">기본코드 + 인쇄방식 + 인쇄면 + 사이즈 + 부자재 + 부자재컬러 구조입니다.</div>
+          <div class="desc">기본코드 + 인쇄면 + 인쇄방식 + 사이즈 + 부자재 + 부자재컬러 구조입니다.</div>
         </div>
 
         <div class="compact-list">
@@ -808,8 +808,8 @@ function buildBundleFromForm(prefix=''){
   const accessoryColor = q(prefix + 'accessory_color') ? String(q(prefix + 'accessory_color').value || '').trim() : '';
 
   const parts = [basicCode];
-  if(printType) parts.push(printType);
   if(printSide) parts.push(printSide);
+  if(printType) parts.push(printType);
   if(sizeCode) parts.push(sizeCode);
   if(accessoryType) parts.push(accessoryType);
   if(accessoryColor) parts.push(accessoryColor);
@@ -1416,6 +1416,18 @@ function renderParsedResult(parsed){
   html += chipGroup('인쇄방식', parsed.printTypeRows);
   html += chipGroup('인쇄면', parsed.printSideRows);
 
+  if(q('size_raw') && q('size_raw').value){
+    html += `<div class="chip-group"><div class="chip-label">사이즈</div><span class="multi-chip">${escapeHtml(q('size_raw').value)}</span></div>`;
+  }
+  if(q('accessory_type') && q('accessory_type').value){
+    const row = (optionGrouped.accessory_type || []).find(r => String(r.code || '') === String(q('accessory_type').value));
+    if(row) html += `<div class="chip-group"><div class="chip-label">부자재타입</div><span class="multi-chip">${escapeHtml(row.name)}${row.code ? ' (' + escapeHtml(row.code) + ')' : ''}</span></div>`;
+  }
+  if(q('accessory_color') && q('accessory_color').value){
+    const row = (optionGrouped.accessory_color || []).find(r => String(r.code || '') === String(q('accessory_color').value));
+    if(row) html += `<div class="chip-group"><div class="chip-label">부자재컬러</div><span class="multi-chip">${escapeHtml(row.name)}${row.code ? ' (' + escapeHtml(row.code) + ')' : ''}</span></div>`;
+  }
+
   const misses = [];
   if(!parsed.materialRows.length) misses.push('재질');
   if(!parsed.shapeRows.length) misses.push('형태');
@@ -1449,8 +1461,7 @@ function parseProductName(){
     matchedTerms: []
   };
 
-  const magsafeRows = getBestMatchesFromGroup('line', source).filter(r => normalizeFlat(r.name) === normalizeFlat('맥세이프'));
-  parsed.lineRows = magsafeRows;
+  parsed.lineRows = getBestMatchesFromGroup('line', source);
   parsed.materialRows = getBestMatchesFromGroup('material', source);
   parsed.finishRows = getBestMatchesFromGroup('finish', source);
   parsed.bodyColorRows = getBestMatchesFromGroup('body_color', source);
@@ -1484,7 +1495,22 @@ function parseProductName(){
   q('print_type').value = parsed.printTypeRows[0] ? String(parsed.printTypeRows[0].code || '') : '';
   q('print_side').value = parsed.printSideRows[0] ? String(parsed.printSideRows[0].code || '') : '';
 
-  if(!q('name').value.trim()) q('name').value = source;
+  const sizeMatch = source.match(/(\d+)\s*[xX×]\s*(\d+)/);
+  q('size_raw').value = sizeMatch ? `${sizeMatch[1]}X${sizeMatch[2]}` : '';
+
+  const accessoryTypeRows = getBestMatchesFromGroup('accessory_type', source);
+  const accessoryColorRows = getBestMatchesFromGroup('accessory_color', source);
+  q('accessory_type').value = accessoryTypeRows[0] ? String(accessoryTypeRows[0].code || '') : '';
+  q('accessory_color').value = accessoryColorRows[0] ? String(accessoryColorRows[0].code || '') : '';
+
+  parsed.matchedTerms = [
+    ...parsed.matchedTerms,
+    ...(sizeMatch ? [q('size_raw').value] : []),
+    ...accessoryTypeRows.map(r => r.name),
+    ...accessoryColorRows.map(r => r.name)
+  ];
+
+  q('name').value = source;
 
   renderParsedResult(parsed);
   updatePreview();
