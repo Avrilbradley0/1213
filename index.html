@@ -108,6 +108,24 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 .product-code-box{border:1px solid #dbe3ee;background:#fff;border-radius:16px;padding:14px 16px}
 @media (max-width:980px){.preview-row{grid-template-columns:1fr}}
 
+
+.grid-main{display:grid;grid-template-columns:1.15fr 0.85fr;gap:16px}
+.title-xl{font-size:34px;font-weight:800;color:var(--navy);margin-bottom:4px}
+.input-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-top:14px}
+.fold-box{border:1px dashed #d6dde7;border-radius:14px;padding:10px 12px;background:#fbfcfd;margin-top:10px}
+.chip-bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.warn-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:12px 14px;font-size:13px;color:#9a3412;margin-top:12px}
+.compact-list{display:grid;gap:10px}
+.compact-item{border:1px solid #dbe3ee;background:#fff;border-radius:14px;padding:12px 14px}
+.product-code-box{border:1px solid #dbe3ee;background:#fff;border-radius:16px;padding:14px 16px}
+.v-main{font-size:30px;font-weight:900;color:var(--navy);word-break:break-all}
+.v-sub{font-size:22px;font-weight:800;color:var(--navy);word-break:break-all}
+.k{font-size:13px;color:var(--sub);margin-bottom:8px}
+.desc{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.5}
+@media (max-width:980px){
+  .grid-main,.input-row{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -148,35 +166,33 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 
 
 
+
 <section id="tab-code">
-  <div class="grid-2">
+  <div class="grid-main">
     <div class="card">
-      <div style="font-size:34px;font-weight:800;color:var(--navy);margin-bottom:4px">코드 생성</div>
+      <div class="title-xl">코드 생성</div>
       <div class="small">기본코드가 메인이고, 제품코드는 기본코드를 기준으로 파생됩니다.</div>
 
       <div class="note-box">
-        <b>기본코드</b>가 우선 생성되고, <b>제품코드</b>는 기본코드 뒤에 옵션이 붙는 구조입니다.<br/>
+        기본코드가 우선 생성되고, 제품코드는 기본코드 뒤에 옵션이 붙는 구조입니다.<br/>
         본체 컬러는 기본코드에 포함되고, 부자재 컬러는 제품코드 확장부에만 붙습니다.<br/>
         예: <b>GBMRSV</b> / <b>FE_GLACKEG_20_BALL_SV</b>
       </div>
 
-      <div class="grid-forms">
-        <div class="field span-2">
+      <div class="input-row">
+        <div class="field">
           <label>상품명</label>
-          <input type="text" id="source_name" placeholder="예: 자유형 글리터 아크릴 키링 20X20 볼체인 실버" />
+          <input type="text" id="source_name" placeholder="예: 자유형 투명아크릴 키링 양면인쇄 라미 60X60 스트랩" />
         </div>
+        <button class="btn" id="btnParseName">상품명 자동 인식</button>
+      </div>
 
-        <div class="field span-2">
-          <div class="actions" style="margin-top:0">
-            <button class="btn" id="btnParseName">상품명 자동 인식</button>
-          </div>
-        </div>
+      <div class="fold-box">
+        <div class="small">자동 인식 결과</div>
+        <div class="chip-bar" id="parse_result_box">아직 분석 전입니다.</div>
+      </div>
 
-        <div class="field span-2">
-          <label>자동 인식 결과</label>
-          <div class="note-box" id="parse_result_box" style="margin:0">아직 분석 전입니다.</div>
-        </div>
-
+      <div class="form-grid">
         <div class="field">
           <label>유형</label>
           <select id="is_free">
@@ -185,51 +201,56 @@ th{background:#f8fafc;color:#475569;font-weight:800}
           </select>
         </div>
 
-        <div class="field span-2 multi-field">
+        <div class="field">
           <label>라인</label>
           <div id="line_multi" class="multi-select"></div>
         </div>
 
-        <div class="field span-2 multi-field">
+        <div class="field">
           <label>재질</label>
           <div id="material_multi" class="multi-select"></div>
         </div>
 
-        <div class="preview-row span-2">
-          <div class="field multi-field">
-            <label>마감/효과</label>
-            <div id="finish_multi" class="multi-select"></div>
-          </div>
-          <div class="field multi-field">
-            <label>본체컬러 <span class="badge">기본코드용</span></label>
-            <div id="body_color_multi" class="multi-select"></div>
-          </div>
-        </div>
-
-        <div class="field span-2 multi-field">
+        <div class="field">
           <label>형태</label>
           <div id="shape_multi" class="multi-select"></div>
         </div>
 
-        <div class="field span-2">
-          <div class="highlight">
-            여기까지가 <b>기본코드 생성 영역</b>입니다.<br/>
-            아래부터는 기본코드를 기준으로 제품코드를 확장하는 보조 옵션입니다.
-          </div>
+        <div class="field">
+          <label>마감/효과</label>
+          <div id="finish_multi" class="multi-select"></div>
         </div>
 
-        <div class="preview-row span-2">
-          <div class="field">
-            <label>사이즈 <span class="badge">제품코드용</span></label>
-            <input type="text" id="size_raw" placeholder="예: 20X20, 20X40" />
-          </div>
-          <div class="field">
-            <label>부자재/링 타입 <span class="badge">제품코드용</span></label>
-            <select id="accessory_type"></select>
-          </div>
+        <div class="field">
+          <label>본체컬러 <span class="badge">기본코드용</span></label>
+          <div id="body_color_multi" class="multi-select"></div>
         </div>
 
-        <div class="field span-2">
+        <div class="span-2 warn-box">
+          여기까지가 기본코드 생성 영역입니다. 아래부터는 제품코드를 확장하는 보조 옵션입니다.
+        </div>
+
+        <div class="field">
+          <label>인쇄방식 <span class="badge">제품코드용</span></label>
+          <select id="print_type"></select>
+        </div>
+
+        <div class="field">
+          <label>인쇄면 <span class="badge">제품코드용</span></label>
+          <select id="print_side"></select>
+        </div>
+
+        <div class="field">
+          <label>사이즈 <span class="badge">제품코드용</span></label>
+          <input type="text" id="size_raw" placeholder="예: 20X20, 20X40" />
+        </div>
+
+        <div class="field">
+          <label>부자재/링 타입 <span class="badge">제품코드용</span></label>
+          <select id="accessory_type"></select>
+        </div>
+
+        <div class="field">
           <label>부자재컬러 <span class="badge">제품코드용</span></label>
           <select id="accessory_color"></select>
         </div>
@@ -248,29 +269,37 @@ th{background:#f8fafc;color:#475569;font-weight:800}
     </div>
 
     <div class="card">
-      <div style="font-size:34px;font-weight:800;color:var(--navy);margin-bottom:4px">생성 결과</div>
-      <div class="small">기본코드가 메인이고, 제품코드는 그 기본코드를 확장한 보조 코드입니다.</div>
+      <div class="title-xl">생성 결과</div>
+      <div class="small">오른쪽은 고정 요약만 보여주도록 줄인 구조입니다.</div>
 
-      <div class="result-box" style="margin-top:14px">
-        <div class="result-item">
+      <div class="result-wrap" style="margin-top:14px">
+        <div class="result-box">
           <div class="k">기본 코드 <span class="badge">메인</span></div>
-          <div class="v" id="preview_basic_code">-</div>
+          <div class="v-main" id="preview_basic_code">-</div>
           <div class="desc">상품명 인식 순서 기준으로 생성됩니다.</div>
         </div>
 
-        <div class="split-line"></div>
-
-        <div class="result-item">
+        <div class="result-box">
           <div class="k">제품코드 <span class="badge">파생</span></div>
-          <div class="product-code-box">
-            <div class="v subcode" id="preview_product_code">-</div>
-            <div class="desc">구성: 기본코드 + _사이즈 + _부자재 + _부자재컬러</div>
+          <div class="v-sub" id="preview_product_code">-</div>
+          <div class="desc">기본코드 + 인쇄방식 + 인쇄면 + 사이즈 + 부자재 + 부자재컬러 구조입니다.</div>
+        </div>
+
+        <div class="compact-list">
+          <div class="compact-item">
+            <div class="k">규칙 요약</div>
+            <div class="desc">20X20처럼 같은 값이면 20으로 줄이고, 20X40처럼 다르면 그대로 사용합니다.</div>
+          </div>
+          <div class="compact-item">
+            <div class="k">옵션 분리</div>
+            <div class="desc">본체컬러는 기본코드용, 인쇄방식/인쇄면/사이즈/부자재/부자재컬러는 제품코드용으로 분리합니다.</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
 
 
 
@@ -420,7 +449,7 @@ th{background:#f8fafc;color:#475569;font-weight:800}
 <div class="toast" id="toast"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyLgGfFwz8mnTLjgN66C6-eAgX8GsTilx-LBpcvdeXJaL3Rbubct7TqBlYMKBe9vGIz/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxX9wdGQ4_ZyoaP_dYM-qlh0oR0olRTO32Vnm2zzdQqvg2TxUB9xfA-fyg8C507s5hV/exec";
 
 let optionRows = [];
 let optionGrouped = {};
@@ -663,6 +692,7 @@ function fillSelect(id, rows){
 
 
 
+
 async function loadOptions(){
   const result = await apiGet('getOptions');
   if(!result.success){ showToast(result.message || '약어 조회 실패', 'error'); return; }
@@ -682,8 +712,12 @@ async function loadOptions(){
   renderMultiSelect('edit_body_color', 'body_color');
   renderMultiSelect('edit_shape', 'shape');
 
+  fillSimpleSelect('print_type', optionGrouped.print_type || []);
+  fillSimpleSelect('print_side', optionGrouped.print_side || []);
   fillSimpleSelect('accessory_type', optionGrouped.accessory_type || []);
   fillSimpleSelect('accessory_color', optionGrouped.accessory_color || []);
+  fillSimpleSelect('edit_print_type', optionGrouped.print_type || []);
+  fillSimpleSelect('edit_print_side', optionGrouped.print_side || []);
   fillSimpleSelect('edit_accessory_type', optionGrouped.accessory_type || []);
   fillSimpleSelect('edit_accessory_color', optionGrouped.accessory_color || []);
 
@@ -692,6 +726,7 @@ async function loadOptions(){
   updatePreview();
   updateEditPreview();
 }
+
 
 
 
@@ -726,11 +761,15 @@ function buildBundleFromForm(prefix=''){
       );
   const basicCode = (isFree ? 'FE_' : '') + baseCode;
 
+  const printType = q(prefix + 'print_type') ? String(q(prefix + 'print_type').value || '').trim() : '';
+  const printSide = q(prefix + 'print_side') ? String(q(prefix + 'print_side').value || '').trim() : '';
   const sizeCode = normalizeSizeCode(q(prefix + 'size_raw') ? q(prefix + 'size_raw').value : '');
   const accessoryType = q(prefix + 'accessory_type') ? String(q(prefix + 'accessory_type').value || '').trim() : '';
   const accessoryColor = q(prefix + 'accessory_color') ? String(q(prefix + 'accessory_color').value || '').trim() : '';
 
   const parts = [basicCode];
+  if(printType) parts.push(printType);
+  if(printSide) parts.push(printSide);
   if(sizeCode) parts.push(sizeCode);
   if(accessoryType) parts.push(accessoryType);
   if(accessoryColor) parts.push(accessoryColor);
@@ -777,6 +816,8 @@ function formPayload(){
     finish:joinCodes(getMultiCodes('finish')),
     body_color:joinCodes(getMultiCodes('body_color')),
     shape:joinCodes(getMultiCodes('shape')),
+    print_type:q('print_type').value,
+    print_side:q('print_side').value,
     size_raw:q('size_raw').value.trim(),
     accessory_type:q('accessory_type').value,
     accessory_color:q('accessory_color').value,
@@ -801,6 +842,8 @@ function editPayload(){
     finish:joinCodes(getMultiCodes('edit_finish')),
     body_color:joinCodes(getMultiCodes('edit_body_color')),
     shape:joinCodes(getMultiCodes('edit_shape')),
+    print_type:q('edit_print_type').value,
+    print_side:q('edit_print_side').value,
     size_raw:q('edit_size_raw').value.trim(),
     accessory_type:q('edit_accessory_type').value,
     accessory_color:q('edit_accessory_color').value,
@@ -1041,6 +1084,8 @@ function resetForm(){
   q('source_name').value = '';
   q('name').value = '';
   q('size_raw').value = '';
+  q('print_type').value = '';
+  q('print_side').value = '';
   q('accessory_type').value = '';
   q('accessory_color').value = '';
   q('is_free').value = 'N';
@@ -1236,10 +1281,9 @@ function normalizeFlat(text){
 function getBestMatchesFromGroup(groupName, source){
   const rows = [...(optionGrouped[groupName] || [])];
   if(!rows.length) return [];
-  const flat = normalizeFlat(source);
 
-  // 먼저 긴 이름 우선으로 겹치는 토큰을 안정적으로 찾고,
-  // 최종 반환은 상품명 등장 순서대로 정렬한다.
+  const sourceText = normalizeText(source);
+  const sourceTokens = sourceText.split(/\s+/).filter(Boolean);
   const scanRows = [...rows].sort((a, b) => {
     const lenA = normalizeFlat(a.name || '').length;
     const lenB = normalizeFlat(b.name || '').length;
@@ -1248,25 +1292,67 @@ function getBestMatchesFromGroup(groupName, source){
   });
 
   const matched = [];
+
+  function tryMatchToken(optionNameFlat, tokenFlat){
+    if(!optionNameFlat || !tokenFlat) return -1;
+    if(tokenFlat === optionNameFlat) return 0;
+    // 한 글자 약어/단어는 포함 매칭 금지. "자" 같은 과매칭 방지
+    if(optionNameFlat.length < 2) return -1;
+    return tokenFlat.indexOf(optionNameFlat);
+  }
+
   for(const row of scanRows){
     const target = normalizeFlat(row.name || '');
     if(!target) continue;
-    const idx = flat.indexOf(target);
-    if(idx > -1){
+
+    let foundTokenIndex = -1;
+    let foundCharIndex = -1;
+
+    // 1) 공백 기준 토큰 안에서 정확/포함 매칭
+    for(let i = 0; i < sourceTokens.length; i++){
+      const tokenFlat = normalizeFlat(sourceTokens[i]);
+      const charIdx = tryMatchToken(target, tokenFlat);
+      if(charIdx > -1){
+        foundTokenIndex = i;
+        foundCharIndex = charIdx;
+        break;
+      }
+    }
+
+    // 2) 옵션명 자체가 여러 단어인 경우, 인접 토큰 이어붙인 값과도 비교
+    if(foundTokenIndex === -1 && String(row.name || '').includes(' ')){
+      const targetWords = normalizeText(row.name).split(/\s+/).filter(Boolean).length;
+      for(let i = 0; i < sourceTokens.length; i++){
+        const joined = normalizeFlat(sourceTokens.slice(i, i + targetWords).join(' '));
+        if(joined === target){
+          foundTokenIndex = i;
+          foundCharIndex = 0;
+          break;
+        }
+      }
+    }
+
+    if(foundTokenIndex > -1){
       const code = String(row.code || '');
       if(!matched.some(m => String(m.code || '') === code && String(m.name || '') === String(row.name || ''))){
-        matched.push({ ...row, __matchIndex: idx, __matchLength: target.length });
+        matched.push({
+          ...row,
+          __tokenIndex: foundTokenIndex,
+          __charIndex: foundCharIndex,
+          __matchLength: target.length
+        });
       }
     }
   }
 
   matched.sort((a, b) => {
-    if(a.__matchIndex !== b.__matchIndex) return a.__matchIndex - b.__matchIndex;
+    if(a.__tokenIndex !== b.__tokenIndex) return a.__tokenIndex - b.__tokenIndex;
+    if(a.__charIndex !== b.__charIndex) return a.__charIndex - b.__charIndex;
     if(a.__matchLength !== b.__matchLength) return b.__matchLength - a.__matchLength;
     return Number(a.sort_order || 999) - Number(b.sort_order || 999);
   });
 
-  return matched.map(({__matchIndex, __matchLength, ...rest}) => rest);
+  return matched.map(({__tokenIndex, __charIndex, __matchLength, ...rest}) => rest);
 }
 
 function renderParsedResult(parsed){
@@ -1283,6 +1369,8 @@ function renderParsedResult(parsed){
   html += chipGroup('마감', parsed.finishRows);
   html += chipGroup('본체컬러', parsed.bodyColorRows);
   html += chipGroup('형태', parsed.shapeRows);
+  html += chipGroup('인쇄방식', parsed.printTypeRows);
+  html += chipGroup('인쇄면', parsed.printSideRows);
 
   const misses = [];
   if(!parsed.materialRows.length) misses.push('재질');
@@ -1312,6 +1400,8 @@ function parseProductName(){
     finishRows: [],
     bodyColorRows: [],
     shapeRows: [],
+    printTypeRows: [],
+    printSideRows: [],
     matchedTerms: []
   };
 
@@ -1321,13 +1411,17 @@ function parseProductName(){
   parsed.finishRows = getBestMatchesFromGroup('finish', source);
   parsed.bodyColorRows = getBestMatchesFromGroup('body_color', source);
   parsed.shapeRows = getBestMatchesFromGroup('shape', source);
+  parsed.printTypeRows = getBestMatchesFromGroup('print_type', source);
+  parsed.printSideRows = getBestMatchesFromGroup('print_side', source);
 
   parsed.matchedTerms = [
     ...parsed.lineRows.map(r => r.name),
     ...parsed.materialRows.map(r => r.name),
     ...parsed.finishRows.map(r => r.name),
     ...parsed.bodyColorRows.map(r => r.name),
-    ...parsed.shapeRows.map(r => r.name)
+    ...parsed.shapeRows.map(r => r.name),
+    ...parsed.printTypeRows.map(r => r.name),
+    ...parsed.printSideRows.map(r => r.name)
   ];
 
   q('is_free').value = parsed.is_free ? 'Y' : 'N';
@@ -1342,6 +1436,9 @@ function parseProductName(){
   renderMultiSelect('finish', 'finish');
   renderMultiSelect('body_color', 'body_color');
   renderMultiSelect('shape', 'shape');
+
+  q('print_type').value = parsed.printTypeRows[0] ? String(parsed.printTypeRows[0].code || '') : '';
+  q('print_side').value = parsed.printSideRows[0] ? String(parsed.printSideRows[0].code || '') : '';
 
   if(!q('name').value.trim()) q('name').value = source;
 
@@ -1359,7 +1456,7 @@ function bindEvents(){
   q('source_name').addEventListener('keydown', (e) => {
     if(e.key === 'Enter'){ e.preventDefault(); parseProductName(); }
   });
-  ['size_raw','accessory_type','accessory_color'].forEach(id => {
+  ['size_raw','print_type','print_side','accessory_type','accessory_color'].forEach(id => {
     if(q(id)){ q(id).addEventListener('input', updatePreview); q(id).addEventListener('change', updatePreview); }
   });
 
@@ -1369,7 +1466,7 @@ function bindEvents(){
   q('btnDeleteSelected').addEventListener('click', deleteSelected);
   q('btnClearEdit').addEventListener('click', clearEdit);
 
-  ['edit_size_raw','edit_accessory_type','edit_accessory_color'].forEach(id => {
+  ['edit_size_raw','edit_print_type','edit_print_side','edit_accessory_type','edit_accessory_color'].forEach(id => {
     if(q(id)){ q(id).addEventListener('input', updateEditPreview); q(id).addEventListener('change', updateEditPreview); }
   });
 
