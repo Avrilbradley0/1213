@@ -833,6 +833,20 @@ function rankedProductCandidates(input){
     .sort((a,b)=>b.score-a.score||byText(a.product.name,b.product.name))
     .slice(0,7);
 }
+function normalizeExactProductName(value){
+  return String(value||'')
+    .toLowerCase()
+    .replace(/\[([^\]]+)\]/g,' $1 ')
+    .replace(/[^0-9a-z가-힣+.\s]/gi,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function uniqueExactProductCandidate(input){
+  const q=normalizeExactProductName(input);
+  if(!q)return null;
+  const exact=state.products.filter(p=>normalizeExactProductName(p.name)===q);
+  return exact.length===1?exact[0]:null;
+}
 function fixedProductTerms(product){
   const text=(product.decomposition||product.name||'')
     .replace(/\[[^\]]+\]/g,' ');
@@ -1110,7 +1124,8 @@ function makeFreeToken(raw,candidates,index,total,inputText){
 function analyzeFreeInput(){
   document.getElementById('freeFinalCode').dataset.manual='';
   const input=document.getElementById('freeInput').value.trim();
-  const selectedProductId=freeBuilder.selectedProductId;
+  const exactProduct=uniqueExactProductCandidate(input);
+  const selectedProductId=exactProduct?.id||freeBuilder.selectedProductId;
   freeBuilder={tokens:[],input,selectedProductId};
   if(!input){renderFreeTokens();updateFreeOutput();return}
   const master=buildFreeCandidates();
