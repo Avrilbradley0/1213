@@ -841,11 +841,19 @@ function normalizeExactProductName(value){
     .replace(/\s+/g,' ')
     .trim();
 }
-function uniqueExactProductCandidate(input){
-  const q=normalizeExactProductName(input);
+function compactProductName(value){
+  return normalizeExactProductName(value).replace(/\s+/g,'');
+}
+function uniqueProductRuleCandidate(input){
+  const q=compactProductName(input);
   if(!q)return null;
-  const exact=state.products.filter(p=>normalizeExactProductName(p.name)===q);
-  return exact.length===1?exact[0]:null;
+  const matches=state.products
+    .map(p=>({product:p,key:compactProductName(p.name)}))
+    .filter(x=>x.key&&q.includes(x.key));
+  if(!matches.length)return null;
+  const longest=Math.max(...matches.map(x=>x.key.length));
+  const best=matches.filter(x=>x.key.length===longest);
+  return best.length===1?best[0].product:null;
 }
 function fixedProductTerms(product){
   const text=(product.decomposition||product.name||'')
@@ -1124,8 +1132,8 @@ function makeFreeToken(raw,candidates,index,total,inputText){
 function analyzeFreeInput(){
   document.getElementById('freeFinalCode').dataset.manual='';
   const input=document.getElementById('freeInput').value.trim();
-  const exactProduct=uniqueExactProductCandidate(input);
-  const selectedProductId=exactProduct?.id||freeBuilder.selectedProductId;
+  const matchedProduct=uniqueProductRuleCandidate(input);
+  const selectedProductId=matchedProduct?.id||freeBuilder.selectedProductId;
   freeBuilder={tokens:[],input,selectedProductId};
   if(!input){renderFreeTokens();updateFreeOutput();return}
   const master=buildFreeCandidates();
