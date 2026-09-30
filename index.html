@@ -724,25 +724,10 @@ function getSelectedOption(ph,el,product){
 function deriveDeviceParts(device,product,allPlaceholders){
   const code=device.code||'';
   const result={};
-  if(allPlaceholders.includes('인치')){
-    let m=code.match(/^(?:TAB|IPAD)_(\d+)(?:_|$)/);
-    if(m) result['인치']=m[1];
   const tablet=code.match(/^(TAB|IPAD)_(\d+)(?:_(.+))?$/);
   if(tablet&&allPlaceholders.includes('인치')){
     // The integrated code keeps the device family with the size: TAB_11 / IPAD_11.
     result['인치']=`${tablet[1]}_${tablet[2]}`;
-  }
-  const special=allPlaceholders.find(x=>x.startsWith('기종('));
-  if(special){
-    const m=code.match(/^IPAD_\d+_(.+)$/);
-    result[special]=m?m[1]:'';
-  }
-  if(allPlaceholders.includes('기종')){
-    if(code.startsWith('TAB_')){
-      const m=code.match(/^TAB_\d+_(.+)$/);result['기종']=m?m[1]:code;
-    }else if(code.startsWith('IPAD_')&&allPlaceholders.includes('인치')){
-      const m=code.match(/^IPAD_\d+_(.+)$/);result['기종']=m?m[1]:'';
-    }else result['기종']=code;
   }
   allPlaceholders.filter(x=>canonicalPlaceholder(x)==='기종').forEach(ph=>{
     result[ph]=tablet&&allPlaceholders.includes('인치')?(tablet[3]||''):code;
@@ -763,7 +748,6 @@ function generateCode(){
     const derived=deriveDeviceParts(selected[deviceKey].raw,product,phs);
     Object.entries(derived).forEach(([k,v])=>{
       // A registered device determines both size and model; a model suffix may be optional.
-      if(v&&!selected[k])selected[k]={korean:v,english:v,code:v,raw:v};
       selected[k]={korean:v,english:v,code:v,raw:v};
     });
     missing=missing.filter(k=>!selected[k]);
@@ -829,7 +813,6 @@ function productMatchNames(product){
 }
 function productCandidateScore(product,input){
   const q=normalizeProductText(input);
-  const name=normalizeProductText(product.name);
   const name=productMatchNames(product).map(normalizeProductText).sort((a,b)=>b.length-a.length).find(n=>q.includes(n))||normalizeProductText(product.name);
   const decomp=normalizeProductText(product.decomposition);
   if(!q||!name)return 0;
@@ -867,12 +850,10 @@ function uniqueProductRuleCandidate(input){
   const q=compactProductName(input);
   if(!q)return null;
   const matches=state.products
-    .map(p=>({product:p,key:compactProductName(p.name)}))
     .flatMap(p=>productMatchNames(p).map(name=>({product:p,key:compactProductName(name)})))
     .filter(x=>x.key&&q.includes(x.key));
   if(!matches.length)return null;
   const longest=Math.max(...matches.map(x=>x.key.length));
-  const best=matches.filter(x=>x.key.length===longest);
   const best=[...new Map(matches.filter(x=>x.key.length===longest).map(x=>[x.product.id,x])).values()];
   return best.length===1?best[0].product:null;
 }
@@ -1030,26 +1011,20 @@ function deviceAliases(name){
   const words=aliasWords(name);
   if(!words.length)return [];
   const aliases=[name];
-  // A combined model (for example AirPods 1 / 2) must not become a new number.
-  if(/[ㆍ·,/]/.test(name))return aliases;
-  aliases.push(words.join(''));
   const combined=/[ㆍ·,/]/.test(name);
   // A combined model (for example S7·S8) remains a single registered device.
   // Its full model phrase may omit the brand, but never invent a merged number.
   if(!combined)aliases.push(words.join(''));
   if(['아이폰','갤럭시','갤럭시탭','아이패드','에어팟','버즈'].includes(words[0])&&words.length>1){
     const model=words.slice(1);
-    aliases.push(words[0]+' '+model.join(''));
     if(!combined)aliases.push(words[0]+' '+model.join(''));
     if(!/^\d+$/.test(model.join(''))){
-      aliases.push(model.join(' '),model.join(''));
       aliases.push(model.join(' '));
       if(!combined)aliases.push(model.join(''));
     }
   }
   return [...new Set(aliases.map(a=>normalizeAliasText(a)).filter(Boolean))];
 }
-function buildFreeCandidates(){
 function buildFreeCandidates(product=null){
   const list=[];
   state.abbreviations.forEach(a=>{
@@ -1066,7 +1041,6 @@ function buildFreeCandidates(product=null){
       });
     });
   });
-  state.devices.forEach(d=>{
   (product?suggestedDevices(product):state.devices).forEach(d=>{
     if(d.enabled===false||String(d.status||'').startsWith('미사용'))return;
     deviceAliases(d.name).forEach(alias=>{
@@ -1208,7 +1182,6 @@ function analyzeFreeInput(){
   freeBuilder={tokens:[],input,selectedProductId};
   if(!input){renderFreeTokens();updateFreeOutput();return}
   const product=state.products.find(p=>p.id===selectedProductId);
-  const master=buildFreeCandidates();
   const master=buildFreeCandidates(product);
   let words=freeInputWords(input);
   const parsed=[];
