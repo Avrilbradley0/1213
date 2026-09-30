@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- CUSTOMLAND_TABLET_ORDER_FIX_20260930 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -912,9 +913,8 @@ function renderExistingProductMatches(){
   </div>`;
 }
 function selectFreeProduct(id){
-  freeBuilder.selectedProductId=id;
-  document.getElementById('freeFinalCode').dataset.manual='';
-  updateFreeOutput();
+  // Reinterpret options in the selected family's context, including typoed names.
+  analyzeFreeInput({productId:id});
 }
 function clearFreeProductSelection(){
   freeBuilder.selectedProductId=null;
@@ -1007,6 +1007,50 @@ function assembleWithSelectedProduct(overrides={}){
   };
 }
 
+function resolveTabletInput(inputWords,product){
+  const context=[product?.name||'',product?.decomposition||'',inputWords.join(' ')].join(' ');
+  const families=[...new Set(['아이패드','갤럭시탭'].filter(name=>context.includes(name)))];
+  if(families.length!==1)return {words:inputWords,matches:[],indices:new Set(),blocked:false};
+  const family=families[0],codePrefix=family==='아이패드'?'IPAD_':'TAB_';
+  const devices=(product?suggestedDevices(product):state.devices)
+    .filter(d=>d.enabled!==false&&!String(d.status||'').startsWith('미사용')&&String(d.code||'').startsWith(codePrefix));
+  const componentWords=d=>aliasWords(d.name).filter(word=>word!==normalizeAliasText(family));
+  const normalizePart=word=>normalizeAliasText(word)
+    .replace(/^gen(\d+)$/,'$1세대')
+    .replace(/(\d)(?:플러스|plus|pl)$/,'$1+')
+    .replace(/(?:인치|inch)$/,'');
+  const components=devices.flatMap(componentWords);
+  const singles=[...new Set(components)].map(word=>({words:[word]}));
+  // Recognize joined option phrases such as M411인치 without rewriting the query.
+  const words=inputWords.flatMap(word=>segmentCompoundWord(word,singles)||[word]);
+  const keys=words.map(normalizePart);
+  const modelKeys=new Set(components.filter(word=>!/^\d+(?:\.\d+)?인치$/.test(word)).map(normalizePart));
+  const modelIndices=keys.map((key,index)=>({key,index}))
+    .filter(({key})=>modelKeys.has(key)||/^(?:m\d+|s\d+[a-z0-9+]*|\d+세대)$/.test(key)).map(({index})=>index);
+  const inchIndices=words.map((word,index)=>({word,index}))
+    .filter(({word})=>/^\d+(?:\.\d+)?(?:인치|inch)$/i.test(word)).map(({index})=>index);
+  const matches=[];
+  devices.forEach(device=>{
+    const required=componentWords(device);
+    if(!required.some(word=>/^\d+(?:\.\d+)?인치$/.test(word)))return;
+    const indices=new Set();
+    for(const word of required){
+      const key=normalizePart(word);
+      const index=keys.findIndex((value,i)=>value===key&&!indices.has(i));
+      if(index<0)return;
+      indices.add(index);
+    }
+    // A shorter size-only device must not swallow an unknown/conflicting model.
+    if([...modelIndices,...inchIndices].some(index=>!indices.has(index)))return;
+    matches.push({device,indices,specificity:required.length});
+  });
+  if(!matches.length)return {words,matches:[],indices:new Set(),blocked:modelIndices.length>0||inchIndices.length>1};
+  const specificity=Math.max(...matches.map(match=>match.specificity));
+  const best=matches.filter(match=>match.specificity===specificity);
+  const indices=new Set(best.flatMap(match=>[...match.indices]));
+  if(!product)words.forEach((word,index)=>{if(normalizeAliasText(word)===normalizeAliasText(family))indices.add(index)});
+  return {words,matches:best,indices,blocked:false};
+}
 function deviceAliases(name){
   const words=aliasWords(name);
   if(!words.length)return [];
@@ -1174,19 +1218,35 @@ function makeFreeToken(raw,candidates,index,total,inputText){
     choiceRequired
   };
 }
-function analyzeFreeInput(){
+function analyzeFreeInput(options={}){
   document.getElementById('freeFinalCode').dataset.manual='';
   const input=document.getElementById('freeInput').value.trim();
   const matchedProduct=uniqueProductRuleCandidate(input);
   // A manually selected product applies only to the query it was selected for.
-  const selectedProductId=matchedProduct?.id||(input===freeBuilder.input?freeBuilder.selectedProductId:null);
+  const explicitProduct=state.products.find(p=>p.id===options.productId);
+  const selectedProductId=explicitProduct?.id||matchedProduct?.id||(input===freeBuilder.input?freeBuilder.selectedProductId:null);
   freeBuilder={tokens:[],input,selectedProductId};
   if(!input){renderFreeTokens();updateFreeOutput();return}
   const product=state.products.find(p=>p.id===selectedProductId);
-  const master=buildFreeCandidates(product);
-  let words=freeInputWords(input);
+  const tablet=resolveTabletInput(freeInputWords(input),product);
+  let master=buildFreeCandidates(product);
+  // Do not fall back to a partial registered tablet when model evidence conflicts.
+  if(tablet.blocked||tablet.matches.length)master=master.filter(candidate=>candidate.source!=='device'||!/^(?:TAB|IPAD)_/.test(candidate.code));
+  const words=tablet.words;
+  const tabletStart=tablet.indices.size?Math.min(...tablet.indices):-1;
   const parsed=[];
   for(let i=0;i<words.length;){
+    if(tablet.indices.has(i)){
+      if(i===tabletStart){
+        const raw=[...tablet.indices].sort((a,b)=>a-b).map(index=>words[index]).join(' ');
+        const candidates=tablet.matches.map(({device:d})=>({
+          source:'device',sourceId:d.id,alias:raw,words:aliasWords(raw),korean:d.name,english:d.english,
+          code:d.code,originalCode:d.code,group:'기종',note:d.status||''
+        }));
+        parsed.push({raw,candidates});
+      }
+      i++;continue;
+    }
     const match=matchCandidatesAt(words,i,master);
     if(match.length){
       const raw=words.slice(i,i+match.length).join(' ');
@@ -1409,7 +1469,11 @@ function freeAlerts(code){
   if(!code)add('error','생성된 코드가 없습니다','기본 또는 옵션 구간에 코드가 하나 이상 있어야 합니다.');
   if(code&&!/^[A-Z0-9_]+$/.test(code))add('error','허용되지 않는 문자가 있습니다','제품코드는 영문 대문자, 숫자, 언더바(_)만 사용하세요.');
   if(/^_|_$|__/.test(code))add('error','언더바 형식 오류','앞뒤 언더바 또는 연속 언더바를 정리하세요.');
-  const parts=code.split('_').filter(Boolean);
+  // TAB/IPAD and generation numbers may legitimately repeat inside registered
+  // rules/devices. Check repeated option values, not their internal code pieces.
+  const parts=assembleFreeCode()===code
+    ? freeBuilder.tokens.filter(token=>token.zone==='option'&&(!selectedAssembly||!tokenCoveredByProduct(token,selectedAssembly.product))).map(token=>String(token.code||'').trim()).filter(Boolean)
+    : code.split('_').filter(Boolean);
   const repeated=unique(parts.filter((p,i)=>parts.indexOf(p)!==i));
   if(repeated.length)add('warn','같은 옵션 코드가 반복됩니다',repeated.join(', ')+'가 최종 코드 안에서 반복됩니다.');
   const match=currentKnownCodeMatches(code);
@@ -1768,3 +1832,4 @@ startAutomaticSheetSync();
 </script>
 </body>
 </html>
+
