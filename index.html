@@ -1175,7 +1175,7 @@ function makeFreeToken(raw,candidates,index,total,inputText){
   };
 }
 function analyzeFreeInput(){
-  document.getElementById('freeFinalCode').dataset.manual='';
+  const selectedProductId=matchedProduct?.id||freeBuilder.selectedProductId;
   const input=document.getElementById('freeInput').value.trim();
   const matchedProduct=uniqueProductRuleCandidate(input);
   const selectedProductId=matchedProduct?.id||freeBuilder.selectedProductId;
