@@ -1175,10 +1175,9 @@ function makeFreeToken(raw,candidates,index,total,inputText){
   };
 }
 function analyzeFreeInput(){
-  const selectedProductId=matchedProduct?.id||freeBuilder.selectedProductId;
+  document.getElementById('freeFinalCode').dataset.manual='';
   const input=document.getElementById('freeInput').value.trim();
   const matchedProduct=uniqueProductRuleCandidate(input);
-  const selectedProductId=matchedProduct?.id||freeBuilder.selectedProductId;
   // A manually selected product applies only to the query it was selected for.
   const selectedProductId=matchedProduct?.id||(input===freeBuilder.input?freeBuilder.selectedProductId:null);
   freeBuilder={tokens:[],input,selectedProductId};
@@ -1703,7 +1702,6 @@ document.getElementById('deviceSearch').oninput=renderDevices;
 document.getElementById('deviceBrandFilter').onchange=renderDevices;
 
 document.getElementById('freeAnalyzeBtn').onclick=analyzeFreeInput;
-document.getElementById('freeInput').addEventListener('input',()=>{
 document.getElementById('freeInput').addEventListener('input',e=>{
   clearTimeout(freeAnalyzeTimer);
   if(!e.target.value.trim()){analyzeFreeInput();return}
