@@ -1179,6 +1179,8 @@ function analyzeFreeInput(){
   const input=document.getElementById('freeInput').value.trim();
   const matchedProduct=uniqueProductRuleCandidate(input);
   const selectedProductId=matchedProduct?.id||freeBuilder.selectedProductId;
+  // A manually selected product applies only to the query it was selected for.
+  const selectedProductId=matchedProduct?.id||(input===freeBuilder.input?freeBuilder.selectedProductId:null);
   freeBuilder={tokens:[],input,selectedProductId};
   if(!input){renderFreeTokens();updateFreeOutput();return}
   const product=state.products.find(p=>p.id===selectedProductId);
@@ -1702,7 +1704,9 @@ document.getElementById('deviceBrandFilter').onchange=renderDevices;
 
 document.getElementById('freeAnalyzeBtn').onclick=analyzeFreeInput;
 document.getElementById('freeInput').addEventListener('input',()=>{
+document.getElementById('freeInput').addEventListener('input',e=>{
   clearTimeout(freeAnalyzeTimer);
+  if(!e.target.value.trim()){analyzeFreeInput();return}
   freeAnalyzeTimer=setTimeout(analyzeFreeInput,280);
 });
 document.getElementById('freeInput').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')analyzeFreeInput()});
