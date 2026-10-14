@@ -213,7 +213,7 @@ tr:hover td{background:#fafcff}.code{font-family:Consolas,monospace;font-size:12
         <div class="free-layout">
           <div class="card panel">
             <div class="form-group">
-              <label class="label">상품명 입력 — 입력하는 즉시 자동 분석</label>
+              <label class="label">상품명·영문·약어 입력 — 입력하는 즉시 자동 분석</label>
               <textarea class="textarea free-input" id="freeInput" placeholder="예: 자유형 투명아크릴 키링 양면인쇄 일반 30x30 볼체인&#10;예: 글라스범퍼케이스 홀로그램 블랙 아이폰 16 PRO"></textarea>
             </div>
             <div class="help-box">
@@ -791,7 +791,10 @@ function normalizeAliasText(v){
     .replace(/\s+/g,' ')
     .toLowerCase();
 }
-function aliasWords(v){return normalizeAliasText(v).split(' ').filter(Boolean)}
+function lookupSpacing(value){
+  return String(value||'').replace(/_/g,' ').replace(/(\d+(?:\.\d+)?)\s+(inch|mm|cm|oz|mah)\b/gi,'$1$2');
+}
+function aliasWords(v){return normalizeAliasText(lookupSpacing(v)).split(' ').filter(Boolean)}
 function activeCode(code){
   const c=String(code||'').trim();
   return c && !['미사용','미포함','제품 시트 미포함','숫자 그대로','표기 그대로','실제 사이즈','정수만 표기 소수점 이하 제외'].includes(c);
@@ -813,7 +816,29 @@ function productMatchNames(product){
   }
   return names;
 }
+function reverseLookupText(value){
+  return normalizeAliasText(lookupSpacing(value));
+}
+function englishLookupNames(value){
+  const parts=String(value||'').split('/').map(part=>part
+    .replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ')
+    .replace(/\s+/g,' ').trim()).filter(Boolean);
+  return unique([parts.join(' '),parts[0]]).filter(value=>/[a-z]/i.test(value));
+}
+function productReverseAliases(product){
+  if(product.enabled===false)return [];
+  return unique([product.baseCode,...englishLookupNames(product.english)].filter(Boolean));
+}
+function hasReverseAlias(input,alias){
+  const q=reverseLookupText(input),key=reverseLookupText(alias);
+  return Boolean(key)&&(' '+q+' ').includes(' '+key+' ');
+}
 function productCandidateScore(product,input){
+  const reverseMatches=productReverseAliases(product).filter(alias=>hasReverseAlias(input,alias));
+  if(reverseMatches.length){
+    const longest=Math.max(...reverseMatches.map(alias=>reverseLookupText(alias).length));
+    return 1500+longest;
+  }
   const q=normalizeProductText(input);
   const name=productMatchNames(product).map(normalizeProductText).sort((a,b)=>b.length-a.length).find(n=>q.includes(n))||normalizeProductText(product.name);
   const decomp=normalizeProductText(product.decomposition);
@@ -828,6 +853,9 @@ function productCandidateScore(product,input){
   qWords.forEach(w=>{if(sourceWords.has(w)||name.includes(w))overlap++});
   score+=overlap*42;
   score-=Math.max(0,qWords.length-overlap)*8;
+  // Partial code searches show product candidates, but never auto-select a rule.
+  const codeQuery=String(input||'').trim().toUpperCase();
+  if(/^[A-Z0-9_]{2,}$/.test(codeQuery)&&String(product.baseCode||'').toUpperCase().startsWith(codeQuery))score=Math.max(score,200);
   return score;
 }
 function rankedProductCandidates(input){
@@ -854,6 +882,9 @@ function uniqueProductRuleCandidate(input){
   const matches=state.products
     .flatMap(p=>productMatchNames(p).map(name=>({product:p,key:compactProductName(name)})))
     .filter(x=>x.key&&q.includes(x.key));
+  state.products.forEach(product=>productReverseAliases(product).forEach(alias=>{
+    if(hasReverseAlias(input,alias))matches.push({product,key:reverseLookupText(alias).replace(/\s/g,'')});
+  }));
   if(!matches.length)return null;
   const longest=Math.max(...matches.map(x=>x.key.length));
   const best=[...new Map(matches.filter(x=>x.key.length===longest).map(x=>[x.product.id,x])).values()];
@@ -1084,32 +1115,49 @@ function buildFreeCandidates(product=null){
   const list=[];
   state.abbreviations.forEach(a=>{
     if(a.enabled===false)return;
-    let aliases=[a.korean];
-    if(a.korean==='미러/거울') aliases.push('미러','거울');
-    if(a.korean==='플러스(+)') aliases.push('플러스','+');
-    aliases.forEach(alias=>{
+    const forwardAliases=[a.korean];
+    if(a.korean==='미러/거울') forwardAliases.push('미러','거울');
+    if(a.korean==='플러스(+)') forwardAliases.push('플러스','+');
+    const numericOption=product&&[...(product.optionRule||'').matchAll(/\[([^\]]+)\]/g)]
+      .some(m=>tokenMatchesPlaceholder({raw:String(a.code)},a,m[1]));
+    const reverseCode=activeCode(a.code)&&(/[a-z]/i.test(a.code)||numericOption)?[a.code]:[];
+    const aliases=[...forwardAliases,...englishLookupNames(a.english),...reverseCode];
+    unique(aliases).forEach(alias=>{
       const words=aliasWords(alias);
       if(!words.length)return;
       list.push({
-        source:'abbr',sourceId:a.id,alias,words,korean:a.korean,english:a.english,
+        source:'abbr',sourceId:a.id,alias,words,korean:a.korean,english:a.english,reverse:!forwardAliases.includes(alias),
         code:activeCode(a.code)?a.code:'',originalCode:a.code,group:a.group,note:a.note||''
       });
     });
   });
   (product?suggestedDevices(product):state.devices).forEach(d=>{
     if(d.enabled===false||String(d.status||'').startsWith('미사용'))return;
-    deviceAliases(d.name).forEach(alias=>{
+    const forwardAliases=deviceAliases(d.name);
+    unique([...forwardAliases,...englishLookupNames(d.english),d.code]).filter(Boolean).forEach(alias=>{
       const words=aliasWords(alias);
       list.push({
-        source:'device',sourceId:d.id,alias,words,korean:d.name,english:d.english,
+        source:'device',sourceId:d.id,alias,words,korean:d.name,english:d.english,reverse:!forwardAliases.includes(alias),
         code:d.code,originalCode:d.code,group:'기종',note:d.status||''
       });
     });
   });
+  state.products.filter(p=>p.enabled!==false&&(!product||p.id===product.id)).forEach(p=>{
+    productReverseAliases(p).forEach(alias=>list.push({
+      source:'product',sourceId:p.id,alias,words:aliasWords(alias),korean:p.name,english:p.english,reverse:true,
+      code:p.baseCode,originalCode:p.baseCode,group:'등록 상품',note:p.category
+    }));
+  });
+  if(product&&/\[사이즈\]/.test(product.optionRule||'')){
+    ['XS','S','M','L','XL','XXL','XXXL'].forEach(code=>list.push({
+      source:'raw',alias:code,words:aliasWords(code),korean:code,english:code,
+      code,originalCode:code,group:'규격·사이즈',note:'선택한 상품의 사이즈 옵션'
+    }));
+  }
   return list.sort((a,b)=>b.words.length-a.words.length||b.alias.length-a.alias.length);
 }
 function freeInputWords(text){
-  return String(text||'')
+  return lookupSpacing(text)
     .replace(/[ㆍ·,/]+/g,' ')
     .replace(/\s+/g,' ')
     .trim()
@@ -1138,6 +1186,7 @@ function segmentCompoundWord(word,candidates){
   const normalized=normalizeAliasText(word).replace(/\s/g,'');
   if(!normalized||normalized.length<2)return null;
   const singles=oneWordAliases(candidates)
+    .filter(c=>!c.reverse||/^[a-z0-9_+().-]+$/i.test(word))
     .filter(c=>/^[가-힣a-z0-9+().]+$/i.test(c.words[0]))
     .sort((a,b)=>b.words[0].length-a.words[0].length);
   const memo={};
@@ -1177,7 +1226,7 @@ function matchCandidatesAt(words,index,candidates){
   return {length:bestLen,candidates:best};
 }
 function specialPrintCandidates(raw,candidates,inputText){
-  const key=normalizeAliasText(raw);
+  const key=normalizeAliasText(candidates[0]?.korean||raw);
   if(key!=='단면인쇄'&&key!=='양면인쇄')return candidates;
   const isSingle=key==='단면인쇄';
   const hasPac=normalizeAliasText(inputText).includes('프린트앤컷');
@@ -1204,19 +1253,25 @@ function inferZone(candidate){
   if(candidate.group==='직접 입력')return 'option';
   return 'base';
 }
-function candidateChoiceScore(candidate,tokenIndex,totalTokens){
+function candidateChoiceScore(candidate,tokenIndex,totalTokens,raw=''){
   let s=0;
   if(candidate.group==='소재·마감')s+=3;
   if(candidate.group==='상품 구성')s+=2;
   if(candidate.group==='형태')s+=1;
   if(candidate.group==='컬러'&&tokenIndex>Math.floor(totalTokens/2))s+=2;
   if(candidate.group==='부자재'&&tokenIndex>=totalTokens-2)s+=2;
+  const product=state.products.find(p=>p.id===freeBuilder.selectedProductId);
+  if(product&&/^[a-z0-9_\s]+$/i.test(raw)){
+    if(candidate.source==='product'&&candidate.sourceId===product.id)s+=100;
+    const placeholders=[...(product.optionRule||'').matchAll(/\[([^\]]+)\]/g)].map(m=>m[1]);
+    if(placeholders.some(ph=>tokenMatchesPlaceholder({raw:candidate.alias},candidate,ph)))s+=20;
+  }
   return s;
 }
 function makeFreeToken(raw,candidates,index,total,inputText){
   let options=dedupeCandidateOptions(specialPrintCandidates(raw,candidates,inputText));
-  options.sort((a,b)=>candidateChoiceScore(b,index,total)-candidateChoiceScore(a,index,total));
-  const choiceRequired=new Set(options.filter(c=>c.source==='device').map(c=>c.sourceId)).size>1;
+  options.sort((a,b)=>candidateChoiceScore(b,index,total,raw)-candidateChoiceScore(a,index,total,raw));
+  const choiceRequired=['device','product'].some(source=>new Set(options.filter(c=>c.source===source).map(c=>c.sourceId)).size>1);
   const selected=choiceRequired?-1:0;
   const candidate=options[selected]||null;
   return {
@@ -1295,8 +1350,9 @@ function renderFreeTokens(){
   }
   wrap.innerHTML=freeBuilder.tokens.map((t,idx)=>{
     const cls=t.unknown?'unknown':(t.choiceRequired||t.ambiguous&&!t.confirmed?'ambiguous':'');
-    const optionHtml=t.options.length?(t.choiceRequired?'<option value="-1" selected>기종 선택 필요</option>':'')+t.options.map((c,i)=>`<option value="${i}"${i===t.selected?' selected':''}>${esc(freeCandidateLabel(c))}</option>`).join(''):'<option value="-1">일치 약어 없음 — 코드 직접 입력</option>';
-    const stateBadge=t.choiceRequired?'<span class="inline-status warn">기종 선택 필요</span>':t.unknown?'<span class="inline-status warn">미등록</span>':t.ambiguous&&!t.confirmed?'<span class="inline-status warn">선택 확인</span>':'<span class="inline-status ok">확정</span>';
+    const choiceLabel=t.options.some(c=>c.source==='product')?'상품 선택 필요':'기종 선택 필요';
+    const optionHtml=t.options.length?(t.choiceRequired?`<option value="-1" selected>${choiceLabel}</option>`:'')+t.options.map((c,i)=>`<option value="${i}"${i===t.selected?' selected':''}>${esc(freeCandidateLabel(c))}</option>`).join(''):'<option value="-1">일치 약어 없음 — 코드 직접 입력</option>';
+    const stateBadge=t.choiceRequired?`<span class="inline-status warn">${choiceLabel}</span>`:t.unknown?'<span class="inline-status warn">미등록</span>':t.ambiguous&&!t.confirmed?'<span class="inline-status warn">선택 확인</span>':'<span class="inline-status ok">확정</span>';
     return `<div class="token-row ${cls}">
       <div><div class="token-source">${esc(t.raw)}</div><div class="token-sub">${stateBadge}</div></div>
       <select class="select free-candidate" data-index="${idx}">${optionHtml}</select>
@@ -1312,6 +1368,7 @@ function renderFreeTokens(){
   }).join('');
   document.querySelectorAll('.free-candidate').forEach(el=>el.onchange=()=>{
     const i=Number(el.dataset.index),t=freeBuilder.tokens[i],n=Number(el.value);
+    if(t.options[n]?.source==='product'){selectFreeProduct(t.options[n].sourceId);return}
     t.selected=n;t.confirmed=n>=0;t.choiceRequired=n<0&&t.options.length>1;t.unknown=n<0&&!t.choiceRequired;document.getElementById('freeFinalCode').dataset.manual='';
     const c=t.options[n]||null;t.code=c?.code||'';t.zone=inferZone(c);
     renderFreeTokens();updateFreeOutput();
@@ -1474,7 +1531,9 @@ function freeAlerts(code){
   const selectedAssembly=assembleWithSelectedProduct();
   if(selectedAssembly&&selectedAssembly.missing.length)add('warn','선택한 상품의 옵션이 부족합니다',selectedAssembly.missing.join(', ')+' 값을 상품명에 추가하거나 아래 약어 항목에서 직접 입력하세요.');
   if(unknown.length)add('error','미등록 단어가 있습니다',unknown.map(t=>t.raw).join(', ')+' — 코드 칸에 직접 입력하거나 약어 관리에 추가하세요.');
-  if(choiceRequired.length)add('error','기종 선택이 필요합니다',choiceRequired.map(t=>`${t.raw}: ${t.options.filter(c=>c.source==='device').map(c=>`${c.korean} (${c.code})`).join(' / ')}`).join(' · '));
+  if(choiceRequired.length)add('error',choiceRequired.some(t=>t.options.some(c=>c.source==='product'))?'상품 또는 기종 선택이 필요합니다':'기종 선택이 필요합니다',choiceRequired.map(t=>`${t.raw}: ${t.options.filter(c=>['device','product'].includes(c.source)).map(c=>`${c.korean} (${c.code})`).join(' / ')}`).join(' · '));
+  const unregisteredCodes=freeBuilder.tokens.filter(t=>selectedFreeCandidate(t)?.group==='직접 입력');
+  if(unregisteredCodes.length)add('warn','등록되지 않은 직접 입력 코드입니다',unregisteredCodes.map(t=>t.raw).join(', ')+' — 등록된 약어·상품·기종으로 확인되지 않았습니다.');
   if(ambiguous.length)add('warn','약어 용도를 확인하세요',ambiguous.map(t=>`${t.raw}: ${t.options.map(c=>`${c.group} ${c.code||'미반영'}`).join(' / ')}`).join(' · '));
   if(omitted.length)add('info','코드에서 제외된 단어',omitted.map(t=>t.raw).join(', ')+' — 영문·상품명에는 남고 제품코드에는 반영되지 않습니다.');
   if(!code)add('error','생성된 코드가 없습니다','기본 또는 옵션 구간에 코드가 하나 이상 있어야 합니다.');
@@ -1843,5 +1902,6 @@ startAutomaticSheetSync();
 </script>
 </body>
 </html>
+
 
 
